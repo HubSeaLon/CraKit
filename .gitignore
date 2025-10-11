@@ -1,0 +1,26 @@
+# Fichiers de build .NET
+bin/
+obj/
+
+# Fichiers temporaires de Rider / Visual Studio
+.idea/
+.vscode/
+*.user
+*.suo
+*.userprefs
+
+# Fichiers de logs
+*.log
+
+# Fichiers de publication
+publish/
+*.exe
+*.dll
+*.pdb
+*.app
+*.dmg
+*.msi
+
+# Fichiers système
+.DS_Store
+Thumbs.db
