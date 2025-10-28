@@ -37,7 +37,7 @@ public class ConnexionSshService : IDisposable
     }
     
     
-    public void Disconnect()
+    private void Disconnect()
     {
         if (_ssh != null)
         {

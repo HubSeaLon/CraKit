@@ -6,5 +6,5 @@
         Width="800" Height="450">
         
         <!-- <views:TestConnexionCommande/> !-->
-        <views:AccueilConnexionVue/>
+        <ContentControl x:Name="AccueilConnexionVue" ></ContentControl>
 </Window>

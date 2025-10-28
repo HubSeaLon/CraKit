@@ -23,10 +23,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Assets\images\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="Assets\images\logocrakit.png" />
     <Resource Include="Assets\images\logocrakit.png" />
   </ItemGroup>

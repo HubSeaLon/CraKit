@@ -38,7 +38,7 @@ public class ExecuterCommandeService
         });
     }
     
-    // Exécution en streaming (temps réel)
+    // Exécution en streaming (temps réel pour les commandes d'énumération)
     /*
     public Task ExecuteCommandStreamAsync(
         string command,

@@ -1,0 +1,85 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             Background="{DynamicResource ThemeBackgroundBrush}"
+             x:Class="CraKit.Views.ChoixOutils.ChoixOutilsExpert">
+    
+    <!-- Séparation en 3 partie (header, les 3 outils, et d'autre outils (possible évolution)) -->
+    <Grid RowDefinitions="Auto,Auto,*">
+    <!-- Barre du haut -->
+    <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,6">
+      <!-- Gauche : statut et il faudrait pouvoir binde la connexion + localhost -->
+      <StackPanel Orientation="Vertical" Spacing="6">
+        <TextBlock x:Name="LblConnecte"
+                   Text="Connecté : localhost"
+                   FontSize="12" Margin="0,0,0,2"/>
+      </StackPanel>
+
+      <!-- Centre : titre -->
+      <TextBlock Grid.Column="1"
+                 Grid.Row="0"
+                 Text="Liste des outils"
+                 HorizontalAlignment="Center"
+                 FontSize="28"
+                 FontWeight="SemiBold"
+                 Margin="0,2,0,0"/>
+
+      <!-- Droite : mode simple + checkbox -->
+      <StackPanel Grid.Column="2"
+                  Grid.Row="0"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Spacing="8">
+        <TextBlock Text="Mode simple" Padding="6"/>
+        <CheckBox x:Name="ChkModeSimple"/>
+      </StackPanel>
+
+      <!-- Ligne de séparation -->
+      <Border Grid.Row="1" 
+              Grid.Column="0"
+              Grid.ColumnSpan="3"
+              Height="1"
+              Background="#7A6FD1AA"
+              Margin="0,8,0,0"/>
+    </Grid>
+
+    <!-- Grille des outils -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,*,*" HorizontalAlignment="Center" Margin="50,15,50,0" ColumnSpacing="70" >
+      <!-- John the Ripper -->
+      <Button Grid.Column="0" Click="OpenJohn"
+              Background="Transparent" BorderBrush="Transparent"
+              Cursor="Hand">
+        <StackPanel HorizontalAlignment="Center" Spacing="10">
+          <Image Source=""
+                 Width="120" Height="120" Stretch="Uniform"/>
+          <TextBlock Text="John the Ripper" HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Button>
+
+      <!-- Hashcat -->
+      <Button Grid.Column="1" Click="OpenHashCat"
+              Background="Transparent" BorderBrush="Transparent"
+              Cursor="Hand">
+        <StackPanel HorizontalAlignment="Center" Spacing="10">
+          <Image Source=""
+                 Width="120" Height="120" Stretch="Uniform"/>
+          <TextBlock Text="Hashcat" HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Button>
+
+      <!-- DNSMap -->
+      <Button Grid.Column="2" Click="OpenDnsMap"
+              Background="Transparent" BorderBrush="Transparent"
+              Cursor="Hand">
+        <StackPanel HorizontalAlignment="Center" Spacing="10">
+          <Image Source=""
+                 Width="120" Height="120" Stretch="Uniform"/>
+          <TextBlock Text="DNSMap" HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Button>
+    </Grid>
+  </Grid>
+</UserControl>
