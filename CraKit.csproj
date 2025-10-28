@@ -22,8 +22,7 @@
     <PackageReference Include="SSH.NET" Version="2025.0.0" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Assets\images\logocrakit.png" />
-    <Resource Include="Assets\images\logocrakit.png" />
-  </ItemGroup>
+    <ItemGroup>
+        <AvaloniaResource Include="Assets\**" />
+    </ItemGroup>
 </Project>

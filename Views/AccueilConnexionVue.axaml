@@ -17,7 +17,7 @@
                        FontSize="32"
                        FontWeight="Bold"/>
 
-            <Image Source="C:\Users\huber\Desktop\ProjectC#\CraKit\Assets\images\logocrakit.png"
+            <Image Source="/Assets/images/logocrakit.png"
                    Width="130" Height="130"
                    HorizontalAlignment="Center"/>
 

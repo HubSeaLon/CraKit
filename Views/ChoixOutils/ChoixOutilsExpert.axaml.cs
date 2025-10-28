@@ -24,4 +24,9 @@ public partial class ChoixOutilsExpert : UserControl
     {
         // Navigation à l'outil selon simple ou expert depuis le service 
     }
+
+    private void SwitchMode(object? sender, RoutedEventArgs e)
+    {
+        // Passer au mode simple liste des outils
+    }
 }
