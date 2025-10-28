@@ -1,0 +1,65 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:choixOutils="clr-namespace:CraKit.Views.ChoixOutils"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="CraKit.Views.ChoixOutils.ChoixOutilsMode">
+    
+    <UserControl.DataContext>
+        <!--Utiliser Etat Simple ou Expert -->
+        <StaticResource ResourceKey="ChoixOutils"/>
+    </UserControl.DataContext>
+    
+    <!-- Header commun aux 2 modes -->
+    <!-- Séparation en 3 partie (header, les 3 outils, et d'autre outils (possible évolution)) -->
+    <Grid RowDefinitions="Auto,Auto,*">
+    <!-- Barre du haut -->
+    <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,6">
+      <!-- Gauche : statut et il faudrait pouvoir binde la connexion + localhost -->
+      <StackPanel Orientation="Vertical" Spacing="6">
+        <TextBlock x:Name="LblConnecte"
+                   Text="Connecté : localhost"
+                   FontSize="12" Margin="0,0,0,2"/>
+      </StackPanel>
+
+      <!-- Centre : titre -->
+      <TextBlock Grid.Column="1"
+                 Grid.Row="0"
+                 Text="{Binding Title}"
+                 HorizontalAlignment="Center"
+                 FontSize="28"
+                 FontWeight="SemiBold"
+                 Margin="0,2,0,0"/>
+
+      <!-- Droite : mode simple + checkbox -->
+      <StackPanel Grid.Column="2"
+                  Grid.Row="0"
+                  Orientation="Horizontal"
+                  HorizontalAlignment="Right"
+                  VerticalAlignment="Top"
+                  Spacing="8">
+        <TextBlock Text="{Binding HeaderRightLabel}" Padding="6"/>
+        <CheckBox IsChecked="{Binding IsSimpleMode, Mode=TwoWay}"/>
+      </StackPanel>
+
+      <!-- Ligne de séparation -->
+      <Border Grid.Row="1" 
+              Grid.Column="0"
+              Grid.ColumnSpan="3"
+              Height="1"
+              Background="#7A6FD1AA"
+              Margin="0,8,0,0"/>
+    </Grid>
+    
+    <!-- Basculer selon le mode -->
+    
+    
+    
+  </Grid>
+    
+    
+    
+    
+    
+</UserControl>
