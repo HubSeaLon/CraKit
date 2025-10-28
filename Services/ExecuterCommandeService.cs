@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Renci.SshNet;
 
 namespace CraKit.Services;
 
@@ -8,16 +7,18 @@ public class ExecuterCommandeService
 {
 
     private readonly ConnexionSshService _sshService;
-    
+
     public ExecuterCommandeService(ConnexionSshService sshService)
-        => _sshService = sshService;
+    {
+        _sshService = sshService;
+    }
     
     public async Task<string> ExecuteCommandAsync(string command, TimeSpan? timeout = null)
     {
         var client = _sshService.Client;
-        if (client == null || !client.IsConnected)
-            return "[SSH] Non connecté.";
-
+        
+        if (client == null || !client.IsConnected) return "[SSH] Non connecté";
+        
         return await Task.Run(() =>
         {
             try

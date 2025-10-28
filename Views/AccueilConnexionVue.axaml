@@ -29,6 +29,10 @@
             <TextBlock Text="" 
                        HorizontalAlignment="Center" 
                        x:Name="Sortie"/>
+            
+            <Button Click="TestCommande"
+                    Content="Test commandes"
+                    HorizontalAlignment="Center"/>
                        
         </StackPanel>
     </Grid>

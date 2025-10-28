@@ -39,5 +39,4 @@ public partial class TestConnexionCommande : UserControl
         var outp = await _exec.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(5));
         SortieText.Text += outp + "\n";
     }
-    
 }

@@ -19,14 +19,21 @@ public partial class AccueilConnexionVue : UserControl
     {
         var success = await _sshService.ConnectAsync("localhost", 22, "root", "123");
         
-        Sortie.Text = success 
-            ? "[SSH] Connexion réussie.\n"
-            : "[SSH] Échec de la connexion.\n";
+        Sortie.Text = success ? "[SSH] Connexion réussie" : "[SSH] Échec de la connexion";
         
         if (TopLevel.GetTopLevel(this) is MainWindow mainWindow)
         {
             mainWindow.Navigate(new ChoixOutilsExpert());
         }
+    }
+
+    // Fenêtre de test commmandes
+    private void TestCommande(object sender, RoutedEventArgs e)
+    {
+        if (TopLevel.GetTopLevel(this) is MainWindow mainWindow)
+        {
+            mainWindow.Navigate(new TestConnexionCommande());
+        }  
     }
     
 }
