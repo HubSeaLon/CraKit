@@ -3,8 +3,8 @@
         xmlns:views="clr-namespace:CraKit.Views"
         x:Class="CraKit.MainWindow"
         Title="CraKit"
-        Width="900" Height="600">
+        Width="800" Height="450">
         
-        <views:TestConnexionCommande/>
-   
+        <!-- <views:TestConnexionCommande/> !-->
+        <views:AccueilConnexionVue/>
 </Window>

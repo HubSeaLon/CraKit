@@ -1,9 +1,37 @@
-﻿<Window xmlns="https://github.com/avaloniaui"
+﻿<UserControl xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-        x:Class="CraKit.Views.AccueilConnexionVue"
-        Title="AccueilConnexionVue">
-    Welcome to Avalonia!
-</Window>
+
+        Background="{DynamicResource ThemeBackgroundBrush}"
+        x:Class="CraKit.Views.AccueilConnexionVue">
+        
+    <Grid>
+        <Border
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Padding="32"
+            MaxWidth="520">
+            
+            <StackPanel Spacing="20" >
+
+                <!-- Titre -->
+                <TextBlock Text="Welcome To CraKit"
+                           HorizontalAlignment="Center"
+                           FontSize="32"
+                           FontWeight="Bold"/>
+
+                <!-- Logo -->
+                <Image Source="C:\Users\huber\Desktop\ProjectC#\CraKit\Assets\images\logocrakit.png"
+                       HorizontalAlignment="Center"
+                       Width="130" Height="130"
+                       Stretch="Uniform"/>
+                
+                   
+                <Button Click="Connecter" Content="Se connecter" HorizontalAlignment="Center" Padding="30, 7, 30, 7"/>
+                
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
