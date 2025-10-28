@@ -6,6 +6,7 @@
     <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
   </PropertyGroup>
 
   <ItemGroup>
@@ -19,5 +20,14 @@
       <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
     </PackageReference>
     <PackageReference Include="SSH.NET" Version="2025.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Assets\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Assets\images\logocrakit.png" />
+    <Resource Include="Assets\images\logocrakit.png" />
   </ItemGroup>
 </Project>
