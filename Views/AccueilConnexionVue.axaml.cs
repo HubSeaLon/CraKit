@@ -14,7 +14,7 @@ public partial class AccueilConnexionVue : UserControl
 
     private async void Connecter(object sender, RoutedEventArgs e)
     {
-        var success = await ConnexionSshService.Instance.ConnectAsync("localhost", 22, "root", "123");
+        var success = await ConnexionSshService.Instance.ConnectAsync("localhost", 2222, "root", "123");
         
         if (success && TopLevel.GetTopLevel(this) is MainWindow mainWindow)
         {
