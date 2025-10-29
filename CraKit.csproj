@@ -32,4 +32,9 @@
         <SubType>Code</SubType>
       </Compile>
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Assets\hashfiles\" />
+      <Folder Include="Assets\wordlists\" />
+    </ItemGroup>
 </Project>
