@@ -38,6 +38,7 @@
                     <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="30">
                         <Button Click="Connecter" Content="Se connecter" MinWidth="12" Padding="12,8"/>
                         <CheckBox Content="Se souvenir" VerticalAlignment="Center"/>
+                        <Button Click="Retour" Content="Retour" />
                     </StackPanel>
                     
                     <TextBlock Grid.Row="2" Grid.Column="0" Text="Commande" VerticalAlignment="Center" Margin="0,0,0,5"/>
