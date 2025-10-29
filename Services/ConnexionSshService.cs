@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
-using Avalonia.Controls.Notifications;
 using Renci.SshNet;
 
 namespace CraKit.Services;
@@ -26,7 +25,6 @@ public class ConnexionSshService : IDisposable, INotifyPropertyChanged
             try
             {
                 Disconnect();
-
                 _ssh = new SshClient(host, port, username, password)
                 {
                     KeepAliveInterval = TimeSpan.FromSeconds(15)
@@ -51,14 +49,20 @@ public class ConnexionSshService : IDisposable, INotifyPropertyChanged
         {
             try
             {
-                if (_ssh.IsConnected) _ssh.Disconnect();  // Deconnexion au SSH
+                if (_ssh.IsConnected) _ssh.Disconnect(); // Deconnexion au SSH
+                Console.WriteLine("[SSH] Disconnected");
             }
-            catch { }   // Evite un crash si déjà connecté
+            catch (Exception ex)
+            {
+                // Evite un crash si déjà connecté
+                Console.WriteLine($"[SSH] Erreur déconnexion : {ex.Message}");
+            }   
             finally
             {
                 // Le Dispose() de IDisposable permet de libérer la mémoire et le socket
                 _ssh.Dispose(); // Libère le client SSH
                 _ssh = null;     
+                Console.WriteLine("[SSH] Libération ressources");
             }
         }
     }
