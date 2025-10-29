@@ -1,0 +1,40 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        Background="{DynamicResource ThemeBackgroundBrush}"
+        x:Class="CraKit.Views.AccueilConnexionVue">
+        
+    <Grid>
+        <StackPanel
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Spacing="20">
+            
+            <TextBlock Text="Welcome To CraKit"
+                       HorizontalAlignment="Center"
+                       FontSize="32"
+                       FontWeight="Bold"/>
+
+            <Image Source="/Assets/images/logocrakit.png"
+                   Width="130" Height="130"
+                   HorizontalAlignment="Center"/>
+
+            <Button Click="Connecter"
+                    Content="Se connecter"
+                    Padding="30,7"
+                    HorizontalAlignment="Center"/>
+
+            <TextBlock Text="" 
+                       HorizontalAlignment="Center" 
+                       x:Name="Sortie"/>
+            
+            <Button Click="TestCommande"
+                    Content="Test commandes"
+                    HorizontalAlignment="Center"/>
+                       
+        </StackPanel>
+    </Grid>
+
+</UserControl>

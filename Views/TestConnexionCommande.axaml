@@ -1,0 +1,58 @@
+﻿<UserControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="900" d:DesignHeight="600"
+        Background="{DynamicResource ThemeBackgroundBrush}"
+        x:Class="CraKit.Views.TestConnexionCommande">
+        
+        <!-- Conteneur plein écran -->
+    <Grid>
+        <!-- Carte centrée -->
+        <Border
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            CornerRadius="12"
+            Padding="32"
+            MaxWidth="520"
+            Background="{DynamicResource ThemeBackgroundBrush}"
+            BoxShadow="0 8 24 #00000040">
+            <StackPanel Spacing="20" >
+
+                <!-- Titre -->
+                <TextBlock Text="Welcome To CraKit"
+                           HorizontalAlignment="Center"
+                           FontSize="32"
+                           FontWeight="Bold"/>
+
+                <!-- Logo -->
+                <Image Source="/Assets/images/logocrakit.png"
+                       HorizontalAlignment="Center"
+                       Width="130" Height="130"
+                       Stretch="Uniform"/>
+
+                <!-- Formulaire -->
+                <Grid ColumnDefinitions="Auto,16,Auto" RowDefinitions="Auto,16,Auto,60,Auto" Margin="0,8,0,0">
+                    
+                    <!-- Bouton + Se souvenir -->
+                    <StackPanel Grid.Row="0" Grid.Column="2" Orientation="Horizontal" Spacing="30">
+                        <Button Click="Connecter" Content="Se connecter" MinWidth="12" Padding="12,8"/>
+                        <CheckBox Content="Se souvenir" VerticalAlignment="Center"/>
+                        <Button Click="Retour" Content="Retour" />
+                    </StackPanel>
+                    
+                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Commande" VerticalAlignment="Center" Margin="0,0,0,5"/>
+                    <TextBox Grid.Row="2" Grid.Column="2" Watermark="Commande" x:Name="CommandeTexte" Padding="5, 5, 0, 0" Width="400"/>
+                    
+                    <Button Grid.Column="2" Grid.Row="3" Click="LancerCommande" Content="Executer la commande" MinWidth="12" Padding="12,8"/>
+                    
+                    <TextBlock Grid.Row="4" Grid.Column="0" Text="Réponse" VerticalAlignment="Center" Margin="0,0,0,0" Height="150"/>
+                    <TextBox Grid.Row="4" Grid.Column="2" x:Name="SortieText" IsReadOnly="True"
+                             ScrollViewer.VerticalScrollBarVisibility="Visible" Width="400" Height="150"/>
+                    
+                </Grid>
+                
+            </StackPanel>
+        </Border>
+    </Grid>
+</UserControl>
