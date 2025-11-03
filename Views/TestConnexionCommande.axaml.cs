@@ -20,7 +20,7 @@ public partial class TestConnexionCommande : UserControl
     
     public async void Connecter(object sender, RoutedEventArgs e)
     {
-        var success = await _sshService.ConnectAsync("localhost", 22, "root", "123");
+        var success = await _sshService.ConnectAsync("localhost", 2222, "root", "123");
 
         Dispatcher.UIThread.Post(() =>
         {
