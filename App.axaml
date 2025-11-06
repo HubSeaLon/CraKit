@@ -12,5 +12,6 @@
              
             <Application.Styles>
                 <FluentTheme />
+                <StyleInclude Source="avares://CraKit/Templates/Template.axaml"/>
             </Application.Styles>
 </Application>

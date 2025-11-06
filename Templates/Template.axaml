@@ -1,0 +1,67 @@
+<Styles xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:control="clr-namespace:CraKit.Templates"
+                    xmlns:Design="clr-namespace:Avalonia;assembly=Avalonia.Base">
+
+    <Style Selector="control|TemplateControl">
+        
+        <Design.PreviewWith>
+            <control:TemplateControl Title="Hashcat (preview)">
+                <control:TemplateControl.HeaderRight>
+                    <Button Content="Save history in file"/>
+                </control:TemplateControl.HeaderRight>
+
+                <control:TemplateControl.LeftPane>
+                    <StackPanel Spacing="8">
+                        <Button Content="Ajouter wordlist"/>
+                        <Button Content="Ajouter hashfile"/>
+                    </StackPanel>
+                </control:TemplateControl.LeftPane>
+
+                <control:TemplateControl.Input>
+                    <StackPanel Spacing="8">
+                        <TextBox Watermark="Options…"/>
+                        <TextBox Watermark="Masque…"/>
+                    </StackPanel>
+                </control:TemplateControl.Input>
+
+                <control:TemplateControl.RunArea>
+                    <Button Content="Lancer" HorizontalAlignment="Center"/>
+                </control:TemplateControl.RunArea>
+
+                <control:TemplateControl.Output>
+                    <TextBox AcceptsReturn="True" IsReadOnly="True" Text="Sortie…"/>
+                </control:TemplateControl.Output>
+            </control:TemplateControl>
+        </Design.PreviewWith>
+        
+        
+        
+        
+        
+        <Setter Property="Template">
+            <ControlTemplate TargetType="control:TemplateControl">
+                <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,*,Auto,Auto,*">
+                    <TextBlock Grid.ColumnSpan="2" Text="{TemplateBinding Title}" 
+                               FontSize="20" FontWeight="Bold" Margin="0,0,0,12"/>
+
+                    <Border Grid.Row="1" Grid.Column="0" Background="#222" Padding="8">
+                        <ContentPresenter Content="{TemplateBinding LeftPane}"/>
+                    </Border>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="8">
+                        <ContentPresenter Content="{TemplateBinding Input}"/>
+                        <ContentPresenter Content="{TemplateBinding RunArea}"/>
+                        <ContentPresenter Content="{TemplateBinding Output}"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="0" Grid.Column="1" Orientation="Horizontal" 
+                                HorizontalAlignment="Right">
+                        <ContentPresenter Content="{TemplateBinding HeaderRight}"/>
+                    </StackPanel>
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+</Styles>
