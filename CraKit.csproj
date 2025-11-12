@@ -38,6 +38,5 @@
       <Folder Include="Assets\hashfiles\" />
       <Folder Include="Assets\wordlists\" />
       <Folder Include="ViewsModels\Tools\" />
-      <Folder Include="Views\Tools\" />
     </ItemGroup>
 </Project>
