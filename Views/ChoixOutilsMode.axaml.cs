@@ -2,12 +2,13 @@
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CraKit.Services;
+using CraKit.Views.Tools.HashCat;
 
 namespace CraKit.Views;
 
 public partial class ChoixOutilsMode : UserControl, INotifyPropertyChanged
 {
-    public event PropertyChangedEventHandler? PropertyChanged; // Even pour que les éléments puisse se charger
+    public new event PropertyChangedEventHandler? PropertyChanged; // Even pour que les éléments puisse se charger
     public ChoixOutilsMode()
     {
         InitializeComponent();
@@ -38,11 +39,28 @@ public partial class ChoixOutilsMode : UserControl, INotifyPropertyChanged
     private void OpenJohn(object? sender, RoutedEventArgs e)
     {
         // Navigation à l'outil selon simple ou expert depuis le service 
+        
     }
 
     private void OpenHashCat(object? sender, RoutedEventArgs e)
     {
-        // Navigation à l'outil selon simple ou expert depuis le service 
+        // 1. On instancie le "Chef" (La logique de l'outil)
+        var hashcatTool = new HashCat();
+
+        // 2. On prépare une fenêtre vierge pour l'accueillir
+        var fenetreOutil = new Window
+        {
+            Title = hashcatTool.Name, // Utilise le nom défini dans la classe (Hashcat)
+            Width = 1000,
+            Height = 700,
+            
+            // C'est ICI que la magie opère : 
+            // On récupère le Template complet (Design + Boutons) via la propriété .View
+            Content = hashcatTool.View 
+        };
+
+        // 3. On affiche la fenêtre
+        fenetreOutil.Show();
     }
 
     private void OpenDnsMap(object? sender, RoutedEventArgs e)
