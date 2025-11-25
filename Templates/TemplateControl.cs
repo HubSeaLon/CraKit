@@ -14,7 +14,11 @@ public class TemplateControl : TemplatedControl
     public static readonly StyledProperty<object?> LeftPaneProperty =
         AvaloniaProperty.Register<TemplateControl, object?>(nameof(LeftPane));
     public object? LeftPane { get => GetValue(LeftPaneProperty); set => SetValue(LeftPaneProperty, value); }
-
+    
+    public static readonly StyledProperty<object?> RightTopProperty =
+        AvaloniaProperty.Register<TemplateControl, object?>(nameof(RightTop));
+    public object? RightTop { get => GetValue(RightTopProperty); set => SetValue(RightTopProperty, value); }
+    
     public static readonly StyledProperty<object?> InputProperty =
         AvaloniaProperty.Register<TemplateControl, object?>(nameof(Input));
     public object? Input { get => GetValue(InputProperty); set => SetValue(InputProperty, value); }
