@@ -5,6 +5,7 @@ obj/
 # Fichiers temporaires de Rider / Visual Studio
 .idea/
 .vscode/
+.vs/
 *.user
 *.suo
 *.userprefs
