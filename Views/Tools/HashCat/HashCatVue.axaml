@@ -1,0 +1,33 @@
+<t:TemplateControl xmlns="https://github.com/avaloniaui"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:t="using:CraKit.Templates"
+                   x:Class="CraKit.Views.Tools.HashCat.HashCatVue"
+                   Title="Hashcat Password Cracker">
+
+    <t:TemplateControl.HeaderRight>
+        <Button Content="Save history in file"/>
+    </t:TemplateControl.HeaderRight>
+
+    <t:TemplateControl.LeftPane>
+        <StackPanel Spacing="8">
+            <Button Content="Ajouter wordlist"/>
+            <Button Content="Ajouter hashfile"/>
+        </StackPanel>
+    </t:TemplateControl.LeftPane>
+
+    <t:TemplateControl.Input>
+        <StackPanel Spacing="8">
+            <TextBox Watermark="Options…"/>
+            <TextBox Watermark="Masque…"/>
+        </StackPanel>
+    </t:TemplateControl.Input>
+
+    <t:TemplateControl.RunArea>
+        <Button Content="Lancer" HorizontalAlignment="Center"/>
+    </t:TemplateControl.RunArea>
+
+    <t:TemplateControl.Output>
+        <TextBox AcceptsReturn="True" IsReadOnly="True" Text="Sortie…"/>
+    </t:TemplateControl.Output>
+
+</t:TemplateControl>

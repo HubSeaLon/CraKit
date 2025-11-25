@@ -89,14 +89,14 @@
       </Button>
     </Grid>
     
-    <!-- Mode SIMPLE -->
+    <!-- Mode SIMPLE
     <Grid Grid.Row="1" x:Name="SimpleView" IsVisible="{Binding IsSimpleMode}">
       
       <TextBlock Text="MODE SIMPLE"/>
       
       
     </Grid>
-    
+     -->
     
     
     
