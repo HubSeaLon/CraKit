@@ -1,8 +1,7 @@
 using System;
 using Avalonia.Controls;
-using CraKit.Templates; 
 
-namespace CraKit.Services;
+namespace CraKit.Views.Tools;
 
 public abstract class ToolBase
 {

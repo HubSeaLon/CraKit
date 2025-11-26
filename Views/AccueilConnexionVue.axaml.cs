@@ -18,7 +18,7 @@ public partial class AccueilConnexionVue : UserControl
         
         if (success && TopLevel.GetTopLevel(this) is MainWindow mainWindow)
         {
-            Console.WriteLine("[SSH] Connexion réussie");
+            Console.WriteLine("[SSH-SFTP] Connexion réussie");
             mainWindow.Content = new ChoixOutilsMode();
         }
         else

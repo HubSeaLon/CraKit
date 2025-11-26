@@ -15,8 +15,8 @@
             <StackPanel Orientation="Horizontal"
                         Spacing="8"
                         Margin="0,0,0,8">
-                <Button Content="Ajouter wordlist" />
-                <Button Content="Ajouter hashfile" />
+                <Button Content="Ajouter wordlist" Click="AjouterWordlistClick" />
+                <Button Content="Ajouter hashfile" Click="AjouterHashfileClick" />
             </StackPanel>
 
             <TextBlock Text="Modes Hashcat :" FontWeight="Bold" Margin="0,4,0,4"/>
@@ -36,16 +36,13 @@
             
             <!-- FAIRE LE BINDING DES LISTES A AFFICHER + LES CHOIX et SELON OPTION CHOISIE (à gauche) -->
             
-            <ComboBox PlaceholderText="Wordlist"  MinWidth="220" Margin="0,0,8,8">
-                <ComboBoxItem Content="Wordlist : wordlist.txt" />
+            <ComboBox  x:Name="WordlistComboBox" PlaceholderText="Wordlist"  MinWidth="220" Margin="0,0,8,8">
             </ComboBox>
 
-            <ComboBox PlaceholderText="Hashfile"  MinWidth="220" Margin="0,0,8,8">
-                <ComboBoxItem Content="Hash : hash.txt" />
+            <ComboBox  x:Name="HashfileComboBox" PlaceholderText="Hashfile"  MinWidth="220" Margin="0,0,8,8">
             </ComboBox>
 
             <ComboBox PlaceholderText="Format hash" MinWidth="180" Margin="0,0,8,8">
-                <ComboBoxItem Content="Format : MD5" />
             </ComboBox>
 
         </WrapPanel>
