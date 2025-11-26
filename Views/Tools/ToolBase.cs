@@ -1,5 +1,6 @@
 using System;
 using Avalonia.Controls;
+using System.IO;
 
 namespace CraKit.Views.Tools;
 
@@ -17,8 +18,30 @@ public abstract class ToolBase
         Name = name;
         Description = description;
     }
+    
+    
+    public static string? LireFichierTexte(string nomFichier)
+    {
+        try
+        {
+            if (!File.Exists(nomFichier))
+            {
+                Console.WriteLine($"[ERREUR] Fichier introuvable : {nomFichier}");
+                return null;
+            }
 
-    // Méthode abstraite implémentée par HashCat
+            // On lit juste le contenu et on le renvoie tel quel
+            Console.WriteLine("Lecture JSON : " +  nomFichier);
+            return File.ReadAllText(nomFichier);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ERREUR] Erreur lecture {nomFichier} : {ex.Message}");
+            return null;
+        }
+    }
+
+    // Méthode abstraite implémentée pour récupérer vue outil
     public abstract Control GetView();
 
     // Propriété inutile ici si on n'utilise pas de binding complexe, 

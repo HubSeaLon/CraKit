@@ -1,0 +1,102 @@
+﻿<t:TemplateControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:t="clr-namespace:CraKit.Templates"
+        x:Class="CraKit.Views.Tools.John.JohnVue"
+        Title="John The Reaper"
+        xmlns:models="clr-namespace:CraKit.Models">
+    
+    <!-- BOUTON BANDEAU HAUT -->
+    <t:TemplateControl.HeaderRight>
+        <Button Content="Save history in file"/>
+    </t:TemplateControl.HeaderRight>
+
+    <!-- COLONNE GAUCHE : presets / types d’attaque -->
+    <t:TemplateControl.LeftPane>
+        <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8"
+                        Margin="0,0,0,8">
+                <Button Content="Ajouter wordlist" Click="AjouterWordlistClick" />
+                <Button Content="Ajouter hashfile" Click="AjouterHashfileClick" />
+            </StackPanel>
+
+            <TextBlock Text="Choisir option :" FontWeight="Bold" Margin="0,4,0,4"/>
+            <Button x:Name="ButtonOption1" Content="Identifier format hash (hashfile)" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            <Button x:Name="ButtonOption2" Content="Crack auto (wordlist, hashfile)" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            <Button x:Name="ButtonOption3" Content="Crack hash (wordlist, format, hashfile)" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            <Button x:Name="ButtonOption4" Content="Crack hash rule (wordlist, format, hashfile, rule)" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            <Button x:Name="ButtonOption5" Content="Mask attack (wordlist, format, hashfile, mask)" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            
+        </StackPanel>
+    </t:TemplateControl.LeftPane>
+
+    <!-- ZONE D’OPTIONS EN HAUT À DROITE -->
+    
+    <t:TemplateControl.RightTop>
+        <WrapPanel>
+            
+            <!-- FAIRE LE BINDING DES LISTES A AFFICHER + LES CHOIX et SELON OPTION CHOISIE (à gauche) -->
+            
+            <ComboBox SelectionChanged="OnChangedList" x:Name="WordlistComboBox" SelectedIndex="-1" PlaceholderText="Choisir Wordlist"  MinWidth="220" Margin="0,0,8,8">
+            </ComboBox>
+
+            <ComboBox SelectionChanged="OnChangedList" x:Name="HashfileComboBox" SelectedIndex="-1" PlaceholderText="Choisir Hashfile"  MinWidth="220" Margin="0,0,8,8">
+            </ComboBox>
+
+            <ComboBox SelectionChanged="OnChangedList" x:Name="FormatHashComboBox" SelectedIndex="-1" PlaceholderText="Choisir format" MinWidth="180" Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:OptionMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            
+            <ComboBox SelectionChanged="OnChangedList" x:Name="RuleComboBox" SelectedIndex="-1" PlaceholderText="Choisir rule"  MinWidth="220" Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:OptionMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                
+            </ComboBox>
+
+            <TextBox TextChanged="OnChangedText" Watermark="Entrez un mask" x:Name="MaskTextBox" Margin="0,0,8,8" MinWidth="220"/>
+            
+        </WrapPanel>
+    </t:TemplateControl.RightTop>
+
+
+    <!-- ENTRÉE : ligne de commande générée -->
+    <t:TemplateControl.Input>
+        <TextBox Text=""
+                 x:Name="EntreeTextBox"
+                 AcceptsReturn="False"
+                 Height="26"
+                 IsReadOnly="True"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Stretch"/>
+    </t:TemplateControl.Input>
+
+    <!-- BOUTON LANCER -->
+    <t:TemplateControl.RunArea>
+        <Button Content="Lancer"
+                Click="LancerCommandeClick"
+                HorizontalAlignment="Center"/>
+    </t:TemplateControl.RunArea>
+
+    <!-- SORTIE -->
+    <t:TemplateControl.Output>
+        <TextBox Text=""
+                 x:Name="SortieTextBox"
+                 AcceptsReturn="True"
+                 IsReadOnly="True"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch" />
+    </t:TemplateControl.Output>
+
+</t:TemplateControl>
