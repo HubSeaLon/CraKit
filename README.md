@@ -1,54 +1,90 @@
-# CraKit
-CraKit est un outil permettant de centraliser et utiliser les outils de crackages développé en C#. 
+## 📋 Présentation
 
-## Instructions d'installation
-- Ouvrir Docker Desktop
-- Dans le répertoire /Installation, suivez les commandes suivantes :
-```cmd
-# Build l'image et la machine Kali 
-docker compose build 
+**CraKit** est un outil permettant de centraliser et utiliser les outils de crackages développé en C#.
 
-# Créer et lancer le conteneur
-docker compose up
+---
 
-# Arrêter le conteneur 
-docker compose stop
+## 🛠 Outils Intégrés
 
-# Relancer le conteneur 
-docker compose start
+CraKit centralise les outils suivants :
 
-# Pour vérifier que l'image a bien été créée, vous devriez avoir l'iamge "kali-crakit" 
-docker images
+### 🔐 Audit de Mots de Passe (Cracking)
+* **[Hashcat](https://hashcat.net/hashcat/)** : L'outil de récupération de mots de passe le plus rapide au monde.
+* **[John The Ripper](https://github.com/openwall/john)** : Suite logicielle de cassage de mots de passe.
 
-# Pour vérifier que le conteneur a bien été créé et en marche 
-docker ps -a
+### 🌐 Énumération & Reconnaissance
+* **[dnsmap](https://www.kali.org/tools/dnsmap/)** : Outil de découverte de sous-domaines.
 
-# Vous devriez avoir en sortie : 
-<id>   kali-crakit:latest   "/bin/bash /entrypoi…"   x minutes ago   Up x minutes   0.0.0.0:2222->22/tcp, [::]:2222->22/tcp   kali-crakit
+---
+
+## 🚀 Installation
+
+### Pré-requis
+
+Avant de commencer, assurez-vous de disposer des éléments suivants :
+
+#### 1. Environnement .NET
+CraKit nécessite le SDK **.NET 8**.
+
+* [Télécharger .NET 8](https://dotnet.microsoft.com/fr-fr/download/dotnet/8.0)
+* Vérifier l'installation :
+    ```bash
+    dotnet --version
+    ```
+
+#### 2. Dépendances & Packages
+Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
+
+```bash
+# Ajout du package Avalonia
+dotnet add package Avalonia
+
+# Clean pour avoir un projet propre
+dotnet restore
+dotnet clean
 ```
 
+#### 3\. Docker (Environnement Kali)
+
+CraKit utilise un conteneur Docker pour exécuter les outils Linux natifs en toute sécurité via une connexion SSH locale.
+
+1.  Ouvrez **Docker Desktop**.
+2.  Naviguez dans le répertoire `/Installation` du projet.
+3.  Exécutez les commandes suivantes :
+
+<!-- end list -->
+
+```bash
+# Construction de l'image Kali personnalisée
+docker compose build 
+
+# Démarrage du conteneur en arrière-plan
+docker compose up -d
+```
+
+**Commandes utiles pour la gestion du conteneur :**
+
+```bash
+# Vérifier que l'image "kali-crakit" existe
+docker images
+
+# Vérifier que le conteneur est en cours d'exécution
+docker ps -a
+# Résultat attendu : kali-crakit:latest ... Up x minutes ... 0.0.0.0:2222->22/tcp
+
+# Arrêter / Redémarrer le conteneur
+docker compose stop
+docker compose start
+```
+
+-----
 
 
+## 📐 Conception et Architecture
 
-## Conception 
-- Squelette (draw.io) : https://app.diagrams.net/#G1UbUJwg6TBZXoDjet9roBA-ND3-4c_nKP#%7B%22pageId%22%3A%22iCKKW3toqpHFSzha94B6%22%7D
-- Prototype Figma : https://www.figma.com/proto/IwhjoJBby0OitEgHiEIXr1/Prototype-CraKit?node-id=1-46&t=g9DDKSZ4qGne3Atx-1
+Pour comprendre la structure interne et le flux de données de CraKit :
 
-## Développements 
-- .NET 8 
-- SSH.NET 
-- Avalonia 
-- IDE : JetBrains Rider
+* **📘 Diagramme de Classes (Squelette)** : [Voir sur Draw.io](https://app.diagrams.net/#G1UbUJwg6TBZXoDjet9roBA-ND3-4c_nKP#%7B%22pageId%22%3A%22iCKKW3toqpHFSzha94B6%22%7D)
+* **🎨 Maquette UX/UI** : [Voir le prototype Figma](https://www.figma.com/proto/IwhjoJBby0OitEgHiEIXr1/Prototype-CraKit?node-id=1-46&t=g9DDKSZ4qGne3Atx-1)
 
-## Outils utilisés
-
-### Craking
-- Hashcat (https://hashcat.net/hashcat/)
-- John The Reaper (https://github.com/openwall/john)
-
-### Enumeration
-- dnsmap (https://www.kali.org/tools/dnsmap/)
-
-
-
-
+-----
