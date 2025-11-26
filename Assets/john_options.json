@@ -1,0 +1,70 @@
+{
+  "name": "John the Ripper",
+  "description": "Outil de craquage de mots de passe polyvalent",
+  
+  "options": {
+    "format": {
+      "description": "Format du hash",
+      "values": [
+        {
+          "value": "raw-md5",
+          "label": "MD5 brut"
+        },
+        {
+          "value": "raw-sha1",
+          "label": "SHA1 brut"
+        },
+        {
+          "value": "raw-sha256",
+          "label": "SHA256 brut"
+        },
+        {
+          "value": "raw-sha512",
+          "label": "SHA512 brut"
+        },
+        {
+          "value": "NT",
+          "label": "NTLM (Windows)"
+        },
+        {
+          "value": "LM",
+          "label": "LM (Windows Legacy)"
+        },
+        {
+          "value": "krb5tgs",
+          "label": "Kerberos 5 TGS"
+        }
+      ]
+    },
+    "rules": {
+      "description": "Règles de mutation à appliquer",
+      "values": [
+        {
+          "value": "Single",
+          "label": "Single crack mode"
+        },
+        {
+          "value": "Wordlist",
+          "label": "Wordlist mode"
+        },
+        {
+          "value": "Extra",
+          "label": "Extra rules"
+        },
+        {
+          "value": "Jumbo",
+          "label": "Jumbo rules"
+        },
+        {
+          "value": "KoreLogic",
+          "label": "KoreLogic rules"
+        },
+        {
+          "value": "All",
+          "label": "All rules"
+        }
+      ]
+    }
+  }
+}
+

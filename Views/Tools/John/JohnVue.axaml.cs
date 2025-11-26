@@ -1,9 +1,10 @@
 ﻿using System;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Media;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
@@ -13,26 +14,54 @@ namespace CraKit.Views.Tools.John;
 
 public partial class JohnVue : TemplateControl
 {
+    // Initialisation des variables 
+    private string commande = "";
+    private string hashfile = "";
+    private string wordlist = "";
+    private string format = "";
+    private string rule = "";
+    private string mask = "";
+    private bool hashidSelected;
+    
     
     private readonly ToolFileService toolFileService;
+    private readonly ExecuterCommandeService executerCommandeService;
 
     public JohnVue()
     {
         InitializeComponent();
+        
+        // Injection des Instances 
         toolFileService = new ToolFileService(ConnexionSshService.Instance);
+        executerCommandeService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        
         AttachedToVisualTree += OnAttachedToVisualTree;
+        
+        // Chargement des listes déroulantes
+        ChargerLesListes();
+        ChargerHashTypes();
+        ChargerFormatTypes();
+    }
+    
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
     }
 
+    // Affichage selon l'option choisi
     private void choixOptionClick(object? sender, RoutedEventArgs e)
     {
         if (sender is not Button btn) return; 
         
         var name = btn.Name;
         
+        ResetButtonStyles();
+        
         switch (name)
         {
             case "ButtonOption1":
-                ResetButtonStyles();
+                hashidSelected = true;
+                
                 ButtonOption1.Opacity = 0.4;
                 
                 WordlistComboBox!.IsEnabled = false;
@@ -43,7 +72,8 @@ public partial class JohnVue : TemplateControl
                 break;
             
             case "ButtonOption2":
-                ResetButtonStyles();
+                hashidSelected = false;
+          
                 ButtonOption2.Opacity = 0.4;
                 
                 WordlistComboBox!.IsEnabled = true;
@@ -54,7 +84,8 @@ public partial class JohnVue : TemplateControl
                 break; 
             
             case "ButtonOption3":
-                ResetButtonStyles();
+                hashidSelected = false;
+       
                 ButtonOption3.Opacity = 0.4;
                 
                 WordlistComboBox!.IsEnabled = true;
@@ -65,7 +96,8 @@ public partial class JohnVue : TemplateControl
                 break;
             
             case "ButtonOption4":
-                ResetButtonStyles();
+                hashidSelected = false;
+           
                 ButtonOption4.Opacity = 0.4;
                 
                 WordlistComboBox!.IsEnabled = true;
@@ -76,7 +108,8 @@ public partial class JohnVue : TemplateControl
                 break;
             
             case "ButtonOption5":
-                ResetButtonStyles();
+                hashidSelected = false;
+              
                 ButtonOption5.Opacity = 0.4;
                 
                 WordlistComboBox!.IsEnabled = true;
@@ -88,6 +121,7 @@ public partial class JohnVue : TemplateControl
         }
     }
     
+    // Reset visuel et fonctionnel 
     private void ResetButtonStyles()
     {
         ButtonOption1.Opacity = 1;
@@ -95,9 +129,28 @@ public partial class JohnVue : TemplateControl
         ButtonOption3.Opacity = 1;
         ButtonOption4.Opacity = 1;
         ButtonOption5.Opacity = 1;
-    }
 
+        format = "";
+        wordlist = "";
+        hashfile = "";
+        rule = "";
+
+        FormatHashComboBox.SelectedIndex = -1;
+        FormatHashComboBox.SelectedItem = null;
+
+        WordlistComboBox.SelectedIndex = -1;
+        WordlistComboBox.SelectedItem = null;
+
+        HashfileComboBox.SelectedIndex = -1;
+        HashfileComboBox.SelectedItem = null;
+
+        RuleComboBox.SelectedIndex = -1;
+        RuleComboBox.SelectedItem = null;
+        MaskTextBox.Text = "";
+    }
     
+    
+    // Ajout des wordlists et hashfile 
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
         var window = TopLevel.GetTopLevel(this) as Window;
@@ -131,12 +184,6 @@ public partial class JohnVue : TemplateControl
         
     }
     
-    private void InitializeComponent()
-    {
-        AvaloniaXamlLoader.Load(this);
-    }
-    
-    
     
     // Méthode permettant de récupérer les noms des bouttons, listes, etc. vu qu'on utilise un template
     private void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
@@ -152,6 +199,9 @@ public partial class JohnVue : TemplateControl
         ButtonOption3 =  this.FindControl<Button>("ButtonOption3");
         ButtonOption4 =  this.FindControl<Button>("ButtonOption4");
         ButtonOption5 =  this.FindControl<Button>("ButtonOption5");
+        
+        EntreeTextBox =  this.FindControl<TextBox>("EntreeTextBox");
+        SortieTextBox =  this.FindControl<TextBox>("SortieTextBox");
 
         WordlistComboBox!.IsEnabled = false;
         HashfileComboBox!.IsEnabled = false;
@@ -160,6 +210,217 @@ public partial class JohnVue : TemplateControl
         MaskTextBox!.IsEnabled = false;
     }
     
+    
+     // Fonction qui fait le travail (LS en SSH)
+    private void RemplirComboBox(ComboBox laBox, string chemin)
+    {
+        // 1. SECURITÉ : Si la boite est null (pas trouvée), on arrête tout pour éviter le crash
+        if (laBox == null) return;
+
+        try 
+        {
+            var ssh = ConnexionSshService.Instance.Client;
+
+            // 2. SECURITÉ : Si pas connecté, on arrête
+            if (ssh == null || !ssh.IsConnected) return;
+
+            var cmd = ssh.CreateCommand($"ls -1 {chemin}");
+            string resultat = cmd.Execute();
+
+            laBox.Items.Clear(); // <-- C'est ici que ça plantait avant si laBox était null
+            
+            if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
+            {
+                var fichiers = resultat.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (var f in fichiers)
+                {
+                    laBox.Items.Add(f);
+                }
+                laBox.Items.Add("rockyou.txt");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur chargement liste : {ex.Message}");
+        }
+    }
+    
+    // Creation du Mask 
+    private void OnChangedText(object? sender, TextChangedEventArgs e)
+    {
+        if (sender is not TextBox textBox) return; 
+        
+        if (textBox.Name == "MaskTextBox")
+        {
+            if (string.IsNullOrWhiteSpace(MaskTextBox.Text))
+            {
+                // aucun mask → on enlève complètement l’option
+                mask = string.Empty;
+            }
+            else
+            {
+                mask = " --mask='" + MaskTextBox.Text + "'";
+            }
+        }
+        
+        commande = "john" + wordlist + mask + format + rule + hashfile;
+        
+        EntreeTextBox.Text = commande;
+        Console.WriteLine("Commande : " + commande);
+    }
+    
+    
+    // Création de la commande selon les choix de l'user
+    private void OnChangedList(object? sender, SelectionChangedEventArgs e)
+    {
+        if (sender is not ComboBox comboBox) return; 
+        
+        var name = comboBox.Name;
+        
+        switch (name)
+        {
+            case "WordlistComboBox":
+                if (WordlistComboBox.SelectedItem is null)
+                {
+                    wordlist = "";
+                    break;
+                }
+                
+                if (WordlistComboBox.SelectedItem!.ToString() == "rockyou.txt")
+                {
+                    wordlist = " --wordlist=/usr/share/wordlists/rockyou.txt";
+                }
+                else
+                {  
+                    wordlist = " --wordlist=/wordlists/" + WordlistComboBox.SelectedItem!;
+                }
+                break;
+            
+            case "HashfileComboBox":
+                if (HashfileComboBox.SelectedItem is null)
+                {
+                    hashfile = "";
+                    break;
+                }
+                
+                hashfile = " hashfiles/" + HashfileComboBox.SelectedItem!;
+                break;
+            
+            case "FormatHashComboBox":
+                if (FormatHashComboBox.SelectedItem is null)
+                {
+                    format = "";
+                    break;
+                }
+                
+                format = " --format=" + FormatHashComboBox.SelectedItem!;
+                break;
+            
+            case "RuleComboBox":
+                if (RuleComboBox.SelectedItem is null)
+                {
+                    rule = "";
+                    break;
+                }
+                
+                rule = " --rules=" + RuleComboBox.SelectedItem!;
+                break;
+        }
+        
+        if (hashidSelected)
+        {
+            commande = "hashid" + hashfile;
+        }
+        else
+        {
+            commande = "john" + wordlist + mask + format + rule + hashfile;
+        }
+        
+        EntreeTextBox.Text = commande;
+        Console.WriteLine("Commande : " + commande);
+    }
+
+
+    // Lancer la commande et afficher 
+    private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
+    {
+        var cmd = commande.Trim();
+        if (string.IsNullOrWhiteSpace(cmd)) return;
+        
+        SortieTextBox.Text = $"$ {cmd}\n";
+        
+        // Tolérance de 5 min pour des craking long (peut etre ajouter un timer)
+        var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(5));
+        SortieTextBox.Text += outp + "\n";
+    }
+    
+    // Chargement des différentes listes déroulantes (lecture json)
+    private void ChargerLesListes()
+    {
+        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+
+        // On ne lance la fonction que si on a bien trouvé les boites
+        if (boxWordlist != null) RemplirComboBox(boxWordlist, "/root/wordlists");
+        if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
+    }
+    
+    private void ChargerHashTypes()
+    {
+        try 
+        {
+            string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "john_options.json");
+            string? jsonBrut = ToolBase.LireFichierTexte(chemin);
+
+            if (string.IsNullOrEmpty(jsonBrut)) return;
+            
+            var rootNode = JsonNode.Parse(jsonBrut);
+            
+            var valuesNode = rootNode?["options"]?["format"]?["values"];
+
+            if (valuesNode != null)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                
+                var boxType = this.FindControl<ComboBox>("FormatHashComboBox");
+                if (listeModes != null && boxType != null) boxType.ItemsSource = listeModes;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[JSON ERROR] {ex.Message}");
+        }
+    }
+    
+    
+    private void ChargerFormatTypes()
+    {
+        try 
+        {
+            string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "john_options.json");
+            string? jsonBrut = ToolBase.LireFichierTexte(chemin);
+
+            if (string.IsNullOrEmpty(jsonBrut)) return;
+            
+            var rootNode = JsonNode.Parse(jsonBrut);
+            
+            var valuesNode = rootNode?["options"]?["rules"]?["values"];
+
+            if (valuesNode != null)
+            {
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                
+                var boxType = this.FindControl<ComboBox>("RuleComboBox");
+                if (listeModes != null && boxType != null) boxType.ItemsSource = listeModes;
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[JSON ERROR] {ex.Message}");
+        }
+    }
     
     // aller chercher le style <Style Selector="control|TemplateControl">
     protected override Type StyleKeyOverride => typeof(TemplateControl);

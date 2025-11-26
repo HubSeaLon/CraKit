@@ -35,8 +35,12 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Assets\hashfiles\" />
-      <Folder Include="Assets\wordlists\" />
       <Folder Include="ViewsModels\Tools\" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Update="Assets\**">
+            <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+        </None>
     </ItemGroup>
 </Project>

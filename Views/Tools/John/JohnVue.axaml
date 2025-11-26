@@ -2,7 +2,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:t="clr-namespace:CraKit.Templates"
         x:Class="CraKit.Views.Tools.John.JohnVue"
-        Title="John The Reaper">
+        Title="John The Reaper"
+        xmlns:models="clr-namespace:CraKit.Models">
     
     <!-- BOUTON BANDEAU HAUT -->
     <t:TemplateControl.HeaderRight>
@@ -36,19 +37,34 @@
             
             <!-- FAIRE LE BINDING DES LISTES A AFFICHER + LES CHOIX et SELON OPTION CHOISIE (à gauche) -->
             
-            <ComboBox x:Name="WordlistComboBox" PlaceholderText="Choisir Wordlist"  MinWidth="220" Margin="0,0,8,8">
+            <ComboBox SelectionChanged="OnChangedList" x:Name="WordlistComboBox" SelectedIndex="-1" PlaceholderText="Choisir Wordlist"  MinWidth="220" Margin="0,0,8,8">
             </ComboBox>
 
-            <ComboBox x:Name="HashfileComboBox" PlaceholderText="Choisir Hashfile"  MinWidth="220" Margin="0,0,8,8">
+            <ComboBox SelectionChanged="OnChangedList" x:Name="HashfileComboBox" SelectedIndex="-1" PlaceholderText="Choisir Hashfile"  MinWidth="220" Margin="0,0,8,8">
             </ComboBox>
 
-            <ComboBox x:Name="FormatHashComboBox" PlaceholderText="Choisir format" MinWidth="180" Margin="0,0,8,8">
+            <ComboBox SelectionChanged="OnChangedList" x:Name="FormatHashComboBox" SelectedIndex="-1" PlaceholderText="Choisir format" MinWidth="180" Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:OptionMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
             
-            <ComboBox x:Name="RuleComboBox" PlaceholderText="Choisir rule"  MinWidth="220" Margin="0,0,8,8">
+            <ComboBox SelectionChanged="OnChangedList" x:Name="RuleComboBox" SelectedIndex="-1" PlaceholderText="Choisir rule"  MinWidth="220" Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:OptionMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+                
             </ComboBox>
 
-            <TextBox Watermark="Entrez un mask" x:Name="MaskTextBox" Margin="0,0,8,8" MinWidth="220"/>
+            <TextBox TextChanged="OnChangedText" Watermark="Entrez un mask" x:Name="MaskTextBox" Margin="0,0,8,8" MinWidth="220"/>
             
         </WrapPanel>
     </t:TemplateControl.RightTop>
@@ -56,7 +72,8 @@
 
     <!-- ENTRÉE : ligne de commande générée -->
     <t:TemplateControl.Input>
-        <TextBox Text="BINDING ENTREE exemple : hashcat -m 0 -a 0 hash.txt wordlist.txt"
+        <TextBox Text=""
+                 x:Name="EntreeTextBox"
                  AcceptsReturn="False"
                  Height="26"
                  IsReadOnly="True"
@@ -67,12 +84,14 @@
     <!-- BOUTON LANCER -->
     <t:TemplateControl.RunArea>
         <Button Content="Lancer"
+                Click="LancerCommandeClick"
                 HorizontalAlignment="Center"/>
     </t:TemplateControl.RunArea>
 
     <!-- SORTIE -->
     <t:TemplateControl.Output>
-        <TextBox Text="FAIRE LE BINDING SORTIE"
+        <TextBox Text=""
+                 x:Name="SortieTextBox"
                  AcceptsReturn="True"
                  IsReadOnly="True"
                  TextWrapping="Wrap"
