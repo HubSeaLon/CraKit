@@ -2,14 +2,13 @@
                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                    xmlns:t="clr-namespace:CraKit.Templates"
                    x:Class="CraKit.Views.Tools.HashCat.HashCatVue"
-                   Title="Hashcat">
-
-    <!-- BOUTON BANDEAU HAUT -->
+                   Title="Hashcat"
+                   xmlns:models="clr-namespace:CraKit.Models">
+    
     <t:TemplateControl.HeaderRight>
         <Button Content="Save history in file" />
     </t:TemplateControl.HeaderRight>
 
-    <!-- COLONNE GAUCHE : presets / types d’attaque -->
     <t:TemplateControl.LeftPane>
         <StackPanel Spacing="8">
             <StackPanel Orientation="Horizontal"
@@ -29,44 +28,49 @@
         </StackPanel>
     </t:TemplateControl.LeftPane>
 
-    <!-- ZONE D’OPTIONS EN HAUT À DROITE -->
-    
     <t:TemplateControl.RightTop>
         <WrapPanel>
             
-            <!-- FAIRE LE BINDING DES LISTES A AFFICHER + LES CHOIX et SELON OPTION CHOISIE (à gauche) -->
-            
-            <ComboBox  x:Name="WordlistComboBox" PlaceholderText="Wordlist"  MinWidth="220" Margin="0,0,8,8">
+            <ComboBox x:Name="WordlistComboBox" PlaceholderText="Wordlist" MinWidth="220" Margin="0,0,8,8">
             </ComboBox>
 
-            <ComboBox  x:Name="HashfileComboBox" PlaceholderText="Hashfile"  MinWidth="220" Margin="0,0,8,8">
+            <ComboBox x:Name="HashfileComboBox" PlaceholderText="Hashfile" MinWidth="220" Margin="0,0,8,8">
             </ComboBox>
 
-            <ComboBox PlaceholderText="Format hash" MinWidth="180" Margin="0,0,8,8">
+            <ComboBox x:Name="HashTypeComboBox" 
+                      PlaceholderText="Format hash" 
+                      MinWidth="220" 
+                      Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:HashMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
             </ComboBox>
 
         </WrapPanel>
     </t:TemplateControl.RightTop>
 
 
-    <!-- ENTRÉE : ligne de commande générée -->
     <t:TemplateControl.Input>
-        <TextBox Text="BINDING ENTREE exemple : hashcat -m 0 -a 0 hash.txt wordlist.txt"
+        <TextBox x:Name="TxtCommandInput"
+                 Watermark="La commande s'affichera ici..."
                  AcceptsReturn="False"
                  Height="26"
                  VerticalAlignment="Center"
                  HorizontalAlignment="Stretch"/>
     </t:TemplateControl.Input>
 
-    <!-- BOUTON LANCER -->
     <t:TemplateControl.RunArea>
         <Button Content="Lancer"
                 HorizontalAlignment="Center"/>
     </t:TemplateControl.RunArea>
 
-    <!-- SORTIE -->
     <t:TemplateControl.Output>
-        <TextBox Text="FAIRE LE BINDING SORTIE"
+        <TextBox x:Name="TxtOutput"
+                 Watermark="Résultat de la commande..."
                  AcceptsReturn="True"
                  IsReadOnly="True"
                  TextWrapping="Wrap"
