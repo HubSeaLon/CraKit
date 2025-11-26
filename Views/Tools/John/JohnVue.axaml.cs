@@ -3,9 +3,11 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
+
 
 namespace CraKit.Views.Tools.John;
 
@@ -23,58 +25,78 @@ public partial class JohnVue : TemplateControl
 
     private void choixOptionClick(object? sender, RoutedEventArgs e)
     {
-        if (sender is Button btn && btn.Name is string name )
-        {
-            switch (name)
-            {
-                case "ButtonOption1":
-                    
-                    WordlistComboBox!.IsEnabled = false;
-                    HashfileComboBox!.IsEnabled = true;
-                    FormatHashComboBox!.IsEnabled = false;
-                    RuleComboBox!.IsEnabled = false;
-                    MaskTextBox!.IsEnabled = false;
-                    break;
-                
-                case "ButtonOption2":
-                    
-                    WordlistComboBox!.IsEnabled = true;
-                    HashfileComboBox!.IsEnabled = true;
-                    FormatHashComboBox!.IsEnabled = false;
-                    RuleComboBox!.IsEnabled = false;
-                    MaskTextBox!.IsEnabled = false;
-                    break;
-                
-                case "ButtonOption3":
-                   
-                    WordlistComboBox!.IsEnabled = true;
-                    HashfileComboBox!.IsEnabled = true;
-                    FormatHashComboBox!.IsEnabled = true;
-                    RuleComboBox!.IsEnabled = false;
-                    MaskTextBox!.IsEnabled = false;
-                    break;
-                
-                case "ButtonOption4":
-                    
-                    WordlistComboBox!.IsEnabled = true;
-                    HashfileComboBox!.IsEnabled = true;
-                    FormatHashComboBox!.IsEnabled = true;
-                    RuleComboBox!.IsEnabled = true;
-                    MaskTextBox!.IsEnabled = false;
-                    break;
-                
-                case "ButtonOption5":
-                    
-                    WordlistComboBox!.IsEnabled = true;
-                    HashfileComboBox!.IsEnabled = true;
-                    FormatHashComboBox!.IsEnabled = true;
-                    RuleComboBox!.IsEnabled = false;
-                    MaskTextBox!.IsEnabled = true;
-                    break;
-            }
-        }
+        if (sender is not Button btn) return; 
         
+        var name = btn.Name;
+        
+        switch (name)
+        {
+            case "ButtonOption1":
+                ResetButtonStyles();
+                ButtonOption1.Opacity = 0.4;
+                
+                WordlistComboBox!.IsEnabled = false;
+                HashfileComboBox!.IsEnabled = true;
+                FormatHashComboBox!.IsEnabled = false;
+                RuleComboBox!.IsEnabled = false;
+                MaskTextBox!.IsEnabled = false;
+                break;
+            
+            case "ButtonOption2":
+                ResetButtonStyles();
+                ButtonOption2.Opacity = 0.4;
+                
+                WordlistComboBox!.IsEnabled = true;
+                HashfileComboBox!.IsEnabled = true;
+                FormatHashComboBox!.IsEnabled = false;
+                RuleComboBox!.IsEnabled = false;
+                MaskTextBox!.IsEnabled = false;
+                break; 
+            
+            case "ButtonOption3":
+                ResetButtonStyles();
+                ButtonOption3.Opacity = 0.4;
+                
+                WordlistComboBox!.IsEnabled = true;
+                HashfileComboBox!.IsEnabled = true;
+                FormatHashComboBox!.IsEnabled = true;
+                RuleComboBox!.IsEnabled = false;
+                MaskTextBox!.IsEnabled = false;
+                break;
+            
+            case "ButtonOption4":
+                ResetButtonStyles();
+                ButtonOption4.Opacity = 0.4;
+                
+                WordlistComboBox!.IsEnabled = true;
+                HashfileComboBox!.IsEnabled = true;
+                FormatHashComboBox!.IsEnabled = true;
+                RuleComboBox!.IsEnabled = true;
+                MaskTextBox!.IsEnabled = false;
+                break;
+            
+            case "ButtonOption5":
+                ResetButtonStyles();
+                ButtonOption5.Opacity = 0.4;
+                
+                WordlistComboBox!.IsEnabled = true;
+                HashfileComboBox!.IsEnabled = true;
+                FormatHashComboBox!.IsEnabled = true;
+                RuleComboBox!.IsEnabled = false;
+                MaskTextBox!.IsEnabled = true;
+                break;
+        }
     }
+    
+    private void ResetButtonStyles()
+    {
+        ButtonOption1.Opacity = 1;
+        ButtonOption2.Opacity = 1;
+        ButtonOption3.Opacity = 1;
+        ButtonOption4.Opacity = 1;
+        ButtonOption5.Opacity = 1;
+    }
+
     
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
