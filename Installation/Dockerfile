@@ -4,11 +4,13 @@
 RUN apt-get update && \
     apt-get -y install \
         openssh-server \
+        hashid \
         john \
         hashcat \
         dnsmap \
         wordlists \
         seclists \
+
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*   # clean et rm -rf permet de réduire la taille
 

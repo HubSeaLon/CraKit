@@ -60,8 +60,7 @@ public partial class HashCatVue : TemplateControl
     {
         AvaloniaXamlLoader.Load(this);
     }
-
-    // AJOUTEZ CECI : C'est la ligne magique !
-    // Elle dit à Avalonia d'aller chercher le style <Style Selector="control|TemplateControl">
+    
+    // aller chercher le style <Style Selector="control|TemplateControl">
     protected override Type StyleKeyOverride => typeof(TemplateControl);
 }

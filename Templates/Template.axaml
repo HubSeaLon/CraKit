@@ -30,7 +30,7 @@
 
                     <!-- Contenu -->
                     <Grid Grid.Row="1"
-                          ColumnDefinitions="320,*">
+                          ColumnDefinitions="360,*">
 
                         <!-- Colonne gauche -->
                         <Border Grid.Column="0"

@@ -96,6 +96,7 @@ public class ConnexionSshService : IDisposable, INotifyPropertyChanged
         {
             using var fs = File.OpenRead(local);
             _sftp.UploadFile(fs, remote, true);
+            Console.WriteLine("[SSH-SFTP] Upload File " + local + " in " + remote);
         });
     }
     

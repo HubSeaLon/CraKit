@@ -37,6 +37,8 @@ public class ExecuterCommandeService
                 return $"[SSH] Erreur exécution : {ex.Message}";
             }
         });
+        
+        // Augmenter Timeout au cas ou pour John et HashCat + compteur 
     }
     
     // Exécution en streaming (temps réel pour les commandes d'énumération)
