@@ -20,7 +20,7 @@
             </StackPanel>
 
             <TextBlock Text="Modes Hashcat :" FontWeight="Bold" Margin="0,4,0,4"/>
-            <Button Content="Crack auto (hashfile)" HorizontalAlignment="Left"/>
+            <Button Content="Attaque par dictionnaire" HorizontalAlignment="Left" Click="DictionaryAttackClick"/>
             <Button Content="Mask attack (hashfile, mask))" HorizontalAlignment="Left"/>
             <Button Content="Wordlist (hashfile, wordlist)" HorizontalAlignment="Left"/>
             <Button Content="Rules (hashfile, wordlist, rules)" HorizontalAlignment="Left"/>
