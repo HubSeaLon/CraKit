@@ -39,7 +39,7 @@ public partial class HashCatVue : TemplateControl
             if (valuesNode != null)
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<HashMode>>(options);
+                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
                 
                 var boxType = this.FindControl<ComboBox>("HashTypeComboBox");
                 if (listeModes != null && boxType != null)
