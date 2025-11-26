@@ -236,7 +236,6 @@ public partial class JohnVue : TemplateControl
                 {
                     laBox.Items.Add(f);
                 }
-                laBox.Items.Add("rockyou.txt");
             }
         }
         catch (Exception ex)
@@ -361,8 +360,14 @@ public partial class JohnVue : TemplateControl
         var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
 
         // On ne lance la fonction que si on a bien trouvé les boites
-        if (boxWordlist != null) RemplirComboBox(boxWordlist, "/root/wordlists");
+        if (boxWordlist != null)
+        {
+            RemplirComboBox(boxWordlist, "/root/wordlists");
+            boxWordlist.Items.Add("rockyou.txt");
+        }
         if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
+        
+       
     }
     
     private void ChargerHashTypes()
