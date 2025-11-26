@@ -194,14 +194,14 @@
             <TextBlock Text="02. DOMAINE" Classes="StepHeader"/>
             
             <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatCracking.IsChecked}">
-                <RadioButton x:Name="RbSubHash" Classes="MenuItem" Content="Hash Cracking" GroupName="SubCatCrack" IsChecked="True"/>
-                <RadioButton Classes="MenuItem" Content="Mask / Rules" GroupName="SubCatCrack"/>
-                <RadioButton Classes="MenuItem" Content="Bruteforce / Wordlist" GroupName="SubCatCrack"/>
+                <RadioButton x:Name="RbHashCracking" Classes="MenuItem" Content="Hash Cracking" GroupName="SubCatCrack" IsChecked="True"/>
+                <RadioButton x:Name="RbMaskRules" Classes="MenuItem" Content="Mask / Rules" GroupName="SubCatCrack"/>
+                <RadioButton x:Name="RbMBruteForce" Classes="MenuItem" Content="Bruteforce / Wordlist" GroupName="SubCatCrack"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatEnum.IsChecked}">
-                <RadioButton x:Name="RbSubDns" Classes="MenuItem" Content="DNS Enumeration" GroupName="SubCatEnum" IsChecked="True"/>
-                <RadioButton Classes="MenuItem" Content="Subdomain Enum" GroupName="SubCatEnum"/>
+                <RadioButton x:Name="RbDNSEnumeration" Classes="MenuItem" Content="DNS Enumeration" GroupName="SubCatEnum" IsChecked="True"/>
+                <RadioButton x:Name="RbSubdomainEnum" Classes="MenuItem" Content="Subdomain Enum" GroupName="SubCatEnum"/>
             </StackPanel>
         </Grid>
 
@@ -210,21 +210,36 @@
 
         <Grid Grid.Column="4" RowDefinitions="Auto, *">
             <TextBlock Text="03. OUTIL ADAPTÉ" Classes="StepHeader"/>
-            
+        
             <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatCracking.IsChecked}">
-                <StackPanel IsVisible="{Binding #RbSubHash.IsChecked}">
+            
+                <StackPanel IsVisible="{Binding #RbHashCracking.IsChecked}">
                     <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
                     <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
                 </StackPanel>
-                
+
+                <StackPanel IsVisible="{Binding #RbMaskRules.IsChecked}">
+                    <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
+                    <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
                 </StackPanel>
 
+                <StackPanel IsVisible="{Binding #RbMBruteForce.IsChecked}">
+                    <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
+                    <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
+                </StackPanel>
+            </StackPanel>
+
             <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatEnum.IsChecked}">
-                <StackPanel IsVisible="{Binding #RbSubDns.IsChecked}">
+            
+                <StackPanel IsVisible="{Binding #RbDNSEnumeration.IsChecked}">
+                    <Button Click="OpenDnsMap" Classes="ActionButton" Content="DNSMap" HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <StackPanel IsVisible="{Binding #RbSubdomainEnum.IsChecked}">
                     <Button Click="OpenDnsMap" Classes="ActionButton" Content="DNSMap" HorizontalAlignment="Stretch"/>
                 </StackPanel>
             </StackPanel>
-            
+        
         </Grid>
 
     </Grid>
