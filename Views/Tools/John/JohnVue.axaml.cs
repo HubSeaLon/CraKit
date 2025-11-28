@@ -64,11 +64,11 @@ public partial class JohnVue : TemplateControl
                 
                 ButtonOption1.Opacity = 0.4;
                 
-                WordlistComboBox!.IsEnabled = false;
-                HashfileComboBox!.IsEnabled = true;
-                FormatHashComboBox!.IsEnabled = false;
-                RuleComboBox!.IsEnabled = false;
-                MaskTextBox!.IsEnabled = false;
+                WordlistComboBox!.IsVisible = false;
+                HashfileComboBox!.IsVisible = true;
+                FormatHashComboBox!.IsVisible = false;
+                RuleComboBox!.IsVisible = false;
+                MaskTextBox!.IsVisible = false;
                 break;
             
             case "ButtonOption2":
@@ -76,11 +76,11 @@ public partial class JohnVue : TemplateControl
           
                 ButtonOption2.Opacity = 0.4;
                 
-                WordlistComboBox!.IsEnabled = true;
-                HashfileComboBox!.IsEnabled = true;
-                FormatHashComboBox!.IsEnabled = false;
-                RuleComboBox!.IsEnabled = false;
-                MaskTextBox!.IsEnabled = false;
+                WordlistComboBox!.IsVisible = true;
+                HashfileComboBox!.IsVisible = true;
+                FormatHashComboBox!.IsVisible = false;
+                RuleComboBox!.IsVisible = false;
+                MaskTextBox!.IsVisible = false;
                 break; 
             
             case "ButtonOption3":
@@ -88,11 +88,11 @@ public partial class JohnVue : TemplateControl
        
                 ButtonOption3.Opacity = 0.4;
                 
-                WordlistComboBox!.IsEnabled = true;
-                HashfileComboBox!.IsEnabled = true;
-                FormatHashComboBox!.IsEnabled = true;
-                RuleComboBox!.IsEnabled = false;
-                MaskTextBox!.IsEnabled = false;
+                WordlistComboBox!.IsVisible = true;
+                HashfileComboBox!.IsVisible = true;
+                FormatHashComboBox!.IsVisible = true;
+                RuleComboBox!.IsVisible = false;
+                MaskTextBox!.IsVisible = false;
                 break;
             
             case "ButtonOption4":
@@ -100,11 +100,11 @@ public partial class JohnVue : TemplateControl
            
                 ButtonOption4.Opacity = 0.4;
                 
-                WordlistComboBox!.IsEnabled = true;
-                HashfileComboBox!.IsEnabled = true;
-                FormatHashComboBox!.IsEnabled = true;
-                RuleComboBox!.IsEnabled = true;
-                MaskTextBox!.IsEnabled = false;
+                WordlistComboBox!.IsVisible = true;
+                HashfileComboBox!.IsVisible = true;
+                FormatHashComboBox!.IsVisible = true;
+                RuleComboBox!.IsVisible = true;
+                MaskTextBox!.IsVisible = false;
                 break;
             
             case "ButtonOption5":
@@ -112,11 +112,11 @@ public partial class JohnVue : TemplateControl
               
                 ButtonOption5.Opacity = 0.4;
                 
-                WordlistComboBox!.IsEnabled = true;
-                HashfileComboBox!.IsEnabled = true;
-                FormatHashComboBox!.IsEnabled = true;
-                RuleComboBox!.IsEnabled = false;
-                MaskTextBox!.IsEnabled = true;
+                WordlistComboBox!.IsVisible = true;
+                HashfileComboBox!.IsVisible = true;
+                FormatHashComboBox!.IsVisible = true;
+                RuleComboBox!.IsVisible = false;
+                MaskTextBox!.IsVisible = true;
                 break;
         }
     }
@@ -203,11 +203,11 @@ public partial class JohnVue : TemplateControl
         EntreeTextBox =  this.FindControl<TextBox>("EntreeTextBox");
         SortieTextBox =  this.FindControl<TextBox>("SortieTextBox");
 
-        WordlistComboBox!.IsEnabled = false;
-        HashfileComboBox!.IsEnabled = false;
-        FormatHashComboBox!.IsEnabled = false;
-        RuleComboBox!.IsEnabled = false;
-        MaskTextBox!.IsEnabled = false;
+        WordlistComboBox!.IsVisible= false;
+        HashfileComboBox!.IsVisible= false;
+        FormatHashComboBox!.IsVisible= false;
+        RuleComboBox!.IsVisible= false;
+        MaskTextBox!.IsVisible= false;
     }
     
     
