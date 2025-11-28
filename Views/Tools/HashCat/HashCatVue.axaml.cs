@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Nodes; 
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
 using CraKit.Models;
@@ -10,42 +12,55 @@ using CraKit.Templates;
 
 namespace CraKit.Views.Tools.HashCat;
 
+// Definition des modes d'attaque supportes
+public enum AttackType
+{
+    Dictionary,
+    Rules,
+    Mask,
+    Association,
+    Prince
+}
+
 public partial class HashCatVue : TemplateControl
 {
-    private readonly ToolFileService toolFileService;
+    private readonly ToolFileService _toolFileService;
+    private AttackType _currentAttackType = AttackType.Dictionary;
 
     public HashCatVue()
     {
+        _toolFileService = new ToolFileService(ConnexionSshService.Instance);
         InitializeComponent();
-        toolFileService = new ToolFileService(ConnexionSshService.Instance);
-
+        
+        // Chargement initial des donnees
         ChargerLesListes();
         ChargerHashTypes();
     }
+    
     
     private void ChargerHashTypes()
     {
         try 
         {
+            // Lecture du fichier JSON contenant les types de hash (MD5, SHA1...)
             string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "HashCat.json");
             string? jsonBrut = ToolBase.LireFichierTexte(chemin);
 
             if (string.IsNullOrEmpty(jsonBrut)) return;
             
             var rootNode = JsonNode.Parse(jsonBrut);
-            
             var valuesNode = rootNode?["options"]?["hashType"]?["values"];
 
             if (valuesNode != null)
             {
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                var listeModes = valuesNode.Deserialize<List<OptionMode>>(options);
                 
                 var boxType = this.FindControl<ComboBox>("HashTypeComboBox");
                 if (listeModes != null && boxType != null)
                 {
                     boxType.ItemsSource = listeModes;
-                    boxType.SelectedIndex = 0;
+                    boxType.SelectedIndex = 0; // Selection par defaut
                 }
             }
         }
@@ -55,6 +70,7 @@ public partial class HashCatVue : TemplateControl
         }
     }
     
+    // Recupere la liste des fichiers sur le serveur via SSH
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
         if (laBox == null) return;
@@ -69,6 +85,7 @@ public partial class HashCatVue : TemplateControl
 
             laBox.Items.Clear();
 
+            // On verifie qu'il y a bien des fichiers et pas d'erreur Linux
             if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
             {
                 var fichiers = resultat.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
@@ -84,23 +101,253 @@ public partial class HashCatVue : TemplateControl
     {
         var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
         var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
 
-        if (boxWordlist != null) RemplirComboBox(boxWordlist, "/root/wordlists");
-        if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
-    }
-
-    private void DictionaryAttackClick(object? sender, RoutedEventArgs e)
-    {
+        // Remplissage des ComboBox avec les chemins distants
         
+        if (boxWordlist != null)
+        {
+            RemplirComboBox(boxWordlist, "/root/wordlists");
+        }
+
+        if (boxHashfile != null)
+        {
+            RemplirComboBox(boxHashfile, "/root/hashfiles");
+        }
+
+        if (boxRules != null)
+        {
+            RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
+        }
     }
     
+    // Methodes declenchees par les boutons du menu de gauche
+    private void DictionaryAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Dictionary);
+    private void DictionaryAttackAndRulesClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Rules);
+    private void BruteForceAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Mask);
+    private void AssociationAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Association);
+    private void PrinceAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Prince);
+
+    // Declenche quand on change une valeur dans une liste
+    private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e) => GenererCommande();
+    
+    // Declenche quand on tape dans le champ Masque
+    private void OnMaskInputChanged(object? sender, KeyEventArgs e) => GenererCommande();
+    
+    // Active ou desactive les elements de l'interface selon le mode choisi
+    private void SetAttackMode(AttackType type)
+    {
+        _currentAttackType = type;
+
+        // Recuperation des controles UI
+        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
+        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
+        var txtMask = this.FindControl<TextBox>("MaskInputBox"); 
+
+        // On cache/desactive tout
+        
+        if (boxWordlist != null)
+        {
+            boxWordlist.IsEnabled = false;
+            boxWordlist.IsVisible = true;
+        }
+
+        if (boxHashfile != null)
+        {
+            boxHashfile.IsEnabled = false;
+        }
+
+        if (boxHashType != null)
+        {
+            boxHashType.IsEnabled = false;
+        }
+
+        if (boxRules != null)
+        {
+            boxRules.IsEnabled = false;
+        }
+
+        if (txtMask != null)
+        {
+            txtMask.IsVisible = false;
+        }
+
+        // On active uniquement ce qui est necessaire
+        switch (type)
+        {
+            case AttackType.Dictionary:
+                if (boxWordlist != null)
+                {
+                    boxWordlist.IsEnabled = true;
+                }
+                if (boxHashfile != null)
+                {
+                    boxHashfile.IsEnabled = true;
+                }
+                if (boxHashType != null)
+                {
+                    boxHashType.IsEnabled = true;
+                }
+                break;
+
+            case AttackType.Rules:
+                if (boxWordlist != null)
+                {
+                    boxWordlist.IsEnabled = true;
+                }
+                if (boxHashfile != null)
+                {
+                    boxHashfile.IsEnabled = true;
+                }
+                if (boxHashType != null)
+                {
+                    boxHashType.IsEnabled = true;
+                }
+                if (boxRules != null)
+                {
+                    boxRules.IsEnabled = true;
+                }
+                break;
+            
+            case AttackType.Mask:
+                // Masque remplace la wordlist
+                if (boxWordlist != null)
+                {
+                    boxWordlist.IsVisible = false;
+                }
+                if (boxHashfile != null)
+                {
+                    boxHashfile.IsEnabled = true;
+                }
+                if (boxHashType != null)
+                {
+                    boxHashType.IsEnabled = true;
+                }
+                if (txtMask != null)
+                {
+                    txtMask.IsVisible = true;
+                }
+                break;
+            
+            case AttackType.Association:
+                if (boxWordlist != null)
+                {
+                    boxWordlist.IsEnabled = true;
+                }
+                if (boxHashfile != null)
+                {
+                    boxHashfile.IsEnabled = true;
+                }
+                if (boxHashType != null)
+                {
+                    boxHashType.IsEnabled = true;
+                }
+                if (boxRules != null)
+                {
+                    boxRules.IsEnabled = true;
+                }
+                break;
+            
+            case AttackType.Prince:
+                if (boxWordlist != null)
+                {
+                    boxWordlist.IsEnabled = true;
+                }
+                if (boxHashfile != null)
+                {
+                    boxHashfile.IsEnabled = true;
+                }
+                if (boxHashType != null)
+                {
+                    boxHashType.IsEnabled = true;
+                }
+                break;
+        }
+
+        GenererCommande();
+    }
+
+    // Construction dynamique de la commande Hashcat
+    private void GenererCommande()
+    {
+        var txtInput = this.FindControl<TextBox>("TxtCommandInput");
+        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
+        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
+        var txtMask = this.FindControl<TextBox>("MaskInputBox");
+
+        if (txtInput == null) return;
+        
+        // Recuperation des valeurs
+        
+        string modeValue = "0"; 
+        if (boxHashType?.SelectedItem is OptionMode selectedMode)
+        {
+            modeValue = selectedMode.value.ToString();
+        }
+        
+        string hashPath = "<fichier_hashes>";
+        if (boxHashfile?.SelectedItem != null)
+        {
+            hashPath = $"/root/hashfiles/{boxHashfile.SelectedItem}";
+        }
+        
+        string wordlistPath = "<wordlist>";
+        if (boxWordlist?.SelectedItem != null)
+        {
+            wordlistPath = $"/root/wordlists/{boxWordlist.SelectedItem}";
+        }
+        
+        string rulePath = "";
+        if (boxRules?.SelectedItem != null)
+        {
+            rulePath = $" -r /usr/share/hashcat/rules/{boxRules.SelectedItem}";
+        }
+        
+        string maskValue = "?a?a?a?a";
+        if (txtMask != null && !string.IsNullOrEmpty(txtMask.Text))
+        {
+            maskValue = txtMask.Text;
+        }
+        
+        // Construction de la string finale
+        string finalCommand = "";
+
+        switch (_currentAttackType)
+        {
+            case AttackType.Dictionary:
+                finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath}";
+                break;
+
+            case AttackType.Rules:
+                finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath}{rulePath}";
+                break;
+            
+            case AttackType.Mask:
+                finalCommand = $"hashcat -m {modeValue} -a 3 {hashPath} {maskValue}";
+                break;
+            
+            case AttackType.Association:
+                finalCommand = $"hashcat -m {modeValue} -a 9 {hashPath} {wordlistPath}{rulePath}";
+                break;
+            
+            case AttackType.Prince:
+                finalCommand = $"hashcat -m {modeValue} -a 8 {hashPath} {wordlistPath}";
+                break;
+        }
+
+        txtInput.Text = finalCommand;
+    }
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window == null) return;
         try
         {
-            await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
+            await _toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
             var box = this.FindControl<ComboBox>("WordlistComboBox");
             if (box != null) RemplirComboBox(box, "/root/wordlists");
         }
@@ -113,7 +360,7 @@ public partial class HashCatVue : TemplateControl
         if (window == null) return;
         try
         {
-            await toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
+            await _toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
             var box = this.FindControl<ComboBox>("HashfileComboBox");
             if (box != null) RemplirComboBox(box, "/root/hashfiles");
         }
@@ -127,4 +374,3 @@ public partial class HashCatVue : TemplateControl
 
     protected override Type StyleKeyOverride => typeof(TemplateControl);
 }
-

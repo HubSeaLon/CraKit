@@ -11,19 +11,38 @@
 
     <t:TemplateControl.LeftPane>
         <StackPanel Spacing="8">
-            <StackPanel Orientation="Horizontal"
-                        Spacing="8"
-                        Margin="0,0,0,8">
-                <Button Content="Ajouter wordlist" Click="AjouterWordlistClick" />
-                <Button Content="Ajouter hashfile" Click="AjouterHashfileClick" />
+            
+            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,0,0,8">
+                <Button Content="Ajouter wordlist" 
+                        Click="AjouterWordlistClick" />
+                
+                <Button Content="Ajouter hashfile" 
+                        Click="AjouterHashfileClick" />
             </StackPanel>
 
-            <TextBlock Text="Modes Hashcat :" FontWeight="Bold" Margin="0,4,0,4"/>
-            <Button Content="Attaque par dictionnaire" HorizontalAlignment="Left" Click="DictionaryAttackClick"/>
-            <Button Content="Mask attack (hashfile, mask))" HorizontalAlignment="Left"/>
-            <Button Content="Wordlist (hashfile, wordlist)" HorizontalAlignment="Left"/>
-            <Button Content="Rules (hashfile, wordlist, rules)" HorizontalAlignment="Left"/>
-            <Button Content="Brute-force (hashfile)" HorizontalAlignment="Left"/>
+            <TextBlock Text="Modes Hashcat :" 
+                       FontWeight="Bold" 
+                       Margin="0,4,0,4"/>
+
+            <Button Content="Attaque par dictionnaire" 
+                    HorizontalAlignment="Left" 
+                    Click="DictionaryAttackClick"/>
+            
+            <Button Content="Attaque par dictionnaire + Rules" 
+                    HorizontalAlignment="Left" 
+                    Click="DictionaryAttackAndRulesClick"/>
+            
+            <Button Content="Attaque par brute-force" 
+                    HorizontalAlignment="Left" 
+                    Click="BruteForceAttackClick"/>
+            
+            <Button Content="Attaque par association" 
+                    HorizontalAlignment="Left" 
+                    Click="AssociationAttackClick"/>
+            
+            <Button Content="Attaque par prince" 
+                    HorizontalAlignment="Left" 
+                    Click="PrinceAttackClick"/>
             
         </StackPanel>
     </t:TemplateControl.LeftPane>
@@ -31,16 +50,28 @@
     <t:TemplateControl.RightTop>
         <WrapPanel>
             
-            <ComboBox x:Name="WordlistComboBox" PlaceholderText="Wordlist" MinWidth="220" Margin="0,0,8,8">
+            <ComboBox x:Name="WordlistComboBox" 
+                      PlaceholderText="Wordlist" 
+                      MinWidth="220" 
+                      Margin="0,0,8,8"
+                      IsEnabled="False"
+                      SelectionChanged="OnSelectionChanged">
             </ComboBox>
 
-            <ComboBox x:Name="HashfileComboBox" PlaceholderText="Hashfile" MinWidth="220" Margin="0,0,8,8">
+            <ComboBox x:Name="HashfileComboBox" 
+                      PlaceholderText="Hashfile" 
+                      MinWidth="220" 
+                      Margin="0,0,8,8"
+                      IsEnabled="False"
+                      SelectionChanged="OnSelectionChanged">
             </ComboBox>
 
             <ComboBox x:Name="HashTypeComboBox" 
                       PlaceholderText="Format hash" 
                       MinWidth="220" 
-                      Margin="0,0,8,8">
+                      Margin="0,0,8,8"
+                      IsEnabled="False"
+                      SelectionChanged="OnSelectionChanged">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="models:OptionMode">
                         <StackPanel Orientation="Horizontal" Spacing="5">
@@ -49,10 +80,24 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            
+            <ComboBox x:Name="RulesComboBox" 
+                      PlaceholderText="Fichier de règles" 
+                      MinWidth="220" 
+                      Margin="0,0,8,8"
+                      IsEnabled="False"
+                      SelectionChanged="OnSelectionChanged">
+            </ComboBox>
+            
+            <TextBox x:Name="MaskInputBox" 
+                     Watermark="Masque (ex: ?a?a?a?a)" 
+                     MinWidth="220" 
+                     Margin="0,0,8,8"
+                     IsVisible="False" 
+                     KeyUp="OnMaskInputChanged"/>
 
         </WrapPanel>
     </t:TemplateControl.RightTop>
-
 
     <t:TemplateControl.Input>
         <TextBox x:Name="TxtCommandInput"
