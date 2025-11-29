@@ -11,6 +11,7 @@ obj/
 *.user
 *.suo
 *.userprefs
+Installation/Crakit/
 
 # Fichiers de logs
 *.log

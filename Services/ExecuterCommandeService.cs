@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Threading.Tasks;
+using System.IO;
+using System.Threading;
+using Renci.SshNet;
 
 namespace CraKit.Services;
 
@@ -7,6 +10,7 @@ public class ExecuterCommandeService
 {
 
     private readonly ConnexionSshService _sshService;
+    private SshCommand? _currentCommand;
 
     public ExecuterCommandeService(ConnexionSshService sshService)
     {
@@ -41,41 +45,77 @@ public class ExecuterCommandeService
         // Augmenter Timeout au cas ou pour John et HashCat + compteur 
     }
     
+    
     // Exécution en streaming (temps réel pour les commandes d'énumération)
-    /*
-    public Task ExecuteCommandStreamAsync(
+   
+     
+    public async Task ExecuteCommandStreamingAsync(
         string command,
-        Action<string> onOutput,
-        CancellationToken cancellationToken,
-        int cols = 200, int rows = 50)
+        Action<string> onLineReceived,
+        Action? onCompleted = null,
+        Action<string>? onError = null,
+        CancellationToken? cancel = null)
     {
-        var client = _sshService.Client ?? throw new InvalidOperationException("SSH non connecté.");
+        var client = _sshService.Client;
 
-        return Task.Run(() =>
+        if (client == null || !client.IsConnected)
         {
-            var term = new Dictionary<TerminalModes, uint>();
-            using var shell = client.CreateShellStream("xterm", cols, rows, cols, rows, 1024, term);
+            onError?.Invoke("[SSH] Non connecté");
+            return;
+        }
 
-            shell.WriteLine(command);
-
-            var buffer = new byte[4096];
-            while (!cancellationToken.IsCancellationRequested && shell.CanRead)
+        await Task.Run(() =>
+        {
+            try
             {
-                if (shell.DataAvailable)
-                {
-                    var read = shell.Read(buffer, 0, buffer.Length);
-                    if (read > 0)
-                        onOutput(Encoding.UTF8.GetString(buffer, 0, read));
-                }
-                else
-                {
-                    Task.Delay(50, cancellationToken).Wait(cancellationToken);
-                }
-            }
+                _currentCommand = client.CreateCommand(command);
+                var asyncResult = _currentCommand.BeginExecute();
 
-            // tenter un Ctrl+C à l’annulation
-            if (cancellationToken.IsCancellationRequested && shell.CanWrite)
-                shell.Write("\x03");
-        }, cancellationToken);
-    } */
+                using var reader = new StreamReader(_currentCommand.OutputStream);
+
+                while (!asyncResult.IsCompleted || !reader.EndOfStream)
+                {
+                    if (cancel?.IsCancellationRequested == true)
+                    {
+                        _currentCommand.CancelAsync();
+                        break;
+                    }
+
+                    var line = reader.ReadLine();
+                    if (line != null)
+                        onLineReceived?.Invoke(line);
+                }
+
+                _currentCommand.EndExecute(asyncResult);
+                onCompleted?.Invoke();
+            }
+            catch (Exception ex)
+            {
+                if (!ex.Message.Contains("command was canceled"))
+                    onError?.Invoke(ex.Message);
+            }
+            finally
+            {
+                _currentCommand = null;
+            }
+        });
+    }
+    
+    
+    public void StopCurrent()
+    {
+        try
+        {
+            _currentCommand?.CancelAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[SSH STOP Command] Error: {ex.Message}");
+        }
+    }
+    
+    
+    
+    
+    
 }
