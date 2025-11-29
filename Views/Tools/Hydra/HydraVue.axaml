@@ -107,14 +107,17 @@
             </ComboBox>
             
             <!-- Mode Verbose -->
-            <CheckBox x:Name="VerboseCheckBox" 
-                      IsChecked="True"
-                      Checked="OnVerboseChanged"
-                      Unchecked="OnVerboseChanged"
-                      Content="Mode verbose (-vV)" 
-                      VerticalAlignment="Center"
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="VerboseComboBox" 
+                      SelectedIndex="1" 
+                      PlaceholderText="Verbosité"  
+                      MinWidth="150" 
                       Margin="0,0,8,8"
-                      ToolTip.Tip="Affiche les détails de l'attaque en temps réel"/>
+                      ToolTip.Tip="Niveau de détail des messages">
+                <ComboBoxItem Content="Aucun" Tag=""/>
+                <ComboBoxItem Content="Normal (-v)" Tag=" -v"/>
+                <ComboBoxItem Content="Verbose (-vV)" Tag=" -vV"/>
+            </ComboBox>
             
         </WrapPanel>
     </t:TemplateControl.RightTop>

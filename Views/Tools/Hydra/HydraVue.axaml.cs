@@ -177,6 +177,7 @@ public partial class HydraVue : TemplateControl
         CombolistComboBox = this.FindControl<ComboBox>("CombolistComboBox");
         ProtocolComboBox = this.FindControl<ComboBox>("ProtocolComboBox");
         ThreadsComboBox = this.FindControl<ComboBox>("ThreadsComboBox");
+        VerboseComboBox = this.FindControl<ComboBox>("VerboseComboBox");
         
         UsernameTextBox = this.FindControl<TextBox>("UsernameTextBox");
         TargetTextBox = this.FindControl<TextBox>("TargetTextBox");
