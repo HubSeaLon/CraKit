@@ -10,7 +10,8 @@ using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates; 
 using System.Threading.Tasks; 
-using System.IO;              
+using System.IO;
+using System.Threading;
 using Avalonia.Threading;
 
 namespace CraKit.Views.Tools.HashCat;
@@ -29,11 +30,15 @@ public partial class HashCatVue : TemplateControl
 {
     private readonly ToolFileService _toolFileService;
     private AttackType _currentAttackType = AttackType.Dictionary;
-    private Renci.SshNet.SshCommand? _currentCommand;
+    private readonly ExecuterCommandeService _execService;
+    private CancellationTokenSource? _cts;
 
     public HashCatVue()
     {
         _toolFileService = new ToolFileService(ConnexionSshService.Instance);
+        _execService = new ExecuterCommandeService(ConnexionSshService.Instance);
+
+
         InitializeComponent();
         
         // Chargement initial des donnees
@@ -373,104 +378,102 @@ public partial class HashCatVue : TemplateControl
     
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
-        var txtInput = this.FindControl<TextBox>("TxtCommandInput");
+        var txtInput  = this.FindControl<TextBox>("TxtCommandInput");
         var txtOutput = this.FindControl<TextBox>("TxtOutput");
         var btnLancer = this.FindControl<Button>("BtnLancer");
-        var btnStop = this.FindControl<Button>("BtnStop");
+        var btnStop   = this.FindControl<Button>("BtnStop");
 
-        // Verifications
-        if (txtInput == null || txtOutput == null) return;
-        string commande = txtInput.Text;
-        if (string.IsNullOrWhiteSpace(commande)) return;
-
-        var ssh = ConnexionSshService.Instance.Client;
-        if (ssh == null || !ssh.IsConnected)
-        {
-            txtOutput.Text = "Erreur : SSH non connecté.";
+        // Vérifications simples
+        if (txtInput == null || txtOutput == null || btnLancer == null || btnStop == null)
             return;
-        }
 
-        // Mise à jour UI avant le départ
-        txtOutput.Text = ">>> Démarrage de l'attaque...\n";
-        
-        if (btnLancer != null) btnLancer.IsEnabled = false; 
-        if (btnStop != null) btnStop.IsEnabled = true;      
+        var commande = txtInput.Text;
+        if (string.IsNullOrWhiteSpace(commande))
+            return;
 
-        // Lancement en arrière-plan
-        await System.Threading.Tasks.Task.Run(() =>
-        {
-            try
-            {
-                // Création et lancement de la commande
-                _currentCommand = ssh.CreateCommand(commande);
-                var asyncResult = _currentCommand.BeginExecute();
+        // Reset / état UI
+        txtOutput.Text = ">>> Démarrage de l'attaque Hashcat...\n";
+        btnLancer.IsEnabled = false;
+        btnStop.IsEnabled   = true;
 
-                // Lecture en direct (Streaming)
-                using (var reader = new System.IO.StreamReader(_currentCommand.OutputStream))
-                {
-                    while (!asyncResult.IsCompleted || !reader.EndOfStream)
-                    {
-                        string? ligne = reader.ReadLine();
-                        if (ligne != null)
-                        {
-                            // Retour vers l'interface graphique via le Dispatcher
-                            Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                            {
-                                txtOutput.Text += ligne + "\n";
-                                txtOutput.CaretIndex = txtOutput.Text.Length; // Auto-scroll
-                            });
-                        }
-                    }
-                }
-                _currentCommand.EndExecute(asyncResult);
-            }
-            catch (Exception ex)
+        // Nouveau token d’annulation
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        await _execService.ExecuteCommandStreamingAsync(
+            commande,
+
+            // 🔹 Reçoit chaque ligne en temps réel
+            onLineReceived: ligne =>
             {
-                if (!ex.Message.Contains("command was canceled"))
+                Dispatcher.UIThread.Post(() =>
                 {
-                    Avalonia.Threading.Dispatcher.UIThread.Post(() => 
-                        txtOutput.Text += $"\n[ERREUR] : {ex.Message}");
-                }
-            }
-            finally
-            {
-                // Nettoyage à la fin
-                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += "\n>>> Fin de l'exécution.";
-                    
-                    if (btnLancer != null) btnLancer.IsEnabled = true;
-                    if (btnStop != null) btnStop.IsEnabled = false; 
-                    
-                    _currentCommand = null;
+                    txtOutput.Text += ligne + "\n";
+                    txtOutput.CaretIndex = txtOutput.Text.Length; // auto-scroll
                 });
-            }
-        });
+            },
+
+            // 🔹 Fin de l’exécution (normalement)
+            onCompleted: () =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    txtOutput.Text += "\n>>> Fin de l'exécution Hashcat.";
+                    btnLancer.IsEnabled = true;
+                    btnStop.IsEnabled   = false;
+                });
+            },
+
+            // 🔹 Erreur (SSH non connecté ou autre)
+            onError: msg =>
+            {
+                Dispatcher.UIThread.Post(() =>
+                {
+                    txtOutput.Text += $"\n[ERREUR] : {msg}";
+                    btnLancer.IsEnabled = true;
+                    btnStop.IsEnabled   = false;
+                });
+            },
+
+            // 🔹 Cancel
+            cancel: _cts.Token
+        );
     }
-    
+
     
     private void StopCommandeClick(object? sender, RoutedEventArgs e)
     {
-        // 1. On annule côté C# si possible
-        if (_currentCommand != null)
-        {
-            _currentCommand.CancelAsync();
-        }
+        var txtOutput = this.FindControl<TextBox>("TxtOutput");
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop   = this.FindControl<Button>("BtnStop");
 
-        // 2. On tue brutalement côté Serveur
+        // 1. Annulation côté client / service
+        _cts?.Cancel();
+        _execService.StopCurrent();
+
+        // 2. Kill brutal côté Kali (tous les processus hashcat)
         try
         {
             var ssh = ConnexionSshService.Instance.Client;
             if (ssh != null && ssh.IsConnected)
             {
-                ssh.CreateCommand("pkill -9 hashcat").Execute();
+                using var killCmd = ssh.CreateCommand("pkill -9 hashcat");
+                killCmd.Execute();
             }
         }
-        catch { /* Ignorer les erreurs de connexion ici */ }
+        catch
+        {
+            // On ignore les erreurs de kill (process déjà mort, etc.)
+        }
 
-        var txtOutput = this.FindControl<TextBox>("TxtOutput");
-        if (txtOutput != null) txtOutput.Text += "\n\n>>> STOP FORCÉ PAR L'UTILISATEUR.";
+        // 3. Feedback UI
+        if (txtOutput != null)
+            txtOutput.Text += "\n\n>>> STOP FORCÉ PAR L'UTILISATEUR (Hashcat).";
+
+        if (btnLancer != null) btnLancer.IsEnabled = true;
+        if (btnStop   != null) btnStop.IsEnabled   = false;
     }
+
 
     private void InitializeComponent()
     {
