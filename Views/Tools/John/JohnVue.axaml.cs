@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
@@ -25,7 +27,7 @@ public partial class JohnVue : TemplateControl
     
     private readonly ToolFileService toolFileService;
     private readonly ExecuterCommandeService executerCommandeService;
-
+    private CancellationTokenSource? _cts;
     public JohnVue()
     {
         InitializeComponent();
@@ -140,7 +142,6 @@ public partial class JohnVue : TemplateControl
         RuleComboBox.SelectedIndex = -1;
         MaskTextBox.Text = "";
     }
-    
     
     // Ajout des wordlists et hashfile 
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
@@ -331,14 +332,105 @@ public partial class JohnVue : TemplateControl
     // Lancer la commande et afficher 
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+        
+        btnLancer!.IsEnabled = false;
+        btnStop!.IsEnabled   = true;
+
+        // Nouveau token d’annulation
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        
         var cmd = commande.Trim();
         if (string.IsNullOrWhiteSpace(cmd)) return;
         
         SortieTextBox.Text = $"$ {cmd}\n";
         
-        // Tolérance de 5 min pour des craking long (peut etre ajouter un timer)
-        var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(5));
-        SortieTextBox.Text += outp + "\n";
+        if (hashidSelected)
+        {
+            // Tolérance de 1 min pour des commandes courtes (hashid)
+            var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(1));
+            
+            SortieTextBox.Text += outp + "\n";
+            SortieTextBox.Text += "\n>>> Fin de l'exécution";
+            
+            btnStop!.IsEnabled = false;
+            btnLancer!.IsEnabled = true;
+        }
+        else
+        {
+            await executerCommandeService.ExecuteCommandStreamingAsync(
+                commande,
+
+                // Reçoit chaque ligne en temps réel
+                onLineReceived: ligne =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        SortieTextBox.Text += ligne + "\n";
+                        SortieTextBox.CaretIndex = SortieTextBox.Text.Length; // auto-scroll
+                    });
+                },
+
+                // Fin de l’exécution (normalement)
+                onCompleted: () =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        SortieTextBox.Text += "\n>>> Fin de l'exécution";
+                        btnLancer.IsEnabled = true;
+                        btnStop.IsEnabled = false;
+                    });
+                },
+
+                // Erreur
+                onError: msg =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        SortieTextBox.Text += $"\n[ERREUR] : {msg}";
+                        btnLancer.IsEnabled = true;
+                        btnStop.IsEnabled = false;
+                    });
+                },
+
+                // Cancel
+                cancel: _cts.Token);
+        }
+    }
+    
+    // Stop la commande 
+    private void StopCommandeClick(object? sender, RoutedEventArgs e)
+    {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+
+        // Annuler le token
+        _cts?.Cancel();
+        executerCommandeService.StopCurrent();
+        
+        // Kill brutal côté Kali (tous les processus hydra)
+        try
+        {
+            var ssh = ConnexionSshService.Instance.Client;
+            if (ssh != null && ssh.IsConnected)
+            {
+                using var killCmd = ssh.CreateCommand("pkill -9 hydra");
+                killCmd.Execute();
+            }
+        }
+        catch
+        {
+            // Ignorer les erreurs de kill (process déjà mort, etc.)
+        }
+
+        // Feedback UI
+        if (SortieTextBox != null) SortieTextBox.Text += "\n[Stop demandé - Processus hydra terminés]\n";
+        
+        // Réactiver Lancer, désactiver Stop
+        btnLancer!.IsEnabled = true;
+        btnStop!.IsEnabled = false;
     }
     
     // Chargement des différentes listes déroulantes (lecture json)
