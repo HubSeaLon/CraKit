@@ -124,19 +124,10 @@ public partial class HydraVue : TemplateControl
         combolist = "";
 
         ProtocolComboBox.SelectedIndex = -1;
-        ProtocolComboBox.SelectedItem = null;
-
         WordlistComboBox.SelectedIndex = -1;
-        WordlistComboBox.SelectedItem = null;
-
         UserlistComboBox.SelectedIndex = -1;
-        UserlistComboBox.SelectedItem = null;
-
         CombolistComboBox.SelectedIndex = -1;
-        CombolistComboBox.SelectedItem = null;
-
         ThreadsComboBox.SelectedIndex = -1;
-        ThreadsComboBox.SelectedItem = null;
 
         UsernameTextBox.Text = "";
         TargetTextBox.Text = "";
@@ -209,8 +200,6 @@ public partial class HydraVue : TemplateControl
     // Fonction qui fait le travail (LS en SSH)
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
-        if (laBox == null) return;
-
         try 
         {
             var ssh = ConnexionSshService.Instance.Client;
