@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using Avalonia;
@@ -20,13 +21,14 @@ public partial class HydraVue : TemplateControl
     private string protocol = "";
     private string mode = "";
     private string threads = " -t 16"; // threads par défaut
-    private string verbose = " -vV"; // mode verbose activé par défaut
+    private string verbose = " -v"; // mode verbose normal par défaut (-v)
     private string username = "";
     private string userlist = "";
     private string combolist = "";
     
     private readonly ToolFileService toolFileService;
     private readonly ExecuterCommandeService executerCommandeService;
+    private readonly HistoryService historyService;
 
     public HydraVue()
     {
@@ -35,6 +37,7 @@ public partial class HydraVue : TemplateControl
         // Injection des Instances 
         toolFileService = new ToolFileService(ConnexionSshService.Instance);
         executerCommandeService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        historyService = HistoryService.Instance;
         
         AttachedToVisualTree += OnAttachedToVisualTree;
         
@@ -57,6 +60,13 @@ public partial class HydraVue : TemplateControl
         var name = btn.Name;
         
         ResetButtonStyles();
+        
+        // Afficher le panneau d'options
+        var optionsPanel = this.FindControl<Panel>("OptionsPanel");
+        if (optionsPanel != null)
+        {
+            optionsPanel.IsVisible = true;
+        }
         
         switch (name)
         {
@@ -322,12 +332,23 @@ public partial class HydraVue : TemplateControl
             case "ThreadsComboBox":
                 if (ThreadsComboBox.SelectedItem is null)
                 {
-                    threads = " -t 16";
+                    threads = "";
                     break;
                 }
                 
                 var selectedThreads = ThreadsComboBox.SelectedItem as OptionMode;
-                threads = selectedThreads != null ? " -t " + selectedThreads.value : " -t 16";
+                threads = selectedThreads != null ? " -t " + selectedThreads.value : "";
+                break;
+            
+            case "VerboseComboBox":
+                if (VerboseComboBox.SelectedItem is null)
+                {
+                    verbose = "";
+                    break;
+                }
+                
+                var selectedVerbose = VerboseComboBox.SelectedItem as ComboBoxItem;
+                verbose = selectedVerbose?.Tag?.ToString() ?? "";
                 break;
         }
         
@@ -337,6 +358,17 @@ public partial class HydraVue : TemplateControl
     // Mise à jour de la commande
     private void UpdateCommande()
     {
+        // Ne rien afficher si aucun mode n'est sélectionné
+        if (string.IsNullOrEmpty(mode))
+        {
+            commande = "";
+            if (EntreeTextBox != null)
+            {
+                EntreeTextBox.Text = "";
+            }
+            return;
+        }
+        
         switch (mode)
         {
             case "single":
@@ -349,7 +381,7 @@ public partial class HydraVue : TemplateControl
                 commande = "hydra" + combolist + threads + verbose + target + protocol;
                 break;
             default:
-                commande = "hydra";
+                commande = "";
                 break;
         }
         
@@ -362,17 +394,116 @@ public partial class HydraVue : TemplateControl
     }
 
 
-    // Lancer la commande et afficher 
+    // Lancer la commande et afficher
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
         var cmd = commande.Trim();
         if (string.IsNullOrWhiteSpace(cmd)) return;
         
         SortieTextBox.Text = $"$ {cmd}\n";
+        var stopwatch = Stopwatch.StartNew();
+        var output = "";
+        var success = false;
         
-        // Tolérance de 10 min pour des attaques longues
-        var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(10));
-        SortieTextBox.Text += outp + "\n";
+        try
+        {
+            // Tolérance de 10 min pour des attaques longues
+            output = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(10));
+            SortieTextBox.Text += output + "\n";
+            
+            stopwatch.Stop();
+            
+            // Détection du succès basée sur les patterns de sortie Hydra
+            success = IsHydraSuccessful(output);
+        }
+        catch (Exception ex)
+        {
+            stopwatch.Stop();
+            output += $"\n[Erreur] {ex.Message}";
+            SortieTextBox.Text += $"\n[Erreur] {ex.Message}\n";
+        }
+        finally
+        {
+            // Enregistrer dans l'historique
+            historyService.AddToHistory(
+                toolName: "Hydra",
+                command: cmd,
+                output: output,
+                success: success,
+                executionTime: stopwatch.Elapsed
+            );
+            
+            Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+        }
+    }
+    
+    // Détermine si Hydra a réussi en analysant la sortie
+    private bool IsHydraSuccessful(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return false;
+        
+        // ÉCHECS : Patterns indiquant un échec
+        if (output.Contains("[SSH] Non connecté") || 
+            output.Contains("[SSH] Erreur") ||
+            output.Contains("Syntax:") ||  // Affichage de l'aide = erreur de syntaxe
+            output.Contains("Options:") && output.Contains("Example:") ||  // Page d'aide complète
+            output.Contains("Use HYDRA_PROXY") ||  // Erreur proxy
+            output.Contains("Error") ||
+            output.Contains("error") ||
+            output.Contains("invalid") ||
+            output.Contains("Unknown") ||
+            output.Contains("target does not support") ||
+            output.Contains("Connection refused") ||
+            output.Contains("Connection timeout"))
+        {
+            return false;
+        }
+        
+        // SUCCÈS : Patterns indiquant un succès (mot de passe trouvé)
+        if (output.Contains("[") && output.Contains("]") && 
+            (output.Contains("login:") && output.Contains("password:")) ||
+            output.Contains("valid password found"))
+        {
+            return true;
+        }
+        
+        // SUCCÈS PARTIEL : L'attaque s'est exécutée correctement même si aucun mot de passe trouvé
+        if ((output.Contains("Hydra") && output.Contains("starting at")) ||
+            output.Contains("[STATUS]") ||
+            output.Contains("[ATTEMPT]") ||
+            output.Contains("of") && output.Contains("tasks completed"))
+        {
+            return true;  // La commande s'est exécutée correctement
+        }
+        
+        // Par défaut : échec si aucun pattern de succès détecté
+        return false;
+    }
+    
+    // Sauvegarder l'historique dans un fichier
+    private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
+    {
+        var window = TopLevel.GetTopLevel(this) as Window;
+        if (window is null) return;
+
+        try
+        {
+            var success = await historyService.SaveHistoryToFileAsync(window, "Hydra");
+            
+            if (success)
+            {
+                Console.WriteLine("[Hydra] Historique sauvegardé avec succès !");
+                // TODO: Afficher un message de confirmation à l'utilisateur
+            }
+            else
+            {
+                Console.WriteLine("[Hydra] Aucun historique à sauvegarder ou annulé");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Hydra] Erreur lors de la sauvegarde : {ex.Message}");
+        }
     }
     
     // Chargement des différentes listes déroulantes

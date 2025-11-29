@@ -7,7 +7,7 @@
     
     <!-- BOUTON BANDEAU HAUT -->
     <t:TemplateControl.HeaderRight>
-        <Button Content="Save history in file"/>
+        <Button Content="Save history in file" Click="SaveHistoryClick"/>
     </t:TemplateControl.HeaderRight>
 
     <!-- COLONNE GAUCHE : presets / types d'attaque -->
@@ -31,7 +31,7 @@
     <!-- ZONE D'OPTIONS EN HAUT À DROITE -->
     
     <t:TemplateControl.RightTop>
-        <WrapPanel>
+        <WrapPanel x:Name="OptionsPanel" IsVisible="False">
             
             <!-- Target -->
             <TextBox TextChanged="OnChangedText" 
