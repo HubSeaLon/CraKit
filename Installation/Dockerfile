@@ -1,18 +1,18 @@
 ﻿FROM kalilinux/kali-rolling:latest
 
-# Installation des outils et packages nécessaiares 
+# Installation des outils et packages nécessaires 
 RUN apt-get update && \
     apt-get -y install \
         openssh-server \
         hashid \
         john \
         hashcat \
+        hydra \
         dnsmap \
         wordlists \
-        seclists \
-
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*   # clean et rm -rf permet de réduire la taille
+        seclists && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/* # clean et rm -rf pour réduire la taille
 
 # Définir le mot de passe à "123"
 RUN echo "root:123" | chpasswd
@@ -36,11 +36,4 @@ EXPOSE 22
 
 # Point d'entrée toujours executé au démarrage pour redémarrer le service ssh
 ENTRYPOINT ["/bin/bash", "/entrypoint.sh"]
-
-
-    
-
-
-
-
 

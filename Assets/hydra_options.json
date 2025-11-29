@@ -1,0 +1,93 @@
+{
+  "name": "Hydra",
+  "description": "Outil de craquage de mots de passe réseau (online)",
+  
+  "options": {
+    "protocol": {
+      "description": "Protocole à attaquer",
+      "values": [
+        {
+          "value": "ssh",
+          "label": "SSH (Secure Shell)"
+        },
+        {
+          "value": "ftp",
+          "label": "FTP (File Transfer)"
+        },
+        {
+          "value": "http-get",
+          "label": "HTTP GET"
+        },
+        {
+          "value": "http-post-form",
+          "label": "HTTP POST Form"
+        },
+        {
+          "value": "rdp",
+          "label": "RDP (Remote Desktop)"
+        },
+        {
+          "value": "smb",
+          "label": "SMB (Windows Shares)"
+        },
+        {
+          "value": "mysql",
+          "label": "MySQL Database"
+        },
+        {
+          "value": "postgres",
+          "label": "PostgreSQL Database"
+        },
+        {
+          "value": "telnet",
+          "label": "Telnet"
+        },
+        {
+          "value": "vnc",
+          "label": "VNC (Virtual Network Computing)"
+        }
+      ]
+    },
+    "mode": {
+      "description": "Mode d'attaque",
+      "values": [
+        {
+          "value": "single",
+          "label": "Single user (-l)"
+        },
+        {
+          "value": "userlist",
+          "label": "User list (-L)"
+        },
+        {
+          "value": "combo",
+          "label": "Combo list (-C)"
+        }
+      ]
+    },
+    "threads": {
+      "description": "Nombre de threads parallèles",
+      "default": 16,
+      "min": 1,
+      "max": 64,
+      "values": [
+        {
+          "value": "4",
+          "label": "4 threads (Lent)"
+        },
+        {
+          "value": "16",
+          "label": "16 threads (Normal)"
+        },
+        {
+          "value": "32",
+          "label": "32 threads (Rapide)"
+        },
+        {
+          "value": "64",
+          "label": "64 threads (Très rapide)"
+        }
+      ]
+    }
+  }
+}
