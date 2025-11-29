@@ -9,7 +9,6 @@ RUN apt-get update && \
         hashcat \
         dnsmap \
         wordlists \
-        seclists \
 
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*   # clean et rm -rf permet de réduire la taille
