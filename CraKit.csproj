@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
@@ -27,14 +27,9 @@
         <AvaloniaResource Include="Assets\**" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Compile Update="Views\ChoixOutilsMode.axaml.cs">
-        <DependentUpon>ChoixOutilsExpert.axaml</DependentUpon>
-        <SubType>Code</SubType>
-      </Compile>
-    </ItemGroup>
 
     <ItemGroup>
+      <Folder Include="Installation\CraKit\Assets\userlists\" />
       <Folder Include="ViewsModels\Tools\" />
     </ItemGroup>
 

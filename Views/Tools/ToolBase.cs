@@ -19,7 +19,6 @@ public abstract class ToolBase
         Description = description;
     }
     
-    
     public static string? LireFichierTexte(string nomFichier)
     {
         try
@@ -48,18 +47,18 @@ public abstract class ToolBase
     // mais on la garde pour la compatibilité.
     public Control ContentSpecifique => GetView();
 
-    // --- CORRECTION MAJEURE ICI ---
+
     public Control View
     {
         get
         {
-            // 1. On récupère la vue spécifique créée par l'enfant (HashCatVue)
+            // On récupère la vue spécifique créée par l'enfant
             var laVueReelle = GetView();
 
-            // 2. On lui assigne le DataContext (pour que le Titre s'affiche)
+            // On lui assigne le DataContext (pour que le Titre s'affiche)
             laVueReelle.DataContext = this;
 
-            // 3. On retourne la VRAIE vue (pas une nouvelle vide)
+            // On retourne la VRAIE vue
             return laVueReelle;
         }
     }

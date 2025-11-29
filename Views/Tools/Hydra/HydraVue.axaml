@@ -1,0 +1,173 @@
+<t:TemplateControl xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:t="clr-namespace:CraKit.Templates"
+        x:Class="CraKit.Views.Tools.Hydra.HydraVue"
+        Title="Hydra"
+        xmlns:models="clr-namespace:CraKit.Models">
+    
+    <!-- BOUTON BANDEAU HAUT -->
+    <t:TemplateControl.HeaderRight>
+        <Button Content="Save history in file" Click="SaveHistoryClick"/>
+    </t:TemplateControl.HeaderRight>
+
+    <!-- COLONNE GAUCHE : presets / types d'attaque -->
+    <t:TemplateControl.LeftPane>
+        <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8"
+                        Margin="0,0,0,4">
+                <Button Content="Ajouter wordlist" Click="AjouterWordlistClick" />
+                <Button Content="Ajouter userlist" Click="AjouterUserlistClick" />
+            </StackPanel>
+            
+            <StackPanel Orientation="Horizontal"
+                        Spacing="8"
+                        Margin="0,0,0,8">
+                <Button Content="Ajouter combolist" Click="AjouterCombolistClick" />
+            </StackPanel>
+
+            <TextBlock Text="Choisir mode :" FontWeight="Bold" Margin="0,4,0,4"/>
+            <Button x:Name="ButtonOption1" Content="Single user + wordlist" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            <Button x:Name="ButtonOption2" Content="User list + wordlist" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            <Button x:Name="ButtonOption3" Content="Combo list (user:pass)" HorizontalAlignment="Left" Click="choixOptionClick"/>
+            
+        </StackPanel>
+    </t:TemplateControl.LeftPane>
+
+    <!-- ZONE D'OPTIONS EN HAUT À DROITE -->
+    
+    <t:TemplateControl.RightTop>
+        <WrapPanel x:Name="OptionsPanel" IsVisible="False">
+            
+            <!-- Target -->
+            <TextBox TextChanged="OnChangedText" 
+                     Watermark="Target (ex: 192.168.1.1 ou ssh://192.168.1.1)" 
+                     x:Name="TargetTextBox" 
+                     Margin="0,0,8,8" 
+                     MinWidth="300"/>
+            
+            <!-- Protocole -->
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="ProtocolComboBox" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Choisir protocole"  
+                      MinWidth="180" 
+                      Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:OptionMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            
+            <!-- Username (visible en mode single) -->
+            <TextBox TextChanged="OnChangedText" 
+                     Watermark="Username" 
+                     x:Name="UsernameTextBox" 
+                     Margin="0,0,8,8" 
+                     MinWidth="150"/>
+            
+            <!-- Wordlist -->
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="WordlistComboBox" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Choisir Wordlist"  
+                      MinWidth="220" 
+                      Margin="0,0,8,8">
+            </ComboBox>
+            
+            <!-- User list -->
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="UserlistComboBox" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Choisir Userlist"  
+                      MinWidth="220" 
+                      Margin="0,0,8,8">
+            </ComboBox>
+
+            <!-- Combo list -->
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="CombolistComboBox" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Choisir Combolist"  
+                      MinWidth="220" 
+                      Margin="0,0,8,8">
+            </ComboBox>
+            
+            <!-- Threads -->
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="ThreadsComboBox" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Threads (défaut: 16)"  
+                      MinWidth="180" 
+                      Margin="0,0,8,8">
+                <ComboBox.ItemTemplate>
+                    <DataTemplate x:DataType="models:OptionMode">
+                        <StackPanel Orientation="Horizontal" Spacing="5">
+                            <TextBlock Text="{Binding label}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            
+            <!-- Mode Verbose -->
+            <ComboBox SelectionChanged="OnChangedList" 
+                      x:Name="VerboseComboBox" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Verbosité (défaut: -v)"  
+                      MinWidth="180" 
+                      Margin="0,0,8,8"
+                      ToolTip.Tip="Niveau de détail des messages">
+                <ComboBoxItem Content="Aucun" Tag=""/>
+                <ComboBoxItem Content="Normal (-v)" Tag=" -v"/>
+                <ComboBoxItem Content="Verbose (-vV)" Tag=" -vV"/>
+            </ComboBox>
+            
+        </WrapPanel>
+    </t:TemplateControl.RightTop>
+
+
+    <!-- ENTRÉE : ligne de commande générée -->
+    <t:TemplateControl.Input>
+        <TextBox Text=""
+                 x:Name="EntreeTextBox"
+                 AcceptsReturn="False"
+                 Height="26"
+                 IsReadOnly="True"
+                 VerticalAlignment="Center"
+                 HorizontalAlignment="Stretch"/>
+    </t:TemplateControl.Input>
+
+    <!-- BOUTON LANCER -->
+    <t:TemplateControl.RunArea>
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+            
+            <Button x:Name="BtnLancer"
+                    Content="Lancer"
+                    Click="LancerCommandeClick"/>
+            
+            <Button x:Name="BtnStop"
+                    Content="Stop"
+                    IsEnabled="False" 
+                    Background="DarkRed"
+                    Foreground="White"
+                    Click="StopCommandeClick"/>
+            
+        </StackPanel>
+    </t:TemplateControl.RunArea>
+
+    <!-- SORTIE -->
+    <t:TemplateControl.Output>
+        <TextBox Text=""
+                 x:Name="SortieTextBox"
+                 AcceptsReturn="True"
+                 IsReadOnly="True"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Stretch"
+                 VerticalAlignment="Stretch" />
+    </t:TemplateControl.Output>
+
+</t:TemplateControl>
+

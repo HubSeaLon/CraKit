@@ -1,4 +1,4 @@
-﻿services:
+﻿﻿services:
   kali-crakit:
     build: # Build de l'image
       context: . # Répertoire courant Dockerfile
@@ -8,15 +8,13 @@
     ports:
       - "2222:22"
     volumes:
-      # Persister le partage des wordlists et hashfiles de l'user en cas de supression ou rebuild
+      # Persister le partage des wordlists, userlists et hashfiles de l'user en cas de supression ou rebuild
       - ./CraKit/Assets/wordlists:/root/wordlists   
+      - ./CraKit/Assets/userlists:/root/userlists
       - ./CraKit/Assets/hashfiles:/root/hashfiles   
+      - ./Crakit/Assets/combolists:/root/combolists
     tty: true
 
 
-# Copier fichier hote au conteneur
-# docker cp ./CraKit/Assets/hashfiles/myhash.txt kali-crakit:/root/hashfiles/myhash.txt
-  
-# Copier conteneur au fichier hote
-# docker cp kali-crakit:/root/wordlists/some.txt ./CraKit/Assets/wordlists/
+
     

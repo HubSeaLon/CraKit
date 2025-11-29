@@ -152,6 +152,7 @@ public partial class JohnVue : TemplateControl
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
             // Ajouter MessageBox pour avertir ou zone texte
+            ChargerLesListes();
         }
         catch (Exception ex)
         {
@@ -168,6 +169,7 @@ public partial class JohnVue : TemplateControl
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
             // Ajouter MessageBox pour avertir ? Ou bien une zone texte simple
+            ChargerHashTypes();
         }
         catch (Exception ex)
         {

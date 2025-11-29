@@ -1,8 +1,9 @@
-﻿using System.ComponentModel;
+﻿﻿using System.ComponentModel;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CraKit.Services;
 using CraKit.Views.Tools.HashCat;
+using CraKit.Views.Tools.Hydra;
 using CraKit.Views.Tools.John;
 
 namespace CraKit.Views;
@@ -74,8 +75,23 @@ public partial class ChoixOutilsMode : UserControl, INotifyPropertyChanged
         fenetreOutil.Show();
     }
 
+    private void OpenHydra(object? sender, RoutedEventArgs e)
+    {
+        var hydraTool = new Hydra();
+        var fenetreOutil = new Window
+        {
+            Title = hydraTool.Name,
+            Width = 1000,
+            Height = 700,
+            Content = hydraTool.View
+        };
+        fenetreOutil.Show();
+    }
+
     private void OpenDnsMap(object? sender, RoutedEventArgs e)
     {
-        // Navigation à l'outil selon simple ou expert depuis le service 
+        // DNSMap n'est pas encore implémenté
+        // TODO: Implémenter DNSMap
+        System.Console.WriteLine("[Info] DNSMap n'est pas encore implémenté");
     }
 }
