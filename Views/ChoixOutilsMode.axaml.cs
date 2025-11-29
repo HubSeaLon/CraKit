@@ -3,6 +3,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using CraKit.Services;
 using CraKit.Views.Tools.HashCat;
+using CraKit.Views.Tools.John;
 
 namespace CraKit.Views;
 
@@ -39,7 +40,17 @@ public partial class ChoixOutilsMode : UserControl, INotifyPropertyChanged
     private void OpenJohn(object? sender, RoutedEventArgs e)
     {
         // Navigation à l'outil selon simple ou expert depuis le service 
+        var johnTool = new John();
+        var fenetreOutil = new Window
+        {
+            Title = johnTool.Name,
+            Width = 1000,
+            Height = 700,
+
+            Content = johnTool.View
+        };
         
+        fenetreOutil.Show();
     }
 
     private void OpenHashCat(object? sender, RoutedEventArgs e)

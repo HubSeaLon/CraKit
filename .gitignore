@@ -2,6 +2,8 @@
 bin/
 obj/
 
+/Installation/CraKit/
+
 # Fichiers temporaires de Rider / Visual Studio
 .idea/
 .vscode/
