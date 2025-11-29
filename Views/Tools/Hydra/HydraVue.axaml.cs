@@ -450,9 +450,16 @@ public partial class HydraVue : TemplateControl
         if (string.IsNullOrWhiteSpace(cmd)) return;
         if (SortieTextBox is null) return;
 
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+
         // Annule une éventuelle exécution précédente
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
+
+        // Désactiver Lancer, activer Stop
+        if (btnLancer != null) btnLancer.IsEnabled = false;
+        if (btnStop != null) btnStop.IsEnabled = true;
 
         SortieTextBox.Text = $"$ {cmd}\n";
 
@@ -463,7 +470,7 @@ public partial class HydraVue : TemplateControl
         {
             await executerCommandeService.ExecuteCommandStreamingAsync(
                 cmd,
-                // 🔹 Chaque ligne reçue en temps réel
+                // Chaque ligne reçue en temps réel
                 onLineReceived: ligne =>
                 {
                     outputBuilder.AppendLine(ligne);
@@ -474,7 +481,7 @@ public partial class HydraVue : TemplateControl
                         SortieTextBox.CaretIndex = SortieTextBox.Text.Length;
                     });
                 },
-                // 🔹 En cas d’erreur SSH / exécution
+                // En cas d'erreur SSH / exécution
                 onError: msg =>
                 {
                     outputBuilder.AppendLine($"[Erreur] {msg}");
@@ -485,9 +492,18 @@ public partial class HydraVue : TemplateControl
                         SortieTextBox.CaretIndex = SortieTextBox.Text.Length;
                     });
                 },
-                // 🔹 Cancel possible (bouton Stop plus tard)
+                // Cancel possible avec bouton Stop
                 cancel: _cts.Token
             );
+        }
+        catch (OperationCanceledException)
+        {
+            // Commande annulée par Stop
+            outputBuilder.AppendLine("\n[Commande arrêtée par l'utilisateur]");
+            Dispatcher.UIThread.Post(() =>
+            {
+                SortieTextBox.Text += "\n[Commande arrêtée par l'utilisateur]\n";
+            });
         }
         finally
         {
@@ -506,9 +522,47 @@ public partial class HydraVue : TemplateControl
             );
 
             Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+
+            // Réactiver Lancer, désactiver Stop
+            if (btnLancer != null) btnLancer.IsEnabled = true;
+            if (btnStop != null) btnStop.IsEnabled = false;
         }
     }
 
+    // Arrêter l'exécution de la commande Hydra
+    private void StopCommandeClick(object? sender, RoutedEventArgs e)
+    {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+
+        // Annuler le token
+        _cts?.Cancel();
+
+        // Kill brutal côté Kali (tous les processus hydra)
+        try
+        {
+            var ssh = ConnexionSshService.Instance.Client;
+            if (ssh != null && ssh.IsConnected)
+            {
+                using var killCmd = ssh.CreateCommand("pkill -9 hydra");
+                killCmd.Execute();
+            }
+        }
+        catch
+        {
+            // Ignorer les erreurs de kill (process déjà mort, etc.)
+        }
+
+        // Feedback UI
+        if (SortieTextBox != null)
+        {
+            SortieTextBox.Text += "\n[Stop demandé - Processus hydra terminés]\n";
+        }
+
+        // Réactiver Lancer, désactiver Stop
+        if (btnLancer != null) btnLancer.IsEnabled = true;
+        if (btnStop != null) btnStop.IsEnabled = false;
+    }
     
     // Détermine si Hydra a réussi en analysant la sortie
     private bool IsHydraSuccessful(string output)

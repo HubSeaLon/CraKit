@@ -142,9 +142,20 @@
 
     <!-- BOUTON LANCER -->
     <t:TemplateControl.RunArea>
-        <Button Content="Lancer"
-                Click="LancerCommandeClick"
-                HorizontalAlignment="Center"/>
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+            
+            <Button x:Name="BtnLancer"
+                    Content="Lancer"
+                    Click="LancerCommandeClick"/>
+            
+            <Button x:Name="BtnStop"
+                    Content="Stop"
+                    IsEnabled="False" 
+                    Background="DarkRed"
+                    Foreground="White"
+                    Click="StopCommandeClick"/>
+            
+        </StackPanel>
     </t:TemplateControl.RunArea>
 
     <!-- SORTIE -->
