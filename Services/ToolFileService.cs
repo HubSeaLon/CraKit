@@ -24,13 +24,20 @@ public class ToolFileService : IToolFileService
     {
         var storage = owner.StorageProvider;
 
+        // Déterminer le titre du dialogue selon le type de fichier
+        var dialogTitle = toolFileModel switch
+        {
+            ToolFileModel.Wordlist => "Choisir une wordlist",
+            ToolFileModel.Userlist => "Choisir une userlist",
+            ToolFileModel.HashFile => "Choisir un hashfile",
+            _ => "Choisir un fichier"
+        };
+
         var result = await storage.OpenFilePickerAsync(
             new FilePickerOpenOptions
             {
                 AllowMultiple = false,
-                Title = toolFileModel == ToolFileModel.Wordlist
-                    ? "Choisir une wordlist"
-                    : "Choisir un hashfile",
+                Title = dialogTitle,
 
                 FileTypeFilter = new[]
                 {
@@ -53,6 +60,7 @@ public class ToolFileService : IToolFileService
         var remoteDir = toolFileModel switch
         {
             ToolFileModel.Wordlist => "/root/wordlists",
+            ToolFileModel.Userlist => "/root/userlists", // Dossier dédié pour userlists
             ToolFileModel.HashFile => "/root/hashfiles",
             _ => "/root"
         };

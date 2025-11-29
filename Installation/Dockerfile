@@ -27,9 +27,10 @@ RUN gunzip /usr/share/wordlists/rockyou.txt.gz
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-# Création des répertoires ou seront stockés les wordlists et hashfiles de l'user
+# Création des répertoires ou seront stockés les wordlists, userlists et hashfiles de l'user
 RUN mkdir /root/hashfiles
 RUN mkdir /root/wordlists
+RUN mkdir /root/userlists
 
 # Conteneur écoute sur le port 22
 EXPOSE 22

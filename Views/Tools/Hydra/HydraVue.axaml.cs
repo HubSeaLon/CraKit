@@ -20,6 +20,7 @@ public partial class HydraVue : TemplateControl
     private string protocol = "";
     private string mode = "";
     private string threads = " -t 16"; // threads par défaut
+    private string verbose = " -vV"; // mode verbose activé par défaut
     private string username = "";
     private string userlist = "";
     private string combolist = "";
@@ -157,7 +158,7 @@ public partial class HydraVue : TemplateControl
 
         try
         {
-            await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
+            await toolFileService.PickAndUploadAsync(ToolFileModel.Userlist, window);
             ChargerLesListes(); // Recharger après upload
             Console.WriteLine("Userlist uploaded!");
         }
@@ -242,6 +243,15 @@ public partial class HydraVue : TemplateControl
         UpdateCommande();
     }
     
+    // Gestion du mode verbose
+    private void OnVerboseChanged(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not CheckBox checkBox) return;
+        
+        verbose = checkBox.IsChecked == true ? " -vV" : "";
+        UpdateCommande();
+    }
+    
     
     // Création de la commande selon les choix de l'user
     private void OnChangedList(object? sender, SelectionChangedEventArgs e)
@@ -276,14 +286,8 @@ public partial class HydraVue : TemplateControl
                     break;
                 }
                 
-                if (UserlistComboBox.SelectedItem!.ToString() == "rockyou.txt")
-                {
-                    userlist = " -L /usr/share/wordlists/rockyou.txt";
-                }
-                else
-                {
-                    userlist = " -L /root/wordlists/" + UserlistComboBox.SelectedItem!;
-                }
+                // Userlists sont dans /root/userlists
+                userlist = " -L /root/userlists/" + UserlistComboBox.SelectedItem!;
                 break;
             
             case "CombolistComboBox":
