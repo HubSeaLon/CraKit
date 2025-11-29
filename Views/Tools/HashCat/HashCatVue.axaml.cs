@@ -9,8 +9,6 @@ using Avalonia.Markup.Xaml;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates; 
-using System.Threading.Tasks; 
-using System.IO;
 using System.Threading;
 using Avalonia.Threading;
 
@@ -30,15 +28,16 @@ public partial class HashCatVue : TemplateControl
 {
     private readonly ToolFileService _toolFileService;
     private AttackType _currentAttackType = AttackType.Dictionary;
+    
     private readonly ExecuterCommandeService _execService;
     private CancellationTokenSource? _cts;
 
     public HashCatVue()
     {
+        // Injection des instances
         _toolFileService = new ToolFileService(ConnexionSshService.Instance);
         _execService = new ExecuterCommandeService(ConnexionSshService.Instance);
-
-
+        
         InitializeComponent();
         
         // Chargement initial des donnees
@@ -69,7 +68,6 @@ public partial class HashCatVue : TemplateControl
                 if (listeModes != null && boxType != null)
                 {
                     boxType.ItemsSource = listeModes;
-                    boxType.SelectedIndex = 0; // Selection par defaut
                 }
             }
         }
@@ -99,8 +97,6 @@ public partial class HashCatVue : TemplateControl
             {
                 var fichiers = resultat.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
                 foreach (var f in fichiers) laBox.Items.Add(f);
-                
-                if (laBox.Items.Count > 0) laBox.SelectedIndex = 0;
             }
         }
         catch (Exception ex) { Console.WriteLine($"[SSH] Erreur : {ex.Message}"); }
@@ -114,20 +110,9 @@ public partial class HashCatVue : TemplateControl
 
         // Remplissage des ComboBox avec les chemins distants
         
-        if (boxWordlist != null)
-        {
-            RemplirComboBox(boxWordlist, "/root/wordlists");
-        }
-
-        if (boxHashfile != null)
-        {
-            RemplirComboBox(boxHashfile, "/root/hashfiles");
-        }
-
-        if (boxRules != null)
-        {
-            RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
-        }
+        if (boxWordlist != null) RemplirComboBox(boxWordlist, "/root/wordlists");
+        if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
+        if (boxRules != null) RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
     }
     
     // Methodes declenchees par les boutons du menu de gauche
@@ -155,126 +140,55 @@ public partial class HashCatVue : TemplateControl
         var boxRules = this.FindControl<ComboBox>("RulesComboBox");
         var txtMask = this.FindControl<TextBox>("MaskInputBox"); 
 
-        // On cache/desactive tout
+        // On cache/desactive/reset tout
+        boxWordlist!.IsVisible = false;
+        boxHashfile!.IsVisible = false;
+        boxHashType!.IsVisible = false;
+        boxRules!.IsVisible = false;
+        txtMask!.IsVisible = false;
         
-        if (boxWordlist != null)
-        {
-            boxWordlist.IsEnabled = false;
-            boxWordlist.IsVisible = true;
-        }
-
-        if (boxHashfile != null)
-        {
-            boxHashfile.IsEnabled = false;
-        }
-
-        if (boxHashType != null)
-        {
-            boxHashType.IsEnabled = false;
-        }
-
-        if (boxRules != null)
-        {
-            boxRules.IsEnabled = false;
-        }
-
-        if (txtMask != null)
-        {
-            txtMask.IsVisible = false;
-        }
-
+        boxWordlist.SelectedItem = -1 ;
+        boxHashfile.SelectedItem = -1 ;
+        boxHashType.SelectedItem = -1 ;
+        boxRules.SelectedItem = -1 ;
+        txtMask.Text = string.Empty;
+        
         // On active uniquement ce qui est necessaire
         switch (type)
         {
             case AttackType.Dictionary:
-                if (boxWordlist != null)
-                {
-                    boxWordlist.IsEnabled = true;
-                }
-                if (boxHashfile != null)
-                {
-                    boxHashfile.IsEnabled = true;
-                }
-                if (boxHashType != null)
-                {
-                    boxHashType.IsEnabled = true;
-                }
+                boxWordlist.IsVisible = true;
+                boxHashfile.IsVisible = true;
+                boxHashType.IsVisible = true;
                 break;
 
             case AttackType.Rules:
-                if (boxWordlist != null)
-                {
-                    boxWordlist.IsEnabled = true;
-                }
-                if (boxHashfile != null)
-                {
-                    boxHashfile.IsEnabled = true;
-                }
-                if (boxHashType != null)
-                {
-                    boxHashType.IsEnabled = true;
-                }
-                if (boxRules != null)
-                {
-                    boxRules.IsEnabled = true;
-                }
+                boxWordlist.IsVisible = true;
+                boxHashfile.IsVisible = true;
+                boxHashType.IsVisible = true;
+                boxRules.IsVisible = true;
                 break;
             
             case AttackType.Mask:
-                // Masque remplace la wordlist
-                if (boxWordlist != null)
-                {
-                    boxWordlist.IsVisible = false;
-                }
-                if (boxHashfile != null)
-                {
-                    boxHashfile.IsEnabled = true;
-                }
-                if (boxHashType != null)
-                {
-                    boxHashType.IsEnabled = true;
-                }
-                if (txtMask != null)
-                {
-                    txtMask.IsVisible = true;
-                }
+                boxWordlist.IsVisible = false;
+                boxHashfile.IsVisible = true;
+                boxHashType.IsVisible = true;
+                txtMask.IsVisible = true;
                 break;
             
             case AttackType.Association:
-                if (boxWordlist != null)
-                {
-                    boxWordlist.IsEnabled = true;
-                }
-                if (boxHashfile != null)
-                {
-                    boxHashfile.IsEnabled = true;
-                }
-                if (boxHashType != null)
-                {
-                    boxHashType.IsEnabled = true;
-                }
-                if (boxRules != null)
-                {
-                    boxRules.IsEnabled = true;
-                }
+                boxWordlist.IsVisible = true;
+                boxHashfile.IsVisible = true;
+                boxHashType.IsVisible = true;
+                boxRules.IsVisible = true;
                 break;
             
             case AttackType.Prince:
-                if (boxWordlist != null)
-                {
-                    boxWordlist.IsEnabled = true;
-                }
-                if (boxHashfile != null)
-                {
-                    boxHashfile.IsEnabled = true;
-                }
-                if (boxHashType != null)
-                {
-                    boxHashType.IsEnabled = true;
-                }
+                boxWordlist.IsVisible = true;
+                boxHashfile.IsVisible = true;
+                boxHashType.IsVisible = true;
                 break;
         }
-
         GenererCommande();
     }
 
@@ -316,7 +230,7 @@ public partial class HashCatVue : TemplateControl
             rulePath = $" -r /usr/share/hashcat/rules/{boxRules.SelectedItem}";
         }
         
-        string maskValue = "?a?a?a?a";
+        string maskValue = "";
         if (txtMask != null && !string.IsNullOrEmpty(txtMask.Text))
         {
             maskValue = txtMask.Text;
@@ -403,7 +317,7 @@ public partial class HashCatVue : TemplateControl
         await _execService.ExecuteCommandStreamingAsync(
             commande,
 
-            // 🔹 Reçoit chaque ligne en temps réel
+            // Reçoit chaque ligne en temps réel
             onLineReceived: ligne =>
             {
                 Dispatcher.UIThread.Post(() =>
@@ -413,7 +327,7 @@ public partial class HashCatVue : TemplateControl
                 });
             },
 
-            // 🔹 Fin de l’exécution (normalement)
+            // Fin de l’exécution (normalement)
             onCompleted: () =>
             {
                 Dispatcher.UIThread.Post(() =>
@@ -424,7 +338,7 @@ public partial class HashCatVue : TemplateControl
                 });
             },
 
-            // 🔹 Erreur (SSH non connecté ou autre)
+            // Erreur (SSH non connecté ou autre)
             onError: msg =>
             {
                 Dispatcher.UIThread.Post(() =>
@@ -435,7 +349,7 @@ public partial class HashCatVue : TemplateControl
                 });
             },
 
-            // 🔹 Cancel
+            // Cancel
             cancel: _cts.Token
         );
     }
@@ -447,11 +361,11 @@ public partial class HashCatVue : TemplateControl
         var btnLancer = this.FindControl<Button>("BtnLancer");
         var btnStop   = this.FindControl<Button>("BtnStop");
 
-        // 1. Annulation côté client / service
+        // Annulation côté client / service
         _cts?.Cancel();
         _execService.StopCurrent();
 
-        // 2. Kill brutal côté Kali (tous les processus hashcat)
+        // Kill brutal côté Kali (tous les processus hashcat)
         try
         {
             var ssh = ConnexionSshService.Instance.Client;
@@ -466,7 +380,7 @@ public partial class HashCatVue : TemplateControl
             // On ignore les erreurs de kill (process déjà mort, etc.)
         }
 
-        // 3. Feedback UI
+        // Feedback UI
         if (txtOutput != null)
             txtOutput.Text += "\n\n>>> STOP FORCÉ PAR L'UTILISATEUR (Hashcat).";
 

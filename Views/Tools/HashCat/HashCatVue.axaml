@@ -51,26 +51,29 @@
         <WrapPanel>
             
             <ComboBox x:Name="WordlistComboBox" 
-                      PlaceholderText="Wordlist" 
+                      PlaceholderText="Choisir Wordlist" 
+                      SelectedIndex="-1"
                       MinWidth="220" 
                       Margin="0,0,8,8"
-                      IsEnabled="False"
+                      IsVisible="False"
                       SelectionChanged="OnSelectionChanged">
             </ComboBox>
 
             <ComboBox x:Name="HashfileComboBox" 
-                      PlaceholderText="Hashfile" 
+                      PlaceholderText="Choisir Hashfile" 
+                      SelectedIndex="-1"
                       MinWidth="220" 
                       Margin="0,0,8,8"
-                      IsEnabled="False"
+                      IsVisible="False"
                       SelectionChanged="OnSelectionChanged">
             </ComboBox>
 
             <ComboBox x:Name="HashTypeComboBox" 
                       PlaceholderText="Format hash" 
+                      SelectedIndex="-1"
                       MinWidth="220" 
                       Margin="0,0,8,8"
-                      IsEnabled="False"
+                      IsVisible="False"
                       SelectionChanged="OnSelectionChanged">
                 <ComboBox.ItemTemplate>
                     <DataTemplate x:DataType="models:OptionMode">
@@ -83,9 +86,10 @@
             
             <ComboBox x:Name="RulesComboBox" 
                       PlaceholderText="Fichier de règles" 
+                      SelectedIndex="-1"
                       MinWidth="220" 
                       Margin="0,0,8,8"
-                      IsEnabled="False"
+                      IsVisible="False"
                       SelectionChanged="OnSelectionChanged">
             </ComboBox>
             
