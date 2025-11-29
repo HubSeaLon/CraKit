@@ -395,54 +395,7 @@ public partial class HydraVue : TemplateControl
         }
         Console.WriteLine("Commande : " + commande);
     }
-
-
-    // Lancer la commande et afficher
     
-    /*
-    private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
-    {
-        var cmd = commande.Trim();
-        if (string.IsNullOrWhiteSpace(cmd)) return;
-        
-        SortieTextBox.Text = $"$ {cmd}\n";
-        var stopwatch = Stopwatch.StartNew();
-        var output = "";
-        var success = false;
-        
-        try
-        {
-            // Tolérance de 10 min pour des attaques longues
-            output = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(10));
-            SortieTextBox.Text += output + "\n";
-            
-            stopwatch.Stop();
-            
-            // Détection du succès basée sur les patterns de sortie Hydra
-            success = IsHydraSuccessful(output);
-        }
-        catch (Exception ex)
-        {
-            stopwatch.Stop();
-            output += $"\n[Erreur] {ex.Message}";
-            SortieTextBox.Text += $"\n[Erreur] {ex.Message}\n";
-        }
-        finally
-        {
-            // Enregistrer dans l'historique
-            historyService.AddToHistory(
-                toolName: "Hydra",
-                command: cmd,
-                output: output,
-                success: success,
-                executionTime: stopwatch.Elapsed
-            );
-            
-            Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
-        }
-    }
-    
-    */
     
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
@@ -537,7 +490,8 @@ public partial class HydraVue : TemplateControl
 
         // Annuler le token
         _cts?.Cancel();
-
+        executerCommandeService.StopCurrent();
+        
         // Kill brutal côté Kali (tous les processus hydra)
         try
         {

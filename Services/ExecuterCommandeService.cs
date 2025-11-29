@@ -41,8 +41,6 @@ public class ExecuterCommandeService
                 return $"[SSH] Erreur exécution : {ex.Message}";
             }
         });
-        
-        // Augmenter Timeout au cas ou pour John et HashCat + compteur 
     }
     
     
@@ -101,12 +99,12 @@ public class ExecuterCommandeService
         });
     }
     
-    
     public void StopCurrent()
     {
         try
         {
             _currentCommand?.CancelAsync();
+            Console.WriteLine("[SSH] Stopping current command");
         }
         catch (Exception ex)
         {
