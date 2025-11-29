@@ -583,13 +583,11 @@ public partial class HydraVue : TemplateControl
         }
         if (boxUserlist != null)
         {
-            RemplirComboBox(boxUserlist, "/root/wordlists");
-            boxUserlist.Items.Add("rockyou.txt");
+            RemplirComboBox(boxUserlist, "/root/userlists");
         }
         if (boxCombolist != null)
         {
-            RemplirComboBox(boxCombolist, "/root/wordlists");
-            boxCombolist.Items.Add("rockyou.txt");
+            RemplirComboBox(boxCombolist, "/root/combolists");
         }
     }
     

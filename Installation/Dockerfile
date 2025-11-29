@@ -31,6 +31,7 @@ RUN chmod +x /entrypoint.sh
 RUN mkdir /root/hashfiles
 RUN mkdir /root/wordlists
 RUN mkdir /root/userlists
+RUN mkdir /root/combolists
 
 # Conteneur écoute sur le port 22
 EXPOSE 22

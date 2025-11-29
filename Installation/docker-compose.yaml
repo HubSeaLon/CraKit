@@ -12,6 +12,7 @@
       - ./CraKit/Assets/wordlists:/root/wordlists   
       - ./CraKit/Assets/userlists:/root/userlists
       - ./CraKit/Assets/hashfiles:/root/hashfiles   
+      - ./Crakit/Assets/combolists:/root/combolists
     tty: true
 
 
