@@ -16,9 +16,5 @@
     tty: true
 
 
-# Copier fichier hote au conteneur
-# docker cp ./CraKit/Assets/hashfiles/myhash.txt kali-crakit:/root/hashfiles/myhash.txt
-  
-# Copier conteneur au fichier hote
-# docker cp kali-crakit:/root/wordlists/some.txt ./CraKit/Assets/wordlists/
+
     

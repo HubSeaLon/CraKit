@@ -11,7 +11,7 @@ CraKit centralise les outils suivants :
 ### 🔐 Audit de Mots de Passe (Cracking)
 * **[Hashcat](https://hashcat.net/hashcat/)** : L'outil de récupération de mots de passe le plus rapide au monde.
 * **[John The Ripper](https://github.com/openwall/john)** : Suite logicielle de cassage de mots de passe.
-
+* **[Hydra](https://www.kali.org/tools/hydra/)** : Outil d'attaque de mot de passes brute-force. 
 ### 🌐 Énumération & Reconnaissance
 * **[dnsmap](https://www.kali.org/tools/dnsmap/)** : Outil de découverte de sous-domaines.
 
