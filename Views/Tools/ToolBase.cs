@@ -52,9 +52,6 @@ public abstract class ToolBase
     {
         get
         {
-            var laVueReelle = GetView();
-            laVueReelle.DataContext = this;
-
             // On récupère la vue spécifique créée par l'enfant
             var laVueReelle = GetView();
 
