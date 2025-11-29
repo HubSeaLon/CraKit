@@ -10,9 +10,9 @@ RUN apt-get update && \
         hydra \
         dnsmap \
         wordlists \
-        seclists && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/* # clean et rm -rf pour réduire la taille
+
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*   # clean et rm -rf permet de réduire la taille
 
 # Définir le mot de passe à "123"
 RUN echo "root:123" | chpasswd
