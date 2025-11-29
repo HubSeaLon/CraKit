@@ -23,7 +23,6 @@ public partial class JohnVue : TemplateControl
     private string mask = "";
     private bool hashidSelected;
     
-    
     private readonly ToolFileService toolFileService;
     private readonly ExecuterCommandeService executerCommandeService;
 
@@ -136,16 +135,9 @@ public partial class JohnVue : TemplateControl
         rule = "";
 
         FormatHashComboBox.SelectedIndex = -1;
-        FormatHashComboBox.SelectedItem = null;
-
         WordlistComboBox.SelectedIndex = -1;
-        WordlistComboBox.SelectedItem = null;
-
         HashfileComboBox.SelectedIndex = -1;
-        HashfileComboBox.SelectedItem = null;
-
         RuleComboBox.SelectedIndex = -1;
-        RuleComboBox.SelectedItem = null;
         MaskTextBox.Text = "";
     }
     
@@ -214,20 +206,14 @@ public partial class JohnVue : TemplateControl
      // Fonction qui fait le travail (LS en SSH)
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
-        // 1. SECURITÉ : Si la boite est null (pas trouvée), on arrête tout pour éviter le crash
-        if (laBox == null) return;
-
         try 
         {
             var ssh = ConnexionSshService.Instance.Client;
+            
+            var cmd = ssh!.CreateCommand($"ls -1 {chemin}");
+            var resultat = cmd.Execute();
 
-            // 2. SECURITÉ : Si pas connecté, on arrête
-            if (ssh == null || !ssh.IsConnected) return;
-
-            var cmd = ssh.CreateCommand($"ls -1 {chemin}");
-            string resultat = cmd.Execute();
-
-            laBox.Items.Clear(); // <-- C'est ici que ça plantait avant si laBox était null
+            laBox.Items.Clear();
             
             if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
             {
