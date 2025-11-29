@@ -353,7 +353,11 @@ public partial class HydraVue : TemplateControl
                 break;
         }
         
-        EntreeTextBox.Text = commande;
+        // Vérifier que EntreeTextBox est initialisée avant de l'utiliser
+        if (EntreeTextBox != null)
+        {
+            EntreeTextBox.Text = commande;
+        }
         Console.WriteLine("Commande : " + commande);
     }
 

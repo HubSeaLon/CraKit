@@ -109,9 +109,9 @@
             <!-- Mode Verbose -->
             <ComboBox SelectionChanged="OnChangedList" 
                       x:Name="VerboseComboBox" 
-                      SelectedIndex="1" 
-                      PlaceholderText="Verbosité"  
-                      MinWidth="150" 
+                      SelectedIndex="-1" 
+                      PlaceholderText="Verbosité (défaut: -v)"  
+                      MinWidth="180" 
                       Margin="0,0,8,8"
                       ToolTip.Tip="Niveau de détail des messages">
                 <ComboBoxItem Content="Aucun" Tag=""/>
