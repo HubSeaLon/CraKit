@@ -1,11 +1,14 @@
 using System;
 using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
@@ -29,6 +32,7 @@ public partial class HydraVue : TemplateControl
     private readonly ToolFileService toolFileService;
     private readonly ExecuterCommandeService executerCommandeService;
     private readonly HistoryService historyService;
+    private CancellationTokenSource? _cts;
 
     public HydraVue()
     {
@@ -384,6 +388,8 @@ public partial class HydraVue : TemplateControl
 
 
     // Lancer la commande et afficher
+    
+    /*
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
         var cmd = commande.Trim();
@@ -425,6 +431,74 @@ public partial class HydraVue : TemplateControl
             Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
         }
     }
+    
+    */
+    
+    private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
+    {
+        var cmd = commande.Trim();
+        if (string.IsNullOrWhiteSpace(cmd)) return;
+        if (SortieTextBox is null) return;
+
+        // Annule une éventuelle exécution précédente
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+
+        SortieTextBox.Text = $"$ {cmd}\n";
+
+        var stopwatch = Stopwatch.StartNew();
+        var outputBuilder = new StringBuilder();
+
+        try
+        {
+            await executerCommandeService.ExecuteCommandStreamingAsync(
+                cmd,
+                // 🔹 Chaque ligne reçue en temps réel
+                onLineReceived: ligne =>
+                {
+                    outputBuilder.AppendLine(ligne);
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        SortieTextBox.Text += ligne + "\n";
+                        SortieTextBox.CaretIndex = SortieTextBox.Text.Length;
+                    });
+                },
+                // 🔹 En cas d’erreur SSH / exécution
+                onError: msg =>
+                {
+                    outputBuilder.AppendLine($"[Erreur] {msg}");
+
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        SortieTextBox.Text += $"\n[Erreur] {msg}\n";
+                        SortieTextBox.CaretIndex = SortieTextBox.Text.Length;
+                    });
+                },
+                // 🔹 Cancel possible (bouton Stop plus tard)
+                cancel: _cts.Token
+            );
+        }
+        finally
+        {
+            stopwatch.Stop();
+
+            var output = outputBuilder.ToString();
+            var success = IsHydraSuccessful(output);
+
+            // Enregistrer dans l'historique
+            historyService.AddToHistory(
+                toolName: "Hydra",
+                command: cmd,
+                output: output,
+                success: success,
+                executionTime: stopwatch.Elapsed
+            );
+
+            Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+        }
+    }
+
     
     // Détermine si Hydra a réussi en analysant la sortie
     private bool IsHydraSuccessful(string output)
