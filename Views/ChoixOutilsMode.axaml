@@ -77,14 +77,14 @@
         </StackPanel>
       </Button>
 
-      <!-- DNSMap -->
-      <Button Grid.Column="2" Click="OpenDnsMap"
+      <!-- Hydra -->
+      <Button Grid.Column="2" Click="OpenHydra"
               Background="Transparent" BorderBrush="Transparent"
               Cursor="Hand">
         <StackPanel HorizontalAlignment="Center" Spacing="10">
-          <Image Source="/Assets/images/logodnsmap.png"
+          <Image Source="/Assets/images/hydra-logo.png"
                  Width="120" Height="120" Stretch="Uniform"/>
-          <TextBlock Text="DNSMap" HorizontalAlignment="Center"/>
+          <TextBlock Text="Hydra" HorizontalAlignment="Center"/>
         </StackPanel>
       </Button>
     </Grid>
@@ -197,6 +197,7 @@
                 <RadioButton x:Name="RbHashCracking" Classes="MenuItem" Content="Hash Cracking" GroupName="SubCatCrack" IsChecked="True"/>
                 <RadioButton x:Name="RbMaskRules" Classes="MenuItem" Content="Mask / Rules" GroupName="SubCatCrack"/>
                 <RadioButton x:Name="RbMBruteForce" Classes="MenuItem" Content="Bruteforce / Wordlist" GroupName="SubCatCrack"/>
+                <RadioButton x:Name="RbNetworkBruteforce" Classes="MenuItem" Content="Network Bruteforce" GroupName="SubCatCrack"/>
             </StackPanel>
 
             <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatEnum.IsChecked}">
@@ -226,6 +227,10 @@
                 <StackPanel IsVisible="{Binding #RbMBruteForce.IsChecked}">
                     <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
                     <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
+                </StackPanel>
+
+                <StackPanel IsVisible="{Binding #RbNetworkBruteforce.IsChecked}">
+                    <Button Click="OpenHydra" Classes="ActionButton" Content="Hydra (Network)" HorizontalAlignment="Stretch"/>
                 </StackPanel>
             </StackPanel>
 
