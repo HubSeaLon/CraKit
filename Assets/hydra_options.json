@@ -15,14 +15,6 @@
           "label": "FTP (File Transfer)"
         },
         {
-          "value": "http-get",
-          "label": "HTTP GET"
-        },
-        {
-          "value": "http-post-form",
-          "label": "HTTP POST Form"
-        },
-        {
           "value": "rdp",
           "label": "RDP (Remote Desktop)"
         },

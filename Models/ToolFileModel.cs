@@ -4,5 +4,6 @@ public enum ToolFileModel
 {
     Wordlist,
     HashFile,
-    Userlist
+    Userlist,
+    Combolist
 }

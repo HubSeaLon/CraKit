@@ -173,6 +173,22 @@ public partial class HydraVue : TemplateControl
         }
     }
     
+    private async void AjouterCombolistClick(object? sender, RoutedEventArgs e)
+    {
+        var window = TopLevel.GetTopLevel(this) as Window;
+        if (window is null) return;
+
+        try
+        {
+            await toolFileService.PickAndUploadAsync(ToolFileModel.Combolist, window);
+            ChargerLesListes(); // Recharger après upload
+            Console.WriteLine("Combolist uploaded!");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
     
     // Méthode permettant de récupérer les noms des boutons, listes, etc. vu qu'on utilise un template
     private void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
@@ -301,14 +317,8 @@ public partial class HydraVue : TemplateControl
                     break;
                 }
                 
-                if (CombolistComboBox.SelectedItem!.ToString() == "rockyou.txt")
-                {
-                    combolist = " -C /usr/share/wordlists/rockyou.txt";
-                }
-                else
-                {
-                    combolist = " -C /root/wordlists/" + CombolistComboBox.SelectedItem!;
-                }
+                // Combolists sont dans /root/combolists
+                combolist = " -C /root/combolists/" + CombolistComboBox.SelectedItem!;
                 break;
             
             case "ProtocolComboBox":

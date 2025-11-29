@@ -60,7 +60,8 @@ public class ToolFileService : IToolFileService
         var remoteDir = toolFileModel switch
         {
             ToolFileModel.Wordlist => "/root/wordlists",
-            ToolFileModel.Userlist => "/root/userlists", // Dossier dédié pour userlists
+            ToolFileModel.Userlist => "/root/userlists",
+            ToolFileModel.Combolist => "/root/combolists",
             ToolFileModel.HashFile => "/root/hashfiles",
             _ => "/root"
         };
