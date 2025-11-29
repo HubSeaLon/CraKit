@@ -26,22 +26,27 @@
 
             <Button Content="Attaque par dictionnaire" 
                     HorizontalAlignment="Left" 
+                    x:Name="ButtonOption1"
                     Click="DictionaryAttackClick"/>
             
             <Button Content="Attaque par dictionnaire + Rules" 
                     HorizontalAlignment="Left" 
+                    x:Name="ButtonOption2"
                     Click="DictionaryAttackAndRulesClick"/>
             
             <Button Content="Attaque par brute-force" 
                     HorizontalAlignment="Left" 
+                    x:Name="ButtonOption3"
                     Click="BruteForceAttackClick"/>
             
             <Button Content="Attaque par association" 
                     HorizontalAlignment="Left" 
+                    x:Name="ButtonOption4"
                     Click="AssociationAttackClick"/>
             
             <Button Content="Attaque par prince" 
                     HorizontalAlignment="Left" 
+                    x:Name="ButtonOption5"
                     Click="PrinceAttackClick"/>
             
         </StackPanel>

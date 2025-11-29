@@ -139,6 +139,12 @@ public partial class HashCatVue : TemplateControl
         var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
         var boxRules = this.FindControl<ComboBox>("RulesComboBox");
         var txtMask = this.FindControl<TextBox>("MaskInputBox"); 
+        
+        var ButtonOption1 = this.FindControl<Button>("ButtonOption1");
+        var ButtonOption2 = this.FindControl<Button>("ButtonOption2");
+        var ButtonOption3 = this.FindControl<Button>("ButtonOption3");
+        var ButtonOption4 = this.FindControl<Button>("ButtonOption4");
+        var ButtonOption5 = this.FindControl<Button>("ButtonOption5");
 
         // On cache/desactive/reset tout
         boxWordlist!.IsVisible = false;
@@ -146,6 +152,12 @@ public partial class HashCatVue : TemplateControl
         boxHashType!.IsVisible = false;
         boxRules!.IsVisible = false;
         txtMask!.IsVisible = false;
+        
+        ButtonOption1!.Opacity = 1;
+        ButtonOption2!.Opacity = 1;
+        ButtonOption3!.Opacity = 1;
+        ButtonOption4!.Opacity = 1;
+        ButtonOption5!.Opacity = 1;
         
         boxWordlist.SelectedItem = -1 ;
         boxHashfile.SelectedItem = -1 ;
@@ -157,12 +169,14 @@ public partial class HashCatVue : TemplateControl
         switch (type)
         {
             case AttackType.Dictionary:
+                ButtonOption1.Opacity = 0.4;
                 boxWordlist.IsVisible = true;
                 boxHashfile.IsVisible = true;
                 boxHashType.IsVisible = true;
                 break;
 
             case AttackType.Rules:
+                ButtonOption2.Opacity = 0.4;
                 boxWordlist.IsVisible = true;
                 boxHashfile.IsVisible = true;
                 boxHashType.IsVisible = true;
@@ -170,6 +184,7 @@ public partial class HashCatVue : TemplateControl
                 break;
             
             case AttackType.Mask:
+                ButtonOption3.Opacity = 0.4;
                 boxWordlist.IsVisible = false;
                 boxHashfile.IsVisible = true;
                 boxHashType.IsVisible = true;
@@ -177,6 +192,7 @@ public partial class HashCatVue : TemplateControl
                 break;
             
             case AttackType.Association:
+                ButtonOption4.Opacity = 0.4;
                 boxWordlist.IsVisible = true;
                 boxHashfile.IsVisible = true;
                 boxHashType.IsVisible = true;
@@ -184,6 +200,7 @@ public partial class HashCatVue : TemplateControl
                 break;
             
             case AttackType.Prince:
+                ButtonOption5.Opacity = 0.4;
                 boxWordlist.IsVisible = true;
                 boxHashfile.IsVisible = true;
                 boxHashType.IsVisible = true;
