@@ -335,13 +335,13 @@ public partial class HydraVue : TemplateControl
         switch (mode)
         {
             case "single":
-                commande = "hydra" + username + wordlist + threads + target + protocol;
+                commande = "hydra" + username + wordlist + threads + verbose + target + protocol;
                 break;
             case "userlist":
-                commande = "hydra" + userlist + wordlist + threads + target + protocol;
+                commande = "hydra" + userlist + wordlist + threads + verbose + target + protocol;
                 break;
             case "combo":
-                commande = "hydra" + combolist + threads + target + protocol;
+                commande = "hydra" + combolist + threads + verbose + target + protocol;
                 break;
             default:
                 commande = "hydra";

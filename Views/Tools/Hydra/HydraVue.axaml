@@ -106,6 +106,16 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             
+            <!-- Mode Verbose -->
+            <CheckBox x:Name="VerboseCheckBox" 
+                      IsChecked="True"
+                      Checked="OnVerboseChanged"
+                      Unchecked="OnVerboseChanged"
+                      Content="Mode verbose (-vV)" 
+                      VerticalAlignment="Center"
+                      Margin="0,0,8,8"
+                      ToolTip.Tip="Affiche les détails de l'attaque en temps réel"/>
+            
         </WrapPanel>
     </t:TemplateControl.RightTop>
 
