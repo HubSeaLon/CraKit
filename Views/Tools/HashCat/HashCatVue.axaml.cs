@@ -109,8 +109,12 @@ public partial class HashCatVue : TemplateControl
         var boxRules = this.FindControl<ComboBox>("RulesComboBox");
 
         // Remplissage des ComboBox avec les chemins distants
-        
-        if (boxWordlist != null) RemplirComboBox(boxWordlist, "/root/wordlists");
+
+        if (boxWordlist != null)
+        {
+            RemplirComboBox(boxWordlist, "/root/wordlists");
+            boxWordlist.Items.Add("rockyou.txt");
+        }
         if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
         if (boxRules != null) RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
     }
@@ -236,7 +240,17 @@ public partial class HashCatVue : TemplateControl
         }
         
         string wordlistPath = "<wordlist>";
-        if (boxWordlist?.SelectedItem != null)
+        
+        if (boxWordlist?.SelectedItem is null)
+        {
+            wordlistPath = "";
+            return;
+        }
+        
+        if (boxWordlist?.SelectedItem!.ToString() == "rockyou.txt")
+        {
+            wordlistPath = $"/usr/share/wordlists/{boxWordlist.SelectedItem}";
+        } else
         {
             wordlistPath = $"/root/wordlists/{boxWordlist.SelectedItem}";
         }

@@ -49,7 +49,7 @@ public class ToolFileService : IToolFileService
             }
         );
 
-        if (result == null || result.Count == 0)
+        if (result.Count == 0)
             return null;
 
         var file = result[0];

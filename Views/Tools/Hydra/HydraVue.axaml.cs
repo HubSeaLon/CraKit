@@ -518,28 +518,11 @@ public partial class HydraVue : TemplateControl
         if (btnStop != null) btnStop.IsEnabled = false;
     }
     
-    // Détermine si Hydra a réussi en analysant la sortie
+    // Détermine si Hydra a réussi en analysant la sortie seulement si mot de passe trouvé
     private bool IsHydraSuccessful(string output)
     {
         if (string.IsNullOrWhiteSpace(output)) return false;
-        
-        // ÉCHECS : Patterns indiquant un échec
-        if (output.Contains("[SSH] Non connecté") || 
-            output.Contains("[SSH] Erreur") ||
-            output.Contains("Syntax:") ||  // Affichage de l'aide = erreur de syntaxe
-            output.Contains("Options:") && output.Contains("Example:") ||  // Page d'aide complète
-            output.Contains("Use HYDRA_PROXY") ||  // Erreur proxy
-            output.Contains("Error") ||
-            output.Contains("error") ||
-            output.Contains("invalid") ||
-            output.Contains("Unknown") ||
-            output.Contains("target does not support") ||
-            output.Contains("Connection refused") ||
-            output.Contains("Connection timeout"))
-        {
-            return false;
-        }
-        
+
         // SUCCÈS : Patterns indiquant un succès (mot de passe trouvé)
         if (output.Contains("[") && output.Contains("]") && 
             (output.Contains("login:") && output.Contains("password:")) ||
@@ -548,16 +531,6 @@ public partial class HydraVue : TemplateControl
             return true;
         }
         
-        // SUCCÈS PARTIEL : L'attaque s'est exécutée correctement même si aucun mot de passe trouvé
-        if ((output.Contains("Hydra") && output.Contains("starting at")) ||
-            output.Contains("[STATUS]") ||
-            output.Contains("[ATTEMPT]") ||
-            output.Contains("of") && output.Contains("tasks completed"))
-        {
-            return true;  // La commande s'est exécutée correctement
-        }
-        
-        // Par défaut : échec si aucun pattern de succès détecté
         return false;
     }
     

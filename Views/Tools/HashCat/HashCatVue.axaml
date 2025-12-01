@@ -111,6 +111,7 @@
     <t:TemplateControl.Input>
         <TextBox x:Name="TxtCommandInput"
                  Watermark="La commande s'affichera ici..."
+                 IsReadOnly="True"
                  AcceptsReturn="False"
                  Height="26"
                  VerticalAlignment="Center"
