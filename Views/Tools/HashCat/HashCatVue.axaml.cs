@@ -125,6 +125,7 @@ public partial class HashCatVue : TemplateControl
     {
         ComboBox boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
         ComboBox boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox boxRules = this.FindControl<ComboBox>("RulesComboBox");
 
         if (boxWordlist != null)
         {
@@ -134,6 +135,10 @@ public partial class HashCatVue : TemplateControl
         if (boxHashfile != null)
         {
             RemplirComboBox(boxHashfile, "/root/hashfiles");
+        }
+        if (boxRules != null)
+        {
+            RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
         }
     }
     
@@ -193,6 +198,30 @@ public partial class HashCatVue : TemplateControl
     {
         currentAttackType = AttackType.Dictionary;
         Console.WriteLine("[HashCat] Mode: Dictionary Attack");
+        
+        // Reinitialiser les styles
+        ResetButtonStyles();
+        Button btn = sender as Button;
+        if (btn != null)
+        {
+            btn.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            btn.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
+        }
+        
+        // Afficher les bons controles
+        ComboBox wordlistBox = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox hashfileBox = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox hashTypeBox = this.FindControl<ComboBox>("HashTypeComboBox");
+        ComboBox rulesBox = this.FindControl<ComboBox>("RulesComboBox");
+        TextBox maskBox = this.FindControl<TextBox>("MaskInputBox");
+        
+        if (wordlistBox != null) wordlistBox.IsVisible = true;
+        if (hashfileBox != null) hashfileBox.IsVisible = true;
+        if (hashTypeBox != null) hashTypeBox.IsVisible = true;
+        if (rulesBox != null) rulesBox.IsVisible = false;
+        if (maskBox != null) maskBox.IsVisible = false;
+        
+        UpdateCommande();
     }
     
     // Attaque dictionnaire + rules
@@ -200,6 +229,30 @@ public partial class HashCatVue : TemplateControl
     {
         currentAttackType = AttackType.Rules;
         Console.WriteLine("[HashCat] Mode: Dictionary + Rules Attack");
+        
+        // Reinitialiser les styles
+        ResetButtonStyles();
+        Button btn = sender as Button;
+        if (btn != null)
+        {
+            btn.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            btn.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
+        }
+        
+        // Afficher les bons controles
+        ComboBox wordlistBox = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox hashfileBox = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox hashTypeBox = this.FindControl<ComboBox>("HashTypeComboBox");
+        ComboBox rulesBox = this.FindControl<ComboBox>("RulesComboBox");
+        TextBox maskBox = this.FindControl<TextBox>("MaskInputBox");
+        
+        if (wordlistBox != null) wordlistBox.IsVisible = true;
+        if (hashfileBox != null) hashfileBox.IsVisible = true;
+        if (hashTypeBox != null) hashTypeBox.IsVisible = true;
+        if (rulesBox != null) rulesBox.IsVisible = true;
+        if (maskBox != null) maskBox.IsVisible = false;
+        
+        UpdateCommande();
     }
     
     // Attaque brute force
@@ -207,6 +260,30 @@ public partial class HashCatVue : TemplateControl
     {
         currentAttackType = AttackType.Mask;
         Console.WriteLine("[HashCat] Mode: Brute Force Attack");
+        
+        // Reinitialiser les styles
+        ResetButtonStyles();
+        Button btn = sender as Button;
+        if (btn != null)
+        {
+            btn.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            btn.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
+        }
+        
+        // Afficher les bons controles
+        ComboBox wordlistBox = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox hashfileBox = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox hashTypeBox = this.FindControl<ComboBox>("HashTypeComboBox");
+        ComboBox rulesBox = this.FindControl<ComboBox>("RulesComboBox");
+        TextBox maskBox = this.FindControl<TextBox>("MaskInputBox");
+        
+        if (wordlistBox != null) wordlistBox.IsVisible = false;
+        if (hashfileBox != null) hashfileBox.IsVisible = true;
+        if (hashTypeBox != null) hashTypeBox.IsVisible = true;
+        if (rulesBox != null) rulesBox.IsVisible = false;
+        if (maskBox != null) maskBox.IsVisible = true;
+        
+        UpdateCommande();
     }
     
     // Attaque association
@@ -214,6 +291,30 @@ public partial class HashCatVue : TemplateControl
     {
         currentAttackType = AttackType.Association;
         Console.WriteLine("[HashCat] Mode: Association Attack");
+        
+        // Reinitialiser les styles
+        ResetButtonStyles();
+        Button btn = sender as Button;
+        if (btn != null)
+        {
+            btn.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            btn.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
+        }
+        
+        // Afficher les bons controles
+        ComboBox wordlistBox = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox hashfileBox = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox hashTypeBox = this.FindControl<ComboBox>("HashTypeComboBox");
+        ComboBox rulesBox = this.FindControl<ComboBox>("RulesComboBox");
+        TextBox maskBox = this.FindControl<TextBox>("MaskInputBox");
+        
+        if (wordlistBox != null) wordlistBox.IsVisible = true;
+        if (hashfileBox != null) hashfileBox.IsVisible = true;
+        if (hashTypeBox != null) hashTypeBox.IsVisible = true;
+        if (rulesBox != null) rulesBox.IsVisible = false;
+        if (maskBox != null) maskBox.IsVisible = false;
+        
+        UpdateCommande();
     }
     
     // Attaque prince
@@ -221,18 +322,163 @@ public partial class HashCatVue : TemplateControl
     {
         currentAttackType = AttackType.Prince;
         Console.WriteLine("[HashCat] Mode: Prince Attack");
+        
+        // Reinitialiser les styles
+        ResetButtonStyles();
+        Button btn = sender as Button;
+        if (btn != null)
+        {
+            btn.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            btn.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
+        }
+        
+        // Afficher les bons controles
+        ComboBox wordlistBox = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox hashfileBox = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox hashTypeBox = this.FindControl<ComboBox>("HashTypeComboBox");
+        ComboBox rulesBox = this.FindControl<ComboBox>("RulesComboBox");
+        TextBox maskBox = this.FindControl<TextBox>("MaskInputBox");
+        
+        if (wordlistBox != null) wordlistBox.IsVisible = true;
+        if (hashfileBox != null) hashfileBox.IsVisible = true;
+        if (hashTypeBox != null) hashTypeBox.IsVisible = true;
+        if (rulesBox != null) rulesBox.IsVisible = false;
+        if (maskBox != null) maskBox.IsVisible = false;
+        
+        UpdateCommande();
+    }
+    
+    // Reinitialiser les styles des boutons
+    private void ResetButtonStyles()
+    {
+        Button btn1 = this.FindControl<Button>("ButtonOption1");
+        Button btn2 = this.FindControl<Button>("ButtonOption2");
+        Button btn3 = this.FindControl<Button>("ButtonOption3");
+        Button btn4 = this.FindControl<Button>("ButtonOption4");
+        Button btn5 = this.FindControl<Button>("ButtonOption5");
+        
+        if (btn1 != null)
+        {
+            btn1.BorderBrush = null;
+            btn1.Background = null;
+        }
+        if (btn2 != null)
+        {
+            btn2.BorderBrush = null;
+            btn2.Background = null;
+        }
+        if (btn3 != null)
+        {
+            btn3.BorderBrush = null;
+            btn3.Background = null;
+        }
+        if (btn4 != null)
+        {
+            btn4.BorderBrush = null;
+            btn4.Background = null;
+        }
+        if (btn5 != null)
+        {
+            btn5.BorderBrush = null;
+            btn5.Background = null;
+        }
+    }
+    
+    // Mettre a jour la commande
+    private void UpdateCommande()
+    {
+        ComboBox wordlistBox = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox hashfileBox = this.FindControl<ComboBox>("HashfileComboBox");
+        ComboBox hashTypeBox = this.FindControl<ComboBox>("HashTypeComboBox");
+        ComboBox rulesBox = this.FindControl<ComboBox>("RulesComboBox");
+        TextBox maskBox = this.FindControl<TextBox>("MaskInputBox");
+        TextBox entreeBox = this.FindControl<TextBox>("EntreeTextBox");
+        
+        if (entreeBox == null) return;
+        
+        string commande = "hashcat";
+        
+        // Mode d'attaque
+        switch (currentAttackType)
+        {
+            case AttackType.Dictionary:
+                commande += " -a 0"; // Dictionary attack
+                break;
+            case AttackType.Rules:
+                commande += " -a 0"; // Dictionary + rules
+                break;
+            case AttackType.Mask:
+                commande += " -a 3"; // Brute-force
+                break;
+            case AttackType.Association:
+                commande += " -a 1"; // Combination
+                break;
+            case AttackType.Prince:
+                commande += " -a 9"; // Prince
+                break;
+        }
+        
+        // Type de hash
+        if (hashTypeBox != null && hashTypeBox.SelectedItem != null)
+        {
+            OptionMode option = hashTypeBox.SelectedItem as OptionMode;
+            if (option != null)
+            {
+                commande += " -m " + option.value;
+            }
+        }
+        
+        // Hashfile
+        if (hashfileBox != null && hashfileBox.SelectedItem != null)
+        {
+            commande += " /root/hashfiles/" + hashfileBox.SelectedItem.ToString();
+        }
+        
+        // Wordlist (pour Dictionary, Rules, Association, Prince)
+        if (currentAttackType == AttackType.Dictionary || 
+            currentAttackType == AttackType.Rules ||
+            currentAttackType == AttackType.Association ||
+            currentAttackType == AttackType.Prince)
+        {
+            if (wordlistBox != null && wordlistBox.SelectedItem != null)
+            {
+                commande += " /root/wordlists/" + wordlistBox.SelectedItem.ToString();
+            }
+        }
+        
+        // Rules (pour Rules)
+        if (currentAttackType == AttackType.Rules)
+        {
+            if (rulesBox != null && rulesBox.SelectedItem != null)
+            {
+                commande += " -r /root/rules/" + rulesBox.SelectedItem.ToString();
+            }
+        }
+        
+        // Mask (pour Brute-force)
+        if (currentAttackType == AttackType.Mask)
+        {
+            if (maskBox != null && maskBox.Text != null && maskBox.Text.Trim() != "")
+            {
+                commande += " " + maskBox.Text.Trim();
+            }
+        }
+        
+        entreeBox.Text = commande;
     }
     
     // Quand on change une selection
     private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         Console.WriteLine("[HashCat] Selection changed");
+        UpdateCommande();
     }
     
     // Quand on tape dans le mask
     private void OnMaskInputChanged(object sender, Avalonia.Input.KeyEventArgs e)
     {
         Console.WriteLine("[HashCat] Mask input changed");
+        UpdateCommande();
     }
     
     // Arreter la commande
@@ -259,7 +505,7 @@ public partial class HashCatVue : TemplateControl
             // Ignorer les erreurs
         }
 
-        TextBox sortieTextBox = this.FindControl<TextBox>("SortieTextBox");
+        TextBox sortieTextBox = this.FindControl<TextBox>("TxtOutput");
         if (sortieTextBox != null)
         {
             sortieTextBox.Text += "\n[Stop demande - Processus hashcat termines]\n";

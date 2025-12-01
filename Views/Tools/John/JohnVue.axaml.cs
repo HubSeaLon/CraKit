@@ -212,11 +212,11 @@ public partial class JohnVue : TemplateControl
         EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
         SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
 
-        WordlistComboBox.IsVisible = false;
-        HashfileComboBox.IsVisible = false;
-        FormatHashComboBox.IsVisible = false;
-        RuleComboBox.IsVisible = false;
-        MaskTextBox.IsVisible = false;
+        WordlistComboBox!.IsVisible = false;
+        HashfileComboBox!.IsVisible = false;
+        FormatHashComboBox!.IsVisible = false;
+        RuleComboBox!.IsVisible = false;
+        MaskTextBox!.IsVisible = false;
     }
     
     // Remplir une ComboBox avec les fichiers d'un dossier
