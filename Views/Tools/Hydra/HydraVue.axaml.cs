@@ -466,13 +466,7 @@ public partial class HydraVue : TemplateControl
             var success = IsHydraSuccessful(output);
 
             // Enregistrer dans l'historique
-            historyService.AddToHistory(
-                toolName: "Hydra",
-                command: cmd,
-                output: output,
-                success: success,
-                executionTime: stopwatch.Elapsed
-            );
+            historyService.AddToHistory("Hydra", cmd, output, success, stopwatch.Elapsed);
 
             Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
 
