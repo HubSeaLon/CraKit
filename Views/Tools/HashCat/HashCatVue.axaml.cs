@@ -1,20 +1,19 @@
 using System;
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Text.Json.Nodes; 
+using System.Text.Json.Nodes;
+using System.Threading;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
+using Avalonia.Threading;
 using CraKit.Models;
 using CraKit.Services;
-using CraKit.Templates; 
-using System.Threading;
-using Avalonia.Threading;
+using CraKit.Templates;
+using Renci.SshNet;
 
 namespace CraKit.Views.Tools.HashCat;
 
-// Definition des modes d'attaque supportes
+// Types d'attaque HashCat
 public enum AttackType
 {
     Dictionary,
@@ -24,47 +23,60 @@ public enum AttackType
     Prince
 }
 
+// Vue pour l'outil HashCat
 public partial class HashCatVue : TemplateControl
 {
-    private readonly ToolFileService _toolFileService;
-    private AttackType _currentAttackType = AttackType.Dictionary;
+    // Services
+    private ToolFileService toolFileService;
+    private ExecuterCommandeService execService;
+    private CancellationTokenSource cts;
     
-    private readonly ExecuterCommandeService _execService;
-    private CancellationTokenSource? _cts;
+    // Type d'attaque actuel
+    private AttackType currentAttackType;
 
+    // Constructeur
     public HashCatVue()
     {
-        // Injection des instances
-        _toolFileService = new ToolFileService(ConnexionSshService.Instance);
-        _execService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        // Creer les services
+        toolFileService = new ToolFileService(ConnexionSshService.Instance);
+        execService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        
+        currentAttackType = AttackType.Dictionary;
+        cts = null;
         
         InitializeComponent();
         
-        // Chargement initial des donnees
+        // Charger les donnees
         ChargerLesListes();
         ChargerHashTypes();
     }
     
+    private void InitializeComponent()
+    {
+        AvaloniaXamlLoader.Load(this);
+    }
     
+    // Charger les types de hash depuis JSON
     private void ChargerHashTypes()
     {
         try 
         {
-            // Lecture du fichier JSON contenant les types de hash (MD5, SHA1...)
             string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "HashCat.json");
-            string? jsonBrut = ToolBase.LireFichierTexte(chemin);
+            string jsonBrut = ToolBase.LireFichierTexte(chemin);
 
-            if (string.IsNullOrEmpty(jsonBrut)) return;
+            if (jsonBrut == null || jsonBrut == "") return;
             
-            var rootNode = JsonNode.Parse(jsonBrut);
-            var valuesNode = rootNode?["options"]?["hashType"]?["values"];
+            JsonNode rootNode = JsonNode.Parse(jsonBrut);
+            JsonNode valuesNode = rootNode["options"]["hashType"]["values"];
 
             if (valuesNode != null)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var listeModes = valuesNode.Deserialize<List<OptionMode>>(options);
+                JsonSerializerOptions options = new JsonSerializerOptions();
+                options.PropertyNameCaseInsensitive = true;
                 
-                var boxType = this.FindControl<ComboBox>("HashTypeComboBox");
+                System.Collections.Generic.List<OptionMode> listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                
+                ComboBox boxType = this.FindControl<ComboBox>("HashTypeComboBox");
                 if (listeModes != null && boxType != null)
                 {
                     boxType.ItemsSource = listeModes;
@@ -73,358 +85,191 @@ public partial class HashCatVue : TemplateControl
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[JSON ERROR] {ex.Message}");
+            Console.WriteLine("[JSON ERROR] " + ex.Message);
         }
     }
     
-    // Recupere la liste des fichiers sur le serveur via SSH
+    // Remplir une ComboBox avec les fichiers d'un dossier
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
         if (laBox == null) return;
 
         try
         {
-            var ssh = ConnexionSshService.Instance.Client;
+            SshClient ssh = ConnexionSshService.Instance.Client;
             if (ssh == null || !ssh.IsConnected) return;
 
-            var cmd = ssh.CreateCommand($"ls -1 {chemin}");
+            var cmd = ssh.CreateCommand("ls -1 " + chemin);
             string resultat = cmd.Execute();
 
             laBox.Items.Clear();
 
-            // On verifie qu'il y a bien des fichiers et pas d'erreur Linux
-            if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
+            if (resultat != null && resultat.Trim() != "" && !resultat.Contains("No such file"))
             {
-                var fichiers = resultat.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var f in fichiers) laBox.Items.Add(f);
+                string[] fichiers = resultat.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                
+                for (int i = 0; i < fichiers.Length; i++)
+                {
+                    laBox.Items.Add(fichiers[i]);
+                }
             }
         }
-        catch (Exception ex) { Console.WriteLine($"[SSH] Erreur : {ex.Message}"); }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Erreur chargement liste : " + ex.Message);
+        }
     }
-
+    
+    // Charger les listes
     private void ChargerLesListes()
     {
-        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
-        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
-        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
-
-        // Remplissage des ComboBox avec les chemins distants
+        ComboBox boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
 
         if (boxWordlist != null)
         {
             RemplirComboBox(boxWordlist, "/root/wordlists");
             boxWordlist.Items.Add("rockyou.txt");
         }
-        if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
-        if (boxRules != null) RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
+        if (boxHashfile != null)
+        {
+            RemplirComboBox(boxHashfile, "/root/hashfiles");
+        }
     }
     
-    // Methodes declenchees par les boutons du menu de gauche
-    private void DictionaryAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Dictionary);
-    private void DictionaryAttackAndRulesClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Rules);
-    private void BruteForceAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Mask);
-    private void AssociationAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Association);
-    private void PrinceAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Prince);
-
-    // Declenche quand on change une valeur dans une liste
-    private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e) => GenererCommande();
-    
-    // Declenche quand on tape dans le champ Masque
-    private void OnMaskInputChanged(object? sender, KeyEventArgs e) => GenererCommande();
-    
-    // Active ou desactive les elements de l'interface selon le mode choisi
-    private void SetAttackMode(AttackType type)
+    // Ajouter une wordlist
+    private async void AjouterWordlistClick(object sender, RoutedEventArgs e)
     {
-        _currentAttackType = type;
-
-        // Recuperation des controles UI
-        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
-        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
-        var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
-        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
-        var txtMask = this.FindControl<TextBox>("MaskInputBox"); 
-        
-        var ButtonOption1 = this.FindControl<Button>("ButtonOption1");
-        var ButtonOption2 = this.FindControl<Button>("ButtonOption2");
-        var ButtonOption3 = this.FindControl<Button>("ButtonOption3");
-        var ButtonOption4 = this.FindControl<Button>("ButtonOption4");
-        var ButtonOption5 = this.FindControl<Button>("ButtonOption5");
-
-        // On cache/desactive/reset tout
-        boxWordlist!.IsVisible = false;
-        boxHashfile!.IsVisible = false;
-        boxHashType!.IsVisible = false;
-        boxRules!.IsVisible = false;
-        txtMask!.IsVisible = false;
-        
-        ButtonOption1!.Opacity = 1;
-        ButtonOption2!.Opacity = 1;
-        ButtonOption3!.Opacity = 1;
-        ButtonOption4!.Opacity = 1;
-        ButtonOption5!.Opacity = 1;
-        
-        boxWordlist.SelectedItem = -1 ;
-        boxHashfile.SelectedItem = -1 ;
-        boxHashType.SelectedItem = -1 ;
-        boxRules.SelectedItem = -1 ;
-        txtMask.Text = string.Empty;
-        
-        // On active uniquement ce qui est necessaire
-        switch (type)
-        {
-            case AttackType.Dictionary:
-                ButtonOption1.Opacity = 0.4;
-                boxWordlist.IsVisible = true;
-                boxHashfile.IsVisible = true;
-                boxHashType.IsVisible = true;
-                break;
-
-            case AttackType.Rules:
-                ButtonOption2.Opacity = 0.4;
-                boxWordlist.IsVisible = true;
-                boxHashfile.IsVisible = true;
-                boxHashType.IsVisible = true;
-                boxRules.IsVisible = true;
-                break;
-            
-            case AttackType.Mask:
-                ButtonOption3.Opacity = 0.4;
-                boxWordlist.IsVisible = false;
-                boxHashfile.IsVisible = true;
-                boxHashType.IsVisible = true;
-                txtMask.IsVisible = true;
-                break;
-            
-            case AttackType.Association:
-                ButtonOption4.Opacity = 0.4;
-                boxWordlist.IsVisible = true;
-                boxHashfile.IsVisible = true;
-                boxHashType.IsVisible = true;
-                boxRules.IsVisible = true;
-                break;
-            
-            case AttackType.Prince:
-                ButtonOption5.Opacity = 0.4;
-                boxWordlist.IsVisible = true;
-                boxHashfile.IsVisible = true;
-                boxHashType.IsVisible = true;
-                break;
-        }
-        GenererCommande();
-    }
-
-    // Construction dynamique de la commande Hashcat
-    private void GenererCommande()
-    {
-        var txtInput = this.FindControl<TextBox>("TxtCommandInput");
-        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
-        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
-        var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
-        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
-        var txtMask = this.FindControl<TextBox>("MaskInputBox");
-
-        if (txtInput == null) return;
-        
-        // Recuperation des valeurs
-        
-        string modeValue = "0"; 
-        if (boxHashType?.SelectedItem is OptionMode selectedMode)
-        {
-            modeValue = selectedMode.value.ToString();
-        }
-        
-        string hashPath = "<fichier_hashes>";
-        if (boxHashfile?.SelectedItem != null)
-        {
-            hashPath = $"/root/hashfiles/{boxHashfile.SelectedItem}";
-        }
-        
-        string wordlistPath = "<wordlist>";
-        
-        if (boxWordlist?.SelectedItem is null)
-        {
-            wordlistPath = "";
-            return;
-        }
-        
-        if (boxWordlist?.SelectedItem!.ToString() == "rockyou.txt")
-        {
-            wordlistPath = $"/usr/share/wordlists/{boxWordlist.SelectedItem}";
-        } else
-        {
-            wordlistPath = $"/root/wordlists/{boxWordlist.SelectedItem}";
-        }
-        
-        string rulePath = "";
-        if (boxRules?.SelectedItem != null)
-        {
-            rulePath = $" -r /usr/share/hashcat/rules/{boxRules.SelectedItem}";
-        }
-        
-        string maskValue = "";
-        if (txtMask != null && !string.IsNullOrEmpty(txtMask.Text))
-        {
-            maskValue = txtMask.Text;
-        }
-        
-        // Construction de la string finale
-        string finalCommand = "";
-
-        switch (_currentAttackType)
-        {
-            case AttackType.Dictionary:
-                finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath}";
-                break;
-
-            case AttackType.Rules:
-                finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath}{rulePath}";
-                break;
-            
-            case AttackType.Mask:
-                finalCommand = $"hashcat -m {modeValue} -a 3 {hashPath} {maskValue}";
-                break;
-            
-            case AttackType.Association:
-                finalCommand = $"hashcat -m {modeValue} -a 9 {hashPath} {wordlistPath}{rulePath}";
-                break;
-            
-            case AttackType.Prince:
-                finalCommand = $"hashcat -m {modeValue} -a 8 {hashPath} {wordlistPath}";
-                break;
-        }
-
-        txtInput.Text = finalCommand;
-    }
-    private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
-    {
-        var window = TopLevel.GetTopLevel(this) as Window;
+        Window window = TopLevel.GetTopLevel(this) as Window;
         if (window == null) return;
+        
         try
         {
-            await _toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
-            var box = this.FindControl<ComboBox>("WordlistComboBox");
-            if (box != null) RemplirComboBox(box, "/root/wordlists");
+            await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
+            ChargerLesListes();
         }
-        catch (Exception ex) { Console.WriteLine(ex.Message); }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
-
-    private async void AjouterHashfileClick(object? sender, RoutedEventArgs e)
+    
+    // Ajouter un hashfile
+    private async void AjouterHashfileClick(object sender, RoutedEventArgs e)
     {
-        var window = TopLevel.GetTopLevel(this) as Window;
+        Window window = TopLevel.GetTopLevel(this) as Window;
         if (window == null) return;
+
         try
         {
-            await _toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
-            var box = this.FindControl<ComboBox>("HashfileComboBox");
-            if (box != null) RemplirComboBox(box, "/root/hashfiles");
+            await toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
+            ChargerLesListes();
         }
-        catch (Exception ex) { Console.WriteLine(ex.Message); }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
     }
     
-    private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
+    // Lancer la commande (version simplifiee sans streaming)
+    private async void LancerCommandeClick(object sender, RoutedEventArgs e)
     {
-        var txtInput  = this.FindControl<TextBox>("TxtCommandInput");
-        var txtOutput = this.FindControl<TextBox>("TxtOutput");
-        var btnLancer = this.FindControl<Button>("BtnLancer");
-        var btnStop   = this.FindControl<Button>("BtnStop");
-
-        // Vérifications simples
-        if (txtInput == null || txtOutput == null || btnLancer == null || btnStop == null)
-            return;
-
-        var commande = txtInput.Text;
-        if (string.IsNullOrWhiteSpace(commande))
-            return;
-
-        // Reset / état UI
-        txtOutput.Text = ">>> Démarrage de l'attaque Hashcat...\n";
-        btnLancer.IsEnabled = false;
-        btnStop.IsEnabled   = true;
-
-        // Nouveau token d’annulation
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
-
-        await _execService.ExecuteCommandStreamingAsync(
-            commande,
-
-            // Reçoit chaque ligne en temps réel
-            onLineReceived: ligne =>
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += ligne + "\n";
-                    txtOutput.CaretIndex = txtOutput.Text.Length; // auto-scroll
-                });
-            },
-
-            // Fin de l’exécution (normalement)
-            onCompleted: () =>
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += "\n>>> Fin de l'exécution Hashcat.";
-                    btnLancer.IsEnabled = true;
-                    btnStop.IsEnabled   = false;
-                });
-            },
-
-            // Erreur (SSH non connecté ou autre)
-            onError: msg =>
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += $"\n[ERREUR] : {msg}";
-                    btnLancer.IsEnabled = true;
-                    btnStop.IsEnabled   = false;
-                });
-            },
-
-            // Cancel
-            cancel: _cts.Token
-        );
+        TextBox entreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
+        TextBox sortieTextBox = this.FindControl<TextBox>("SortieTextBox");
+        
+        if (entreeTextBox == null || sortieTextBox == null) return;
+        
+        string cmd = entreeTextBox.Text;
+        if (cmd == null || cmd.Trim() == "") return;
+        
+        sortieTextBox.Text = "$ " + cmd + "\n";
+        
+        string outp = await execService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(10));
+        sortieTextBox.Text += outp + "\n";
     }
-
     
-    private void StopCommandeClick(object? sender, RoutedEventArgs e)
+    // Attaque dictionnaire
+    private void DictionaryAttackClick(object sender, RoutedEventArgs e)
     {
-        var txtOutput = this.FindControl<TextBox>("TxtOutput");
-        var btnLancer = this.FindControl<Button>("BtnLancer");
-        var btnStop   = this.FindControl<Button>("BtnStop");
-
-        // Annulation côté client / service
-        _cts?.Cancel();
-        _execService.StopCurrent();
-
-        // Kill brutal côté Kali (tous les processus hashcat)
+        currentAttackType = AttackType.Dictionary;
+        Console.WriteLine("[HashCat] Mode: Dictionary Attack");
+    }
+    
+    // Attaque dictionnaire + rules
+    private void DictionaryAttackAndRulesClick(object sender, RoutedEventArgs e)
+    {
+        currentAttackType = AttackType.Rules;
+        Console.WriteLine("[HashCat] Mode: Dictionary + Rules Attack");
+    }
+    
+    // Attaque brute force
+    private void BruteForceAttackClick(object sender, RoutedEventArgs e)
+    {
+        currentAttackType = AttackType.Mask;
+        Console.WriteLine("[HashCat] Mode: Brute Force Attack");
+    }
+    
+    // Attaque association
+    private void AssociationAttackClick(object sender, RoutedEventArgs e)
+    {
+        currentAttackType = AttackType.Association;
+        Console.WriteLine("[HashCat] Mode: Association Attack");
+    }
+    
+    // Attaque prince
+    private void PrinceAttackClick(object sender, RoutedEventArgs e)
+    {
+        currentAttackType = AttackType.Prince;
+        Console.WriteLine("[HashCat] Mode: Prince Attack");
+    }
+    
+    // Quand on change une selection
+    private void OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        Console.WriteLine("[HashCat] Selection changed");
+    }
+    
+    // Quand on tape dans le mask
+    private void OnMaskInputChanged(object sender, Avalonia.Input.KeyEventArgs e)
+    {
+        Console.WriteLine("[HashCat] Mask input changed");
+    }
+    
+    // Arreter la commande
+    private void StopCommandeClick(object sender, RoutedEventArgs e)
+    {
+        if (cts != null)
+        {
+            cts.Cancel();
+        }
+        
+        execService.StopCurrent();
+        
         try
         {
-            var ssh = ConnexionSshService.Instance.Client;
+            SshClient ssh = ConnexionSshService.Instance.Client;
             if (ssh != null && ssh.IsConnected)
             {
-                using var killCmd = ssh.CreateCommand("pkill -9 hashcat");
+                var killCmd = ssh.CreateCommand("pkill -9 hashcat");
                 killCmd.Execute();
             }
         }
         catch
         {
-            // On ignore les erreurs de kill (process déjà mort, etc.)
+            // Ignorer les erreurs
         }
 
-        // Feedback UI
-        if (txtOutput != null)
-            txtOutput.Text += "\n\n>>> STOP FORCÉ PAR L'UTILISATEUR (Hashcat).";
-
-        if (btnLancer != null) btnLancer.IsEnabled = true;
-        if (btnStop   != null) btnStop.IsEnabled   = false;
+        TextBox sortieTextBox = this.FindControl<TextBox>("SortieTextBox");
+        if (sortieTextBox != null)
+        {
+            sortieTextBox.Text += "\n[Stop demande - Processus hashcat termines]\n";
+        }
     }
-
-
-    private void InitializeComponent()
+    
+    // Style du template
+    protected override Type StyleKeyOverride
     {
-        AvaloniaXamlLoader.Load(this);
+        get { return typeof(TemplateControl); }
     }
-
-    // aller chercher le style <Style Selector="control|TemplateControl">
-    protected override Type StyleKeyOverride => typeof(TemplateControl);
 }
+

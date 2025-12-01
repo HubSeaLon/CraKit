@@ -5,6 +5,7 @@ using CraKit.Services;
 
 namespace CraKit.Views;
 
+// Vue de connexion au serveur SSH
 public partial class AccueilConnexionVue : UserControl
 {
     public AccueilConnexionVue()
@@ -12,31 +13,38 @@ public partial class AccueilConnexionVue : UserControl
         InitializeComponent();
     }
 
+    // Quand on clique sur le bouton Connecter
     private async void Connecter(object sender, RoutedEventArgs e)
     {
-        var success = await ConnexionSshService.Instance.ConnectAsync("localhost", 2222, "root", "123");
+        // Se connecter au serveur Kali
+        bool success = await ConnexionSshService.Instance.ConnectAsync("localhost", 2222, "root", "123");
         
-        if (success && TopLevel.GetTopLevel(this) is MainWindow mainWindow)
+        if (success)
         {
-            Console.WriteLine("[SSH-SFTP] Connexion réussie");
-            mainWindow.Content = new ChoixOutilsMode();
+            Console.WriteLine("[SSH] Connexion reussie");
+            
+            // Aller vers la page de choix des outils
+            MainWindow mainWindow = TopLevel.GetTopLevel(this) as MainWindow;
+            if (mainWindow != null)
+            {
+                mainWindow.Content = new ChoixOutilsMode();
+            }
         }
         else
         {
-            Sortie.Text = "[SSH] Échec de la connexion";
-            Console.WriteLine("[SSH] Échec de la connexion");
+            Sortie.Text = "[SSH] Echec de la connexion";
+            Console.WriteLine("[SSH] Echec de la connexion");
         }
     }
     
-    // Peut-être créer une commande pour lancer la machine Kali automatiquement ?
-    
-    // Fenêtre de test commmandes
+    // Ouvrir la fenetre de test des commandes
     private void TestCommande(object sender, RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is MainWindow mainWindow)
+        MainWindow mainWindow = TopLevel.GetTopLevel(this) as MainWindow;
+        if (mainWindow != null)
         {
             mainWindow.Navigate(new TestConnexionCommande());
         }  
     }
-    
 }
+

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using System.IO;
 using System.Threading;
@@ -6,59 +6,67 @@ using Renci.SshNet;
 
 namespace CraKit.Services;
 
+// Service pour executer des commandes SSH
 public class ExecuterCommandeService
 {
+    private ConnexionSshService sshService;
+    private SshCommand commandeEnCours;
 
-    private readonly ConnexionSshService _sshService;
-    private SshCommand? _currentCommand;
-
-    public ExecuterCommandeService(ConnexionSshService sshService)
+    // Constructeur
+    public ExecuterCommandeService(ConnexionSshService ssh)
     {
-        _sshService = sshService;
+        sshService = ssh;
+        commandeEnCours = null;
     }
     
-    public async Task<string> ExecuteCommandAsync(string command, TimeSpan? timeout = null)
+    // Executer une commande simple
+    public async Task<string> ExecuteCommandAsync(string command, TimeSpan timeout)
     {
-        var client = _sshService.Client;
+        SshClient client = sshService.Client;
         
-        if (client == null || !client.IsConnected) return "[SSH] Non connecté";
+        if (client == null || !client.IsConnected)
+        {
+            return "[SSH] Non connecte";
+        }
         
         return await Task.Run(() =>
         {
             try
             {
-                using var cmd = client.CreateCommand(command);
-                if (timeout.HasValue) cmd.CommandTimeout = timeout.Value;
-                var output = cmd.Execute();
-                var error = cmd.Error;
+                SshCommand cmd = client.CreateCommand(command);
+                cmd.CommandTimeout = timeout;
+                
+                string output = cmd.Execute();
+                string error = cmd.Error;
 
-                return string.IsNullOrWhiteSpace(error)
-                    ? output
-                    : $"{output}\n[stderr]\n{error}";
+                if (string.IsNullOrWhiteSpace(error))
+                {
+                    return output;
+                }
+                else
+                {
+                    return output + "\n[stderr]\n" + error;
+                }
             }
             catch (Exception ex)
             {
-                return $"[SSH] Erreur exécution : {ex.Message}";
+                return "[SSH] Erreur execution : " + ex.Message;
             }
         });
     }
     
-    
-    // Exécution en streaming (temps réel pour les commandes d'énumération)
-   
-     
+    // Executer une commande en temps reel (pour voir le resultat ligne par ligne)
     public async Task ExecuteCommandStreamingAsync(
         string command,
         Action<string> onLineReceived,
-        Action? onCompleted = null,
-        Action<string>? onError = null,
-        CancellationToken? cancel = null)
+        Action<string> onError,
+        CancellationToken cancel)
     {
-        var client = _sshService.Client;
+        SshClient client = sshService.Client;
 
         if (client == null || !client.IsConnected)
         {
-            onError?.Invoke("[SSH] Non connecté");
+            onError("[SSH] Non connecte");
             return;
         }
 
@@ -66,49 +74,60 @@ public class ExecuterCommandeService
         {
             try
             {
-                _currentCommand = client.CreateCommand(command);
-                var asyncResult = _currentCommand.BeginExecute();
+                commandeEnCours = client.CreateCommand(command);
+                IAsyncResult asyncResult = commandeEnCours.BeginExecute();
 
-                using var reader = new StreamReader(_currentCommand.OutputStream);
+                StreamReader reader = new StreamReader(commandeEnCours.OutputStream);
 
                 while (!asyncResult.IsCompleted || !reader.EndOfStream)
                 {
-                    if (cancel?.IsCancellationRequested == true)
+                    // Verifier si on veut annuler
+                    if (cancel.IsCancellationRequested)
                     {
-                        _currentCommand.CancelAsync();
+                        commandeEnCours.CancelAsync();
                         break;
                     }
 
-                    var line = reader.ReadLine();
+                    // Lire une ligne
+                    string line = reader.ReadLine();
                     if (line != null)
-                        onLineReceived?.Invoke(line);
+                    {
+                        onLineReceived(line);
+                    }
                 }
 
-                _currentCommand.EndExecute(asyncResult);
-                onCompleted?.Invoke();
+                commandeEnCours.EndExecute(asyncResult);
+                reader.Close();
             }
             catch (Exception ex)
             {
-                if (!ex.Message.Contains("command was canceled"))
-                    onError?.Invoke(ex.Message);
+                if (!ex.Message.Contains("canceled"))
+                {
+                    onError(ex.Message);
+                }
             }
             finally
             {
-                _currentCommand = null;
+                commandeEnCours = null;
             }
         });
     }
     
+    // Arreter la commande en cours
     public void StopCurrent()
     {
         try
         {
-            _currentCommand?.CancelAsync();
-            Console.WriteLine("[SSH] Stopping current command");
+            if (commandeEnCours != null)
+            {
+                commandeEnCours.CancelAsync();
+                Console.WriteLine("[SSH] Arret commande en cours");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[SSH STOP Command] Error: {ex.Message}");
+            Console.WriteLine("[SSH] Erreur arret : " + ex.Message);
         }
     }
 }
+

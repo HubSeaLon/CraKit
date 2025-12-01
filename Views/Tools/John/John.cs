@@ -1,21 +1,24 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 
 namespace CraKit.Views.Tools.John;
 
+// Classe John qui herite de ToolBase
 public class John : ToolBase
 {
-    private Control? _view;
+    private Control view;
     
-    public John() : base("John", "Outil de crack de mot de passe")
+    public John() : base("John The Ripper", "Outil de crack de mot de passe")
     {
+        view = null;
     }
     
     public override Control GetView()
     {
-        if (_view == null)
+        if (view == null)
         {
-            _view = new JohnVue(); 
+            view = new JohnVue(); 
         }
-        return _view;
+        return view;
     }
 }
+

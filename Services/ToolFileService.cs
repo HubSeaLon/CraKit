@@ -1,4 +1,4 @@
-﻿using Avalonia.Controls;
+using Avalonia.Controls;
 using CraKit.Models;
 using System.IO;
 using System.Threading.Tasks;
@@ -6,39 +6,42 @@ using Avalonia.Platform.Storage;
 
 namespace CraKit.Services;
 
-public interface IToolFileService
+// Service pour choisir et envoyer des fichiers sur le serveur
+public class ToolFileService
 {
-    Task<string?> PickAndUploadAsync(ToolFileModel toolFileModel, Window owner);
-}
-
-public class ToolFileService : IToolFileService
-{
-    private readonly ConnexionSshService _ssh;
+    private ConnexionSshService ssh;
     
-    public ToolFileService(ConnexionSshService ssh)
+    // Constructeur
+    public ToolFileService(ConnexionSshService sshService)
     {
-        _ssh = ssh;
+        ssh = sshService;
     }
 
-    public async Task<string?> PickAndUploadAsync(ToolFileModel toolFileModel, Window owner)
+    // Choisir un fichier et l'envoyer sur le serveur
+    public async Task<string> PickAndUploadAsync(ToolFileModel toolFileModel, Window owner)
     {
         var storage = owner.StorageProvider;
 
-        // Déterminer le titre du dialogue selon le type de fichier
-        var dialogTitle = toolFileModel switch
-        {
-            ToolFileModel.Wordlist => "Choisir une wordlist",
-            ToolFileModel.Userlist => "Choisir une userlist",
-            ToolFileModel.HashFile => "Choisir un hashfile",
-            _ => "Choisir un fichier"
-        };
+        // Determiner le titre selon le type de fichier
+        string dialogTitle = "";
+        
+        if (toolFileModel == ToolFileModel.Wordlist)
+            dialogTitle = "Choisir une wordlist";
+        else if (toolFileModel == ToolFileModel.Userlist)
+            dialogTitle = "Choisir une userlist";
+        else if (toolFileModel == ToolFileModel.Combolist)
+            dialogTitle = "Choisir une combolist";
+        else if (toolFileModel == ToolFileModel.HashFile)
+            dialogTitle = "Choisir un hashfile";
+        else
+            dialogTitle = "Choisir un fichier";
 
+        // Ouvrir la fenetre pour choisir un fichier
         var result = await storage.OpenFilePickerAsync(
             new FilePickerOpenOptions
             {
                 AllowMultiple = false,
                 Title = dialogTitle,
-
                 FileTypeFilter = new[]
                 {
                     new FilePickerFileType("Text files")
@@ -49,27 +52,35 @@ public class ToolFileService : IToolFileService
             }
         );
 
+        // Si aucun fichier choisi
         if (result.Count == 0)
             return null;
 
+        // Recuperer le fichier choisi
         var file = result[0];
-        var localPath = file.Path.LocalPath;
+        string localPath = file.Path.LocalPath;
+        string fileName = Path.GetFileName(localPath);
 
-        var fileName = Path.GetFileName(localPath);
+        // Determiner le dossier sur le serveur
+        string remoteDir = "";
+        
+        if (toolFileModel == ToolFileModel.Wordlist)
+            remoteDir = "/root/wordlists";
+        else if (toolFileModel == ToolFileModel.Userlist)
+            remoteDir = "/root/userlists";
+        else if (toolFileModel == ToolFileModel.Combolist)
+            remoteDir = "/root/combolists";
+        else if (toolFileModel == ToolFileModel.HashFile)
+            remoteDir = "/root/hashfiles";
+        else
+            remoteDir = "/root";
 
-        var remoteDir = toolFileModel switch
-        {
-            ToolFileModel.Wordlist => "/root/wordlists",
-            ToolFileModel.Userlist => "/root/userlists",
-            ToolFileModel.Combolist => "/root/combolists",
-            ToolFileModel.HashFile => "/root/hashfiles",
-            _ => "/root"
-        };
+        string remotePath = remoteDir + "/" + fileName;
 
-        var remotePath = $"{remoteDir}/{fileName}";
-
-        await _ssh.UploadFileAsync(localPath, remotePath);
+        // Envoyer le fichier
+        await ssh.UploadFileAsync(localPath, remotePath);
 
         return remotePath;
     }
 }
+

@@ -4,41 +4,28 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              Background="{DynamicResource ThemeBackgroundBrush}"
-             x:Class="CraKit.Views.ChoixOutilsMode"
-             xmlns:views="clr-namespace:CraKit.Views"
-             x:DataType="views:ChoixOutilsMode">
+             x:Class="CraKit.Views.ChoixOutilsMode">
         
     
-  <!-- Séparation en 3 partie (header, les 3 outils, et d'autre outils (possible évolution)) -->
+  <!-- Séparation en 3 partie (header, les 3 outils) -->
   <Grid RowDefinitions="Auto,Auto,*">
     <!-- Barre du haut -->
     <Grid ColumnDefinitions="*,Auto,*" RowDefinitions="Auto,6">
-      <!-- Gauche : statut binding de la connexion -->
+      <!-- Gauche -->
       <StackPanel Orientation="Vertical" Spacing="6">
         <TextBlock x:Name="LblConnecte"
-                   Text="{Binding IsConnected}"
+                   Text="Outils disponibles"
                    FontSize="12" Margin="0,0,0,2"/>
       </StackPanel>
 
       <!-- Centre : titre -->
       <TextBlock Grid.Column="1"
                  Grid.Row="0"
-                 Text="{Binding Title}"
+                 Text="Choisir un outil"
                  HorizontalAlignment="Center"
                  FontSize="28"
                  FontWeight="SemiBold"
                  Margin="0,2,0,0"/>
-
-      <!-- Droite : mode simple + checkbox -->
-      <StackPanel Grid.Column="2"
-                  Grid.Row="0"
-                  Orientation="Horizontal"
-                  HorizontalAlignment="Right"
-                  VerticalAlignment="Top"
-                  Spacing="8">
-        <TextBlock Text="Mode simple" Padding="6"/>
-        <CheckBox x:Name="ChkModeSimple" IsChecked="{Binding IsSimpleMode, Mode=TwoWay}"/>
-      </StackPanel>
 
       <!-- Ligne de séparation -->
       <Border Grid.Row="1" 
@@ -49,12 +36,8 @@
               Margin="0,8,0,0"/>
     </Grid>
     
-    
-    
-    <!-- Affichage selon les modes expert ou simple -->
-    
-    <!-- Grille des outils Mode EXPERT-->
-    <Grid x:Name="ExpertView" IsVisible="{Binding !IsSimpleMode}" Grid.Row="1" ColumnDefinitions="*,*,*" HorizontalAlignment="Center" Margin="50,15,50,0" ColumnSpacing="70" >
+    <!-- Grille des outils -->
+    <Grid x:Name="ExpertView" Grid.Row="1" ColumnDefinitions="*,*,*" HorizontalAlignment="Center" Margin="50,15,50,0" ColumnSpacing="70" >
       <!-- John the Ripper -->
       <Button Grid.Column="0" Click="OpenJohn"
               Background="Transparent" BorderBrush="Transparent"
@@ -88,166 +71,6 @@
         </StackPanel>
       </Button>
     </Grid>
-    
-    <!-- Mode SIMPLE -->
-    
-    <Grid Grid.Row="1" x:Name="SimpleView" IsVisible="{Binding IsSimpleMode}" 
-          HorizontalAlignment="Center" VerticalAlignment="Stretch" Margin="0,40,0,20">
-        
-        <Grid.Styles>
-            <Style Selector="RadioButton.MenuItem">
-                <Setter Property="Background" Value="Transparent"/>
-                <Setter Property="Foreground" Value="White"/> 
-                <Setter Property="FontSize" Value="15"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Margin" Value="0,0,0,15"/>
-                <Setter Property="Template">
-                    <ControlTemplate>
-                        <Grid ColumnDefinitions="Auto, Auto" Background="Transparent">
-                            <Border x:Name="Indicator" Width="8" Height="8" CornerRadius="50" 
-                                    BorderBrush="#888888" BorderThickness="1"
-                                    Background="Transparent" Margin="0,0,12,0" VerticalAlignment="Center"/>
-                            <ContentPresenter Grid.Column="1" Content="{TemplateBinding Content}" 
-                                              Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center"/>
-                        </Grid>
-                    </ControlTemplate>
-                </Setter>
-                <Setter Property="Transitions">
-                    <Transitions>
-                        <BrushTransition Property="Foreground" Duration="0:0:0.2"/>
-                    </Transitions>
-                </Setter>
-            </Style>
-            
-            <Style Selector="RadioButton.MenuItem:disabled">
-                <Setter Property="Foreground" Value="Gray"/>
-                <Setter Property="Opacity" Value="15"/>
-            </Style>
-
-            <Style Selector="RadioButton.MenuItem:checked">
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="FontWeight" Value="Bold"/>
-            </Style>
-            <Style Selector="RadioButton.MenuItem:checked /template/ Border#Indicator">
-                <Setter Property="Background" Value="#7A6FD1"/>
-                <Setter Property="BorderBrush" Value="#7A6FD1"/>
-                <Setter Property="Effect">
-                    <DropShadowEffect Color="#7A6FD1" BlurRadius="12" Opacity="0.8"/>
-                </Setter>
-            </Style>
-
-            <Style Selector="TextBlock.StepHeader">
-                <Setter Property="Foreground" Value="MediumPurple"/> <Setter Property="FontSize" Value="15"/>      <Setter Property="FontWeight" Value="Bold"/>
-                <Setter Property="Margin" Value="0,0,0,30"/>  <Setter Property="LetterSpacing" Value="1"/>
-            </Style>
-
-            <Style Selector="Border.VerticalSep">
-                <Setter Property="Width" Value="2"/>
-                <Setter Property="Margin" Value="0,0,30,0"/> <Setter Property="VerticalAlignment" Value="Stretch"/>
-                <Setter Property="Background" Value="White"/>
-            </Style>
-
-            <Style Selector="Button.ActionButton">
-                <Setter Property="Background" Value="#1A1A1A"/>
-                <Setter Property="BorderBrush" Value="#444444"/>
-                <Setter Property="BorderThickness" Value="1"/>
-                <Setter Property="Foreground" Value="White"/>
-                <Setter Property="CornerRadius" Value="6"/>
-                <Setter Property="Padding" Value="15,10"/>
-                <Setter Property="FontSize" Value="14"/>
-                <Setter Property="HorizontalContentAlignment" Value="Center"/>
-                <Setter Property="Cursor" Value="Hand"/>
-                <Setter Property="Margin" Value="0,0,0,15"/>
-                <Setter Property="Transitions">
-                    <Transitions>
-                        <BrushTransition Property="Background" Duration="0:0:0.2"/>
-                        <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
-                        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1"/>
-                    </Transitions>
-                </Setter>
-            </Style>
-        </Grid.Styles>
-
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="220"/> 
-            <ColumnDefinition Width="Auto"/> 
-            <ColumnDefinition Width="240"/> 
-            <ColumnDefinition Width="Auto"/> 
-            <ColumnDefinition Width="220"/> 
-        </Grid.ColumnDefinitions>
-
-
-        <Grid Grid.Column="0" RowDefinitions="Auto, *">
-            <TextBlock Text="01. CATÉGORIE" Classes="StepHeader"/>
-            <StackPanel Grid.Row="1">
-                <RadioButton x:Name="RbCatCracking" Classes="MenuItem" Content="Cracking" GroupName="Cat" IsChecked="True"/>
-                <RadioButton x:Name="RbCatEnum" Classes="MenuItem" Content="Enumeration" GroupName="Cat"/>
-                <RadioButton Classes="MenuItem" Content="Network Scanning" GroupName="Cat" IsEnabled="False"/>
-                <RadioButton Classes="MenuItem" Content="Web Analysis" GroupName="Cat" IsEnabled="False"/>
-            </StackPanel>
-        </Grid>
-
-        <Border Grid.Column="1" Classes="VerticalSep"/>
-
-
-        <Grid Grid.Column="2" RowDefinitions="Auto, *">
-            <TextBlock Text="02. DOMAINE" Classes="StepHeader"/>
-            
-            <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatCracking.IsChecked}">
-                <RadioButton x:Name="RbHashCracking" Classes="MenuItem" Content="Hash Cracking" GroupName="SubCatCrack" IsChecked="True"/>
-                <RadioButton x:Name="RbMaskRules" Classes="MenuItem" Content="Mask / Rules" GroupName="SubCatCrack"/>
-                <RadioButton x:Name="RbMBruteForce" Classes="MenuItem" Content="Bruteforce / Wordlist" GroupName="SubCatCrack"/>
-                <RadioButton x:Name="RbNetworkBruteforce" Classes="MenuItem" Content="Network Bruteforce" GroupName="SubCatCrack"/>
-            </StackPanel>
-
-            <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatEnum.IsChecked}">
-                <RadioButton x:Name="RbDNSEnumeration" Classes="MenuItem" Content="DNS Enumeration" GroupName="SubCatEnum" IsChecked="True"/>
-                <RadioButton x:Name="RbSubdomainEnum" Classes="MenuItem" Content="Subdomain Enum" GroupName="SubCatEnum"/>
-            </StackPanel>
-        </Grid>
-
-        <Border Grid.Column="3" Classes="VerticalSep"/>
-
-
-        <Grid Grid.Column="4" RowDefinitions="Auto, *">
-            <TextBlock Text="03. OUTIL ADAPTÉ" Classes="StepHeader"/>
-        
-            <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatCracking.IsChecked}">
-            
-                <StackPanel IsVisible="{Binding #RbHashCracking.IsChecked}">
-                    <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
-                    <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding #RbMaskRules.IsChecked}">
-                    <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
-                    <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding #RbMBruteForce.IsChecked}">
-                    <Button Click="OpenJohn" Classes="ActionButton" Content="John The Reaper" HorizontalAlignment="Stretch"/>
-                    <Button Click="OpenHashCat" Classes="ActionButton" Content="Hashcat" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding #RbNetworkBruteforce.IsChecked}">
-                    <Button Click="OpenHydra" Classes="ActionButton" Content="Hydra (Network)" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-            </StackPanel>
-
-            <StackPanel Grid.Row="1" IsVisible="{Binding #RbCatEnum.IsChecked}">
-            
-                <StackPanel IsVisible="{Binding #RbDNSEnumeration.IsChecked}">
-                    <Button Click="OpenDnsMap" Classes="ActionButton" Content="DNSMap" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-
-                <StackPanel IsVisible="{Binding #RbSubdomainEnum.IsChecked}">
-                    <Button Click="OpenDnsMap" Classes="ActionButton" Content="DNSMap" HorizontalAlignment="Stretch"/>
-                </StackPanel>
-            </StackPanel>
-        
-        </Grid>
-
-    </Grid>
-    
   </Grid>
 </UserControl>
+

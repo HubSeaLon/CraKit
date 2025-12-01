@@ -12,40 +12,57 @@ using Avalonia.Threading;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
+using Renci.SshNet;
 
 namespace CraKit.Views.Tools.Hydra;
 
+// Vue pour l'outil Hydra
 public partial class HydraVue : TemplateControl
 {
-    // Initialisation des variables 
-    private string commande = "";
-    private string target = "";
-    private string wordlist = "";
-    private string protocol = "";
-    private string mode = "";
-    private string threads = " -t 16"; // threads par défaut
-    private string verbose = " -v"; // mode verbose normal par défaut (-v)
-    private string username = "";
-    private string userlist = "";
-    private string combolist = "";
+    // Variables pour construire la commande
+    private string commande;
+    private string target;
+    private string wordlist;
+    private string protocol;
+    private string mode;
+    private string threads;
+    private string verbose;
+    private string username;
+    private string userlist;
+    private string combolist;
     
-    private readonly ToolFileService toolFileService;
-    private readonly ExecuterCommandeService executerCommandeService;
-    private readonly HistoryService historyService;
-    private CancellationTokenSource? _cts;
+    // Services
+    private ToolFileService toolFileService;
+    private ExecuterCommandeService executerCommandeService;
+    private HistoryService historyService;
+    private CancellationTokenSource cts;
 
+    // Constructeur
     public HydraVue()
     {
         InitializeComponent();
         
-        // Injection des Instances 
+        // Initialiser les variables
+        commande = "";
+        target = "";
+        wordlist = "";
+        protocol = "";
+        mode = "";
+        threads = " -t 16";
+        verbose = " -v";
+        username = "";
+        userlist = "";
+        combolist = "";
+        cts = null;
+        
+        // Creer les services
         toolFileService = new ToolFileService(ConnexionSshService.Instance);
         executerCommandeService = new ExecuterCommandeService(ConnexionSshService.Instance);
         historyService = HistoryService.Instance;
         
         AttachedToVisualTree += OnAttachedToVisualTree;
         
-        // Chargement des listes déroulantes
+        // Charger les listes
         ChargerLesListes();
         ChargerProtocoles();
         ChargerThreads();
@@ -56,70 +73,77 @@ public partial class HydraVue : TemplateControl
         AvaloniaXamlLoader.Load(this);
     }
 
-    // Affichage selon l'option choisie
-    private void choixOptionClick(object? sender, RoutedEventArgs e)
+    // Quand on clique sur un mode (Single, userlist, Combo)
+    private void choixOptionClick(object sender, RoutedEventArgs e)
     {
-        if (sender is not Button btn) return; 
+        Button btn = sender as Button;
+        if (btn == null) return;
         
-        var name = btn.Name;
+        string name = btn.Name;
         
         ResetButtonStyles();
         
         // Afficher le panneau d'options
-        var optionsPanel = this.FindControl<Panel>("OptionsPanel");
+        Panel optionsPanel = this.FindControl<Panel>("OptionsPanel");
         if (optionsPanel != null)
         {
             optionsPanel.IsVisible = true;
         }
         
-        switch (name)
+        if (name == "ButtonOption1")
         {
-            case "ButtonOption1":
-                // Mode: Single user + wordlist
-                mode = "single";
-                
-                ButtonOption1.Opacity = 0.4;
-                
-                UsernameTextBox!.IsVisible = true;
-                UserlistComboBox!.IsVisible = false;
-                CombolistComboBox!.IsVisible = false;
-                WordlistComboBox!.IsVisible = true;
-                break;
+            // mode: Single user + wordlist
+            mode = "single";
+            ButtonOption1.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            ButtonOption1.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
             
-            case "ButtonOption2":
-                // Mode: User list + wordlist
-                mode = "userlist";
-          
-                ButtonOption2.Opacity = 0.4;
-                
-                UsernameTextBox!.IsVisible = false;
-                UserlistComboBox!.IsVisible = true;
-                CombolistComboBox!.IsVisible = false;
-                WordlistComboBox!.IsVisible = true;
-                break; 
+            UsernameTextBox.IsVisible = true;
+            UserlistComboBox.IsVisible = false;
+            CombolistComboBox.IsVisible = false;
+            WordlistComboBox.IsVisible = true;
+        }
+        else if (name == "ButtonOption2")
+        {
+            // mode: User list + wordlist
+            mode = "userlist";
+            ButtonOption2.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            ButtonOption2.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
             
-            case "ButtonOption3":
-                // Mode: Combo list (user:pass)
-                mode = "combo";
-       
-                ButtonOption3.Opacity = 0.4;
-                
-                UsernameTextBox!.IsVisible = false;
-                UserlistComboBox!.IsVisible = false;
-                CombolistComboBox!.IsVisible = true;
-                WordlistComboBox!.IsVisible = false;
-                break;
+            UsernameTextBox.IsVisible = false;
+            UserlistComboBox.IsVisible = true;
+            CombolistComboBox.IsVisible = false;
+            WordlistComboBox.IsVisible = true;
+        }
+        else if (name == "ButtonOption3")
+        {
+            // mode: Combo list (user:pass)
+            mode = "combo";
+            ButtonOption3.BorderBrush = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#3B82F6"));
+            ButtonOption3.Background = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#1E40AF"));
+            
+            UsernameTextBox.IsVisible = false;
+            UserlistComboBox.IsVisible = false;
+            CombolistComboBox.IsVisible = true;
+            WordlistComboBox.IsVisible = false;
         }
         
         UpdateCommande();
     }
     
-    // Reset visuel et fonctionnel 
+    // Remettre tous les boutons a zero
     private void ResetButtonStyles()
     {
-        ButtonOption1.Opacity = 1;
-        ButtonOption2.Opacity = 1;
-        ButtonOption3.Opacity = 1;
+        var defaultBg = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Color.Parse("#334155"));
+        var transparentBorder = new Avalonia.Media.SolidColorBrush(Avalonia.Media.Colors.Transparent);
+        
+        ButtonOption1.Background = defaultBg;
+        ButtonOption1.BorderBrush = transparentBorder;
+        
+        ButtonOption2.Background = defaultBg;
+        ButtonOption2.BorderBrush = transparentBorder;
+        
+        ButtonOption3.Background = defaultBg;
+        ButtonOption3.BorderBrush = transparentBorder;
 
         protocol = "";
         wordlist = "";
@@ -137,18 +161,17 @@ public partial class HydraVue : TemplateControl
         TargetTextBox.Text = "";
     }
     
-    
-    // Ajout des wordlists et userlists
-    private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
+    // Ajouter une wordlist
+    private async void AjouterWordlistClick(object sender, RoutedEventArgs e)
     {
-        var window = TopLevel.GetTopLevel(this) as Window;
-        if (window is null) return;
+        Window window = TopLevel.GetTopLevel(this) as Window;
+        if (window == null) return;
         
         try
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
-            ChargerLesListes(); // Recharger après upload
-            Console.WriteLine("Wordlist uploaded!");
+            ChargerLesListes();
+            Console.WriteLine("wordlist uploaded!");
         }
         catch (Exception ex)
         {
@@ -156,16 +179,17 @@ public partial class HydraVue : TemplateControl
         }
     }
     
-    private async void AjouterUserlistClick(object? sender, RoutedEventArgs e)
+    // Ajouter une userlist
+    private async void AjouterUserlistClick(object sender, RoutedEventArgs e)
     {
-        var window = TopLevel.GetTopLevel(this) as Window;
-        if (window is null) return;
+        Window window = TopLevel.GetTopLevel(this) as Window;
+        if (window == null) return;
 
         try
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.Userlist, window);
-            ChargerLesListes(); // Recharger après upload
-            Console.WriteLine("Userlist uploaded!");
+            ChargerLesListes();
+            Console.WriteLine("userlist uploaded!");
         }
         catch (Exception ex)
         {
@@ -173,16 +197,17 @@ public partial class HydraVue : TemplateControl
         }
     }
     
-    private async void AjouterCombolistClick(object? sender, RoutedEventArgs e)
+    // Ajouter une combolist
+    private async void AjouterCombolistClick(object sender, RoutedEventArgs e)
     {
-        var window = TopLevel.GetTopLevel(this) as Window;
-        if (window is null) return;
+        Window window = TopLevel.GetTopLevel(this) as Window;
+        if (window == null) return;
 
         try
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.Combolist, window);
-            ChargerLesListes(); // Recharger après upload
-            Console.WriteLine("Combolist uploaded!");
+            ChargerLesListes();
+            Console.WriteLine("combolist uploaded!");
         }
         catch (Exception ex)
         {
@@ -190,8 +215,8 @@ public partial class HydraVue : TemplateControl
         }
     }
     
-    // Méthode permettant de récupérer les noms des boutons, listes, etc. vu qu'on utilise un template
-    private void OnAttachedToVisualTree(object? sender, VisualTreeAttachmentEventArgs e)
+    // Recuperer les controles de l'interface
+    private void OnAttachedToVisualTree(object sender, VisualTreeAttachmentEventArgs e)
     {
         WordlistComboBox = this.FindControl<ComboBox>("WordlistComboBox");
         UserlistComboBox = this.FindControl<ComboBox>("UserlistComboBox");
@@ -210,159 +235,185 @@ public partial class HydraVue : TemplateControl
         EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
         SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
 
-        WordlistComboBox!.IsVisible = false;
-        UserlistComboBox!.IsVisible = false;
-        CombolistComboBox!.IsVisible = false;
-        UsernameTextBox!.IsVisible = false;
+        WordlistComboBox.IsVisible = false;
+        UserlistComboBox.IsVisible = false;
+        CombolistComboBox.IsVisible = false;
+        UsernameTextBox.IsVisible = false;
     }
     
-    
-    // Fonction qui fait le travail (LS en SSH)
+    // Remplir une ComboBox avec les fichiers d'un dossier
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
         try 
         {
-            var ssh = ConnexionSshService.Instance.Client;
+            SshClient ssh = ConnexionSshService.Instance.Client;
 
             if (ssh == null || !ssh.IsConnected) return;
 
-            var cmd = ssh.CreateCommand($"ls -1 {chemin}");
+            var cmd = ssh.CreateCommand("ls -1 " + chemin);
             string resultat = cmd.Execute();
 
             laBox.Items.Clear();
             
-            if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
+            if (resultat != null && resultat.Trim() != "" && !resultat.Contains("No such file"))
             {
-                var fichiers = resultat.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var f in fichiers)
+                string[] fichiers = resultat.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                
+                for (int i = 0; i < fichiers.Length; i++)
                 {
-                    laBox.Items.Add(f);
+                    laBox.Items.Add(fichiers[i]);
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erreur chargement liste : {ex.Message}");
+            Console.WriteLine("Erreur chargement liste : " + ex.Message);
         }
     }
     
-    // Modification du texte (Target et Username)
-    private void OnChangedText(object? sender, TextChangedEventArgs e)
+    // Quand on change le texte dans target ou username
+    private void OnChangedText(object sender, TextChangedEventArgs e)
     {
-        if (sender is not TextBox textBox) return; 
+        TextBox textBox = sender as TextBox;
+        if (textBox == null) return;
         
         if (textBox.Name == "TargetTextBox")
         {
-            target = string.IsNullOrWhiteSpace(TargetTextBox.Text) ? "" : " " + TargetTextBox.Text;
+            if (TargetTextBox.Text == null || TargetTextBox.Text.Trim() == "")
+            {
+                target = "";
+            }
+            else
+            {
+                target = " " + TargetTextBox.Text;
+            }
         }
         else if (textBox.Name == "UsernameTextBox")
         {
-            username = string.IsNullOrWhiteSpace(UsernameTextBox.Text) ? "" : " -l " + UsernameTextBox.Text;
+            if (UsernameTextBox.Text == null || UsernameTextBox.Text.Trim() == "")
+            {
+                username = "";
+            }
+            else
+            {
+                username = " -l " + UsernameTextBox.Text;
+            }
         }
         
         UpdateCommande();
     }
     
-    // Gestion du mode verbose
-    private void OnVerboseChanged(object? sender, RoutedEventArgs e)
+    // Quand on change une liste deroulante
+    private void OnChangedList(object sender, SelectionChangedEventArgs e)
     {
-        if (sender is not CheckBox checkBox) return;
+        ComboBox comboBox = sender as ComboBox;
+        if (comboBox == null) return;
         
-        verbose = checkBox.IsChecked == true ? " -vV" : "";
-        UpdateCommande();
-    }
-    
-    
-    // Création de la commande selon les choix de l'user
-    private void OnChangedList(object? sender, SelectionChangedEventArgs e)
-    {
-        if (sender is not ComboBox comboBox) return; 
+        string name = comboBox.Name;
         
-        var name = comboBox.Name;
-        
-        switch (name)
+        if (name == "WordlistComboBox")
         {
-            case "WordlistComboBox":
-                if (WordlistComboBox.SelectedItem is null)
+            if (WordlistComboBox.SelectedItem == null)
+            {
+                wordlist = "";
+            }
+            else if (WordlistComboBox.SelectedItem.ToString() == "rockyou.txt")
+            {
+                wordlist = " -P /usr/share/wordlists/rockyou.txt";
+            }
+            else
+            {  
+                wordlist = " -P /root/wordlists/" + WordlistComboBox.SelectedItem.ToString();
+            }
+        }
+        else if (name == "UserlistComboBox")
+        {
+            if (UserlistComboBox.SelectedItem == null)
+            {
+                userlist = "";
+            }
+            else
+            {
+                userlist = " -L /root/userlists/" + UserlistComboBox.SelectedItem.ToString();
+            }
+        }
+        else if (name == "CombolistComboBox")
+        {
+            if (CombolistComboBox.SelectedItem == null)
+            {
+                combolist = "";
+            }
+            else
+            {
+                combolist = " -C /root/combolists/" + CombolistComboBox.SelectedItem.ToString();
+            }
+        }
+        else if (name == "ProtocolComboBox")
+        {
+            if (ProtocolComboBox.SelectedItem == null)
+            {
+                protocol = "";
+            }
+            else
+            {
+                OptionMode selectedProtocol = ProtocolComboBox.SelectedItem as OptionMode;
+                if (selectedProtocol != null)
                 {
-                    wordlist = "";
-                    break;
-                }
-                
-                if (WordlistComboBox.SelectedItem!.ToString() == "rockyou.txt")
-                {
-                    wordlist = " -P /usr/share/wordlists/rockyou.txt";
+                    protocol = " " + selectedProtocol.value;
                 }
                 else
-                {  
-                    wordlist = " -P /root/wordlists/" + WordlistComboBox.SelectedItem!;
-                }
-                break;
-            
-            case "UserlistComboBox":
-                if (UserlistComboBox.SelectedItem is null)
-                {
-                    userlist = "";
-                    break;
-                }
-                
-                // Userlists sont dans /root/userlists
-                userlist = " -L /root/userlists/" + UserlistComboBox.SelectedItem!;
-                break;
-            
-            case "CombolistComboBox":
-                if (CombolistComboBox.SelectedItem is null)
-                {
-                    combolist = "";
-                    break;
-                }
-                
-                // Combolists sont dans /root/combolists
-                combolist = " -C /root/combolists/" + CombolistComboBox.SelectedItem!;
-                break;
-            
-            case "ProtocolComboBox":
-                if (ProtocolComboBox.SelectedItem is null)
                 {
                     protocol = "";
-                    break;
                 }
-                
-                var selectedProtocol = ProtocolComboBox.SelectedItem as OptionMode;
-                protocol = selectedProtocol != null ? " " + selectedProtocol.value : "";
-                break;
-            
-            case "ThreadsComboBox":
-                if (ThreadsComboBox.SelectedItem is null)
+            }
+        }
+        else if (name == "ThreadsComboBox")
+        {
+            if (ThreadsComboBox.SelectedItem == null)
+            {
+                threads = "";
+            }
+            else
+            {
+                OptionMode selectedThreads = ThreadsComboBox.SelectedItem as OptionMode;
+                if (selectedThreads != null)
+                {
+                    threads = " -t " + selectedThreads.value;
+                }
+                else
                 {
                     threads = "";
-                    break;
                 }
-                
-                var selectedThreads = ThreadsComboBox.SelectedItem as OptionMode;
-                threads = selectedThreads != null ? " -t " + selectedThreads.value : "";
-                break;
-            
-            case "VerboseComboBox":
-                if (VerboseComboBox.SelectedItem is null)
+            }
+        }
+        else if (name == "VerboseComboBox")
+        {
+            if (VerboseComboBox.SelectedItem == null)
+            {
+                verbose = "";
+            }
+            else
+            {
+                ComboBoxItem selectedVerbose = VerboseComboBox.SelectedItem as ComboBoxItem;
+                if (selectedVerbose != null && selectedVerbose.Tag != null)
+                {
+                    verbose = selectedVerbose.Tag.ToString();
+                }
+                else
                 {
                     verbose = "";
-                    break;
                 }
-                
-                var selectedVerbose = VerboseComboBox.SelectedItem as ComboBoxItem;
-                verbose = selectedVerbose?.Tag?.ToString() ?? "";
-                break;
+            }
         }
         
         UpdateCommande();
     }
 
-    // Mise à jour de la commande
+    // Mettre a jour la commande affichee
     private void UpdateCommande()
     {
-        // Ne rien afficher si aucun mode n'est sélectionné
-        if (string.IsNullOrEmpty(mode))
+        // Si aucun mode selectionne, ne rien afficher
+        if (mode == null || mode == "")
         {
             commande = "";
             if (EntreeTextBox != null)
@@ -372,59 +423,62 @@ public partial class HydraVue : TemplateControl
             return;
         }
         
-        switch (mode)
+        if (mode == "single")
         {
-            case "single":
-                commande = "hydra" + username + wordlist + threads + verbose + target + protocol;
-                break;
-            case "userlist":
-                commande = "hydra" + userlist + wordlist + threads + verbose + target + protocol;
-                break;
-            case "combo":
-                commande = "hydra" + combolist + threads + verbose + target + protocol;
-                break;
-            default:
-                commande = "";
-                break;
+            commande = "hydra" + username + wordlist + threads + verbose + target + protocol;
+        }
+        else if (mode == "userlist")
+        {
+            commande = "hydra" + userlist + wordlist + threads + verbose + target + protocol;
+        }
+        else if (mode == "combo")
+        {
+            commande = "hydra" + combolist + threads + verbose + target + protocol;
+        }
+        else
+        {
+            commande = "";
         }
         
-        // Vérifier que EntreeTextBox est initialisée avant de l'utiliser
         if (EntreeTextBox != null)
         {
             EntreeTextBox.Text = commande;
         }
-        Console.WriteLine("Commande : " + commande);
+        Console.WriteLine("commande : " + commande);
     }
-    
-    
-    private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
+
+    // Lancer la commande Hydra
+    private async void LancerCommandeClick(object sender, RoutedEventArgs e)
     {
-        var cmd = commande.Trim();
-        if (string.IsNullOrWhiteSpace(cmd)) return;
-        if (SortieTextBox is null) return;
+        string cmd = commande.Trim();
+        if (cmd == null || cmd == "") return;
+        if (SortieTextBox == null) return;
 
-        var btnLancer = this.FindControl<Button>("BtnLancer");
-        var btnStop = this.FindControl<Button>("BtnStop");
+        Button btnLancer = this.FindControl<Button>("BtnLancer");
+        Button btnStop = this.FindControl<Button>("BtnStop");
 
-        // Annule une éventuelle exécution précédente
-        _cts?.Cancel();
-        _cts = new CancellationTokenSource();
+        // Annuler la commande precedente si elle existe
+        if (cts != null)
+        {
+            cts.Cancel();
+        }
+        cts = new CancellationTokenSource();
 
-        // Désactiver Lancer, activer Stop
+        // Desactiver Lancer, activer Stop
         if (btnLancer != null) btnLancer.IsEnabled = false;
         if (btnStop != null) btnStop.IsEnabled = true;
 
-        SortieTextBox.Text = $"$ {cmd}\n";
+        SortieTextBox.Text = "$ " + cmd + "\n";
 
-        var stopwatch = Stopwatch.StartNew();
-        var outputBuilder = new StringBuilder();
+        Stopwatch stopwatch = Stopwatch.StartNew();
+        StringBuilder outputBuilder = new StringBuilder();
 
         try
         {
             await executerCommandeService.ExecuteCommandStreamingAsync(
                 cmd,
-                // Chaque ligne reçue en temps réel
-                onLineReceived: ligne =>
+                // Quand on recoit une ligne
+                ligne =>
                 {
                     outputBuilder.AppendLine(ligne);
 
@@ -434,99 +488,101 @@ public partial class HydraVue : TemplateControl
                         SortieTextBox.CaretIndex = SortieTextBox.Text.Length;
                     });
                 },
-                // En cas d'erreur SSH / exécution
-                onError: msg =>
+                // En cas d'erreur
+                msg =>
                 {
-                    outputBuilder.AppendLine($"[Erreur] {msg}");
+                    outputBuilder.AppendLine("[Erreur] " + msg);
 
                     Dispatcher.UIThread.Post(() =>
                     {
-                        SortieTextBox.Text += $"\n[Erreur] {msg}\n";
+                        SortieTextBox.Text += "\n[Erreur] " + msg + "\n";
                         SortieTextBox.CaretIndex = SortieTextBox.Text.Length;
                     });
                 },
-                // Cancel possible avec bouton Stop
-                cancel: _cts.Token
+                // Token pour annuler
+                cts.Token
             );
         }
         catch (OperationCanceledException)
         {
-            // Commande annulée par Stop
-            outputBuilder.AppendLine("\n[Commande arrêtée par l'utilisateur]");
+            // commande annulee
+            outputBuilder.AppendLine("\n[commande arretee par l'utilisateur]");
             Dispatcher.UIThread.Post(() =>
             {
-                SortieTextBox.Text += "\n[Commande arrêtée par l'utilisateur]\n";
+                SortieTextBox.Text += "\n[commande arretee par l'utilisateur]\n";
             });
         }
         finally
         {
             stopwatch.Stop();
 
-            var output = outputBuilder.ToString();
-            var success = IsHydraSuccessful(output);
+            string output = outputBuilder.ToString();
+            bool success = IsHydraSuccessful(output);
 
             // Enregistrer dans l'historique
-            historyService.AddToHistory(
-                toolName: "Hydra",
-                command: cmd,
-                output: output,
-                success: success,
-                executionTime: stopwatch.Elapsed
-            );
+            historyService.AddToHistory("Hydra", cmd, output, success, stopwatch.Elapsed);
 
-            Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+            Console.WriteLine("[Hydra] commande ajoutee a l'historique (" + stopwatch.Elapsed.TotalSeconds.ToString("F2") + "s) - Success: " + success);
 
-            // Réactiver Lancer, désactiver Stop
+            // Reactiver Lancer, desactiver Stop
             if (btnLancer != null) btnLancer.IsEnabled = true;
             if (btnStop != null) btnStop.IsEnabled = false;
         }
     }
 
-    // Arrêter l'exécution de la commande Hydra
-    private void StopCommandeClick(object? sender, RoutedEventArgs e)
+    // Arreter la commande
+    private void StopCommandeClick(object sender, RoutedEventArgs e)
     {
-        var btnLancer = this.FindControl<Button>("BtnLancer");
-        var btnStop = this.FindControl<Button>("BtnStop");
+        Button btnLancer = this.FindControl<Button>("BtnLancer");
+        Button btnStop = this.FindControl<Button>("BtnStop");
 
         // Annuler le token
-        _cts?.Cancel();
+        if (cts != null)
+        {
+            cts.Cancel();
+        }
+        
         executerCommandeService.StopCurrent();
         
-        // Kill brutal côté Kali (tous les processus hydra)
+        // Kill tous les processus hydra sur le serveur
         try
         {
-            var ssh = ConnexionSshService.Instance.Client;
+            SshClient ssh = ConnexionSshService.Instance.Client;
             if (ssh != null && ssh.IsConnected)
             {
-                using var killCmd = ssh.CreateCommand("pkill -9 hydra");
+                var killCmd = ssh.CreateCommand("pkill -9 hydra");
                 killCmd.Execute();
             }
         }
         catch
         {
-            // Ignorer les erreurs de kill (process déjà mort, etc.)
+            // Ignorer les erreurs
         }
 
-        // Feedback UI
+        // Afficher un message
         if (SortieTextBox != null)
         {
-            SortieTextBox.Text += "\n[Stop demandé - Processus hydra terminés]\n";
+            SortieTextBox.Text += "\n[Stop demande - Processus hydra termines]\n";
         }
 
-        // Réactiver Lancer, désactiver Stop
+        // Reactiver les boutons
         if (btnLancer != null) btnLancer.IsEnabled = true;
         if (btnStop != null) btnStop.IsEnabled = false;
     }
     
-    // Détermine si Hydra a réussi en analysant la sortie seulement si mot de passe trouvé
+    // Verifier si Hydra a reussi (mot de passe trouve)
     private bool IsHydraSuccessful(string output)
     {
-        if (string.IsNullOrWhiteSpace(output)) return false;
+        if (output == null || output.Trim() == "") 
+            return false;
 
-        // SUCCÈS : Patterns indiquant un succès (mot de passe trouvé)
-        if (output.Contains("[") && output.Contains("]") && 
-            (output.Contains("login:") && output.Contains("password:")) ||
-            output.Contains("valid password found"))
+        // Mot de passe trouve
+        if (output.Contains("[") && output.Contains("]") && output.Contains("login:") && output.Contains("password:"))
+        {
+            return true;
+        }
+        
+        if (output.Contains("valid password found"))
         {
             return true;
         }
@@ -534,38 +590,37 @@ public partial class HydraVue : TemplateControl
         return false;
     }
     
-    // Sauvegarder l'historique dans un fichier
-    private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
+    // Sauvegarder l'historique
+    private async void SaveHistoryClick(object sender, RoutedEventArgs e)
     {
-        var window = TopLevel.GetTopLevel(this) as Window;
-        if (window is null) return;
+        Window window = TopLevel.GetTopLevel(this) as Window;
+        if (window == null) return;
 
         try
         {
-            var success = await historyService.SaveHistoryToFileAsync(window, "Hydra");
+            bool success = await historyService.SaveHistoryToFileAsync(window, "Hydra");
             
             if (success)
             {
-                Console.WriteLine("[Hydra] Historique sauvegardé avec succès !");
-                // TODO: Afficher un message de confirmation à l'utilisateur
+                Console.WriteLine("[Hydra] Historique sauvegarde avec succes !");
             }
             else
             {
-                Console.WriteLine("[Hydra] Aucun historique à sauvegarder ou annulé");
+                Console.WriteLine("[Hydra] Aucun historique a sauvegarder ou annule");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[Hydra] Erreur lors de la sauvegarde : {ex.Message}");
+            Console.WriteLine("[Hydra] Erreur lors de la sauvegarde : " + ex.Message);
         }
     }
     
-    // Chargement des différentes listes déroulantes
+    // Charger les wordlists, userlists et combolists
     private void ChargerLesListes()
     {
-        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
-        var boxUserlist = this.FindControl<ComboBox>("UserlistComboBox");
-        var boxCombolist = this.FindControl<ComboBox>("CombolistComboBox");
+        ComboBox boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        ComboBox boxUserlist = this.FindControl<ComboBox>("UserlistComboBox");
+        ComboBox boxCombolist = this.FindControl<ComboBox>("CombolistComboBox");
 
         if (boxWordlist != null)
         {
@@ -582,63 +637,78 @@ public partial class HydraVue : TemplateControl
         }
     }
     
+    // Charger les protocoles depuis le JSON
     private void ChargerProtocoles()
     {
         try 
         {
             string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "hydra_options.json");
-            string? jsonBrut = ToolBase.LireFichierTexte(chemin);
+            string jsonBrut = ToolBase.LireFichierTexte(chemin);
 
-            if (string.IsNullOrEmpty(jsonBrut)) return;
+            if (jsonBrut == null || jsonBrut == "") return;
             
-            var rootNode = JsonNode.Parse(jsonBrut);
+            JsonNode rootNode = JsonNode.Parse(jsonBrut);
             
-            var valuesNode = rootNode?["options"]?["protocol"]?["values"];
+            JsonNode valuesNode = rootNode["options"]["protocol"]["values"];
 
             if (valuesNode != null)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                JsonSerializerOptions options = new JsonSerializerOptions();
+                options.PropertyNameCaseInsensitive = true;
                 
-                var boxProtocol = this.FindControl<ComboBox>("ProtocolComboBox");
-                if (listeModes != null && boxProtocol != null) boxProtocol.ItemsSource = listeModes;
+                System.Collections.Generic.List<OptionMode> listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                
+                ComboBox boxProtocol = this.FindControl<ComboBox>("ProtocolComboBox");
+                if (listeModes != null && boxProtocol != null)
+                {
+                    boxProtocol.ItemsSource = listeModes;
+                }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[JSON ERROR] {ex.Message}");
+            Console.WriteLine("[JSON ERROR] " + ex.Message);
         }
     }
     
+    // Charger les threads depuis le JSON
     private void ChargerThreads()
     {
         try 
         {
             string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "hydra_options.json");
-            string? jsonBrut = ToolBase.LireFichierTexte(chemin);
+            string jsonBrut = ToolBase.LireFichierTexte(chemin);
 
-            if (string.IsNullOrEmpty(jsonBrut)) return;
+            if (jsonBrut == null || jsonBrut == "") return;
             
-            var rootNode = JsonNode.Parse(jsonBrut);
+            JsonNode rootNode = JsonNode.Parse(jsonBrut);
             
-            var valuesNode = rootNode?["options"]?["threads"]?["values"];
+            JsonNode valuesNode = rootNode["options"]["threads"]["values"];
 
             if (valuesNode != null)
             {
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                JsonSerializerOptions options = new JsonSerializerOptions();
+                options.PropertyNameCaseInsensitive = true;
                 
-                var boxThreads = this.FindControl<ComboBox>("ThreadsComboBox");
-                if (listeModes != null && boxThreads != null) boxThreads.ItemsSource = listeModes;
+                System.Collections.Generic.List<OptionMode> listeModes = valuesNode.Deserialize<System.Collections.Generic.List<OptionMode>>(options);
+                
+                ComboBox boxThreads = this.FindControl<ComboBox>("ThreadsComboBox");
+                if (listeModes != null && boxThreads != null)
+                {
+                    boxThreads.ItemsSource = listeModes;
+                }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"[JSON ERROR] {ex.Message}");
+            Console.WriteLine("[JSON ERROR] " + ex.Message);
         }
     }
     
-    // aller chercher le style <Style Selector="control|TemplateControl">
-    protected override Type StyleKeyOverride => typeof(TemplateControl);
+    // Style du template
+    protected override Type StyleKeyOverride
+    {
+        get { return typeof(TemplateControl); }
+    }
 }
 

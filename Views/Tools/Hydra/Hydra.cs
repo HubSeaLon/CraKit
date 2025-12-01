@@ -2,21 +2,23 @@ using Avalonia.Controls;
 
 namespace CraKit.Views.Tools.Hydra;
 
+// Classe Hydra qui herite de ToolBase
 public class Hydra : ToolBase
 {
-    private Control? _view;
+    private Control view;
     
-    public Hydra() : base("Hydra", "Outil de craquage de mots de passe réseau")
+    public Hydra() : base("Hydra", "Outil de craquage de mots de passe reseau")
     {
+        view = null;
     }
     
     public override Control GetView()
     {
-        if (_view == null)
+        if (view == null)
         {
-            _view = new HydraVue(); 
+            view = new HydraVue(); 
         }
-        return _view;
+        return view;
     }
 }
 

@@ -2,25 +2,35 @@ using System;
 
 namespace CraKit.Models;
 
+// Classe simple pour stocker une commande dans l'historique
 public class HistoryEntry
 {
-    public DateTime Timestamp { get; set; }
-    public string ToolName { get; set; } = string.Empty;
-    public string Command { get; set; } = string.Empty;
-    public string Output { get; set; } = string.Empty;
-    public bool Success { get; set; }
-    public TimeSpan? ExecutionTime { get; set; }
+    // Quand la commande a été exécutée
+    public DateTime Timestamp;
+    
+    // Nom de l'outil (Hydra, John, etc.)
+    public string ToolName;
+    
+    // La commande qui a été lancée
+    public string Command;
+    
+    // Le résultat de la commande
+    public string Output;
+    
+    // Si ça a marché ou pas
+    public bool Success;
+    
+    // Combien de temps ça a pris
+    public TimeSpan ExecutionTime;
 
-    public override string ToString()
+    // Constructeur 
+    public HistoryEntry()
     {
-        var status = Success ? "SUCCESS" : "FAILED";
-        var duration = ExecutionTime.HasValue ? " (" + ExecutionTime.Value.TotalSeconds.ToString("F2") + "s)" : "";
-        
-        return $"[{Timestamp:yyyy-MM-dd HH:mm:ss}] {status}{duration}\n" +
-               $"Tool: {ToolName}\n" +
-               $"Command: {Command}\n" +
-               $"Output:\n{Output}\n" +
-               new string('-', 60);
+        Timestamp = DateTime.Now;
+        ToolName = "";
+        Command = "";
+        Output = "";
+        Success = false;
+        ExecutionTime = TimeSpan.Zero;
     }
 }
-

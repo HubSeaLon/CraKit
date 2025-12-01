@@ -1,9 +1,9 @@
 using Avalonia.Controls;
 using CraKit.Views;
 
-
 namespace CraKit;
 
+// Fenetre principale de l'application
 public partial class MainWindow : Window
 {
     public MainWindow()
@@ -14,9 +14,10 @@ public partial class MainWindow : Window
         AccueilConnexionVue.Content = new AccueilConnexionVue();
     }
     
-    // Méthode publique de navigation entre vue
+    // Changer de vue (navigation)
     public void Navigate(UserControl newView)
     {
         AccueilConnexionVue.Content = newView;
     }
-} 
+}
+

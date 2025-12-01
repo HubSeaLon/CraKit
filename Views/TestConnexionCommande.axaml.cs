@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Threading;
@@ -6,46 +6,62 @@ using CraKit.Services;
 
 namespace CraKit.Views;
 
+// Page de test de connexion SSH et commandes
 public partial class TestConnexionCommande : UserControl
 {
-    
-    private readonly ConnexionSshService _sshService = new();
-    private readonly ExecuterCommandeService _exec;
+    private ConnexionSshService sshService;
+    private ExecuterCommandeService exec;
    
     public TestConnexionCommande()
     {
         InitializeComponent();
-        _exec = new ExecuterCommandeService(_sshService);
+        sshService = new ConnexionSshService();
+        exec = new ExecuterCommandeService(sshService);
     }
     
+    // Se connecter au serveur
     public async void Connecter(object sender, RoutedEventArgs e)
     {
-        var success = await _sshService.ConnectAsync("localhost", 2222, "root", "123");
+        bool success = await sshService.ConnectAsync("localhost", 2222, "root", "123");
 
         Dispatcher.UIThread.Post(() =>
         {
-            SortieText.Text = success
-                ? "[SSH] Connexion réussie.\n"
-                : "[SSH] Échec de la connexion.\n";
+            if (success)
+            {
+                SortieText.Text = "[SSH] Connexion reussie.\n";
+            }
+            else
+            {
+                SortieText.Text = "[SSH] Echec de la connexion.\n";
+            }
         });
     }
 
-    public async void LancerCommande(object? sender, RoutedEventArgs e)
+    // Executer une commande
+    public async void LancerCommande(object sender, RoutedEventArgs e)
     { 
-        var cmd = CommandeTexte.Text?.Trim();
-        if (string.IsNullOrEmpty(cmd)) return;
+        string cmd = CommandeTexte.Text;
+        
+        if (cmd == null || cmd.Trim() == "")
+        {
+            return;
+        }
 
-        SortieText.Text = $"$ {cmd}\n";
-        var outp = await _exec.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(5));
-        SortieText.Text += outp + "\n";
+        SortieText.Text = "$ " + cmd + "\n";
+        
+        string resultat = await exec.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(5));
+        
+        SortieText.Text += resultat + "\n";
     }
 
+    // Retourner a la page d'accueil
     public void Retour(object sender, RoutedEventArgs e)
     {
-        if (TopLevel.GetTopLevel(this) is MainWindow mainWindow)
+        MainWindow mainWindow = TopLevel.GetTopLevel(this) as MainWindow;
+        if (mainWindow != null)
         {
             mainWindow.Navigate(new AccueilConnexionVue());
         }
     }
-    
 }
+
