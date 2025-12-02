@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
@@ -464,15 +465,25 @@ public partial class HydraVue : TemplateControl
 
             var output = outputBuilder.ToString();
             var success = IsHydraSuccessful(output);
+            
+            UsernameTextBox = this.FindControl<TextBox>("UsernameTextBox");
+            TargetTextBox = this.FindControl<TextBox>("TargetTextBox");
+            ProtocolComboBox =  this.FindControl<ComboBox>("ProtocolComboBox");
+            
+            var username = UsernameTextBox!.Text;
+            var target = TargetTextBox!.Text;
+            var result = ExtractHydraPassword(output);
+            var protocol = ProtocolComboBox!.SelectionBoxItem!.ToString();
 
-            // Enregistrer dans l'historique
-            historyService.AddToHistory("Hydra", cmd, output, success, stopwatch.Elapsed);
+            // Enregistrer dans l'historique brut
+            historyService.AddToHistoryBrut("Hydra", cmd, output, success, stopwatch.Elapsed);
+            historyService.AddToHistoryParsed("Hydra", cmd, username!, target!, protocol!, result, success, stopwatch.Elapsed);
 
-            Console.WriteLine($"[Hydra] Commande ajoutée à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+            Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
 
             // Réactiver Lancer, désactiver Stop
-            if (btnLancer != null) btnLancer.IsEnabled = true;
-            if (btnStop != null) btnStop.IsEnabled = false;
+            btnLancer!.IsEnabled = true;
+            btnStop!.IsEnabled = false;
         }
     }
 
@@ -527,6 +538,17 @@ public partial class HydraVue : TemplateControl
         
         return false;
     }
+    
+    // Extraire le mot de passe trouvé pour la sortie Hydra
+    private string ExtractHydraPassword(string output)
+    {
+        var pattern = @"password:\s*(\S+)";
+        var match = Regex.Match(output, pattern, RegexOptions.IgnoreCase);
+
+        return match.Success ? match.Groups[1].Value : "Not found";
+    }
+
+
     
     // Sauvegarder l'historique dans un fichier
     private async void SaveHistoryClick(object? sender, RoutedEventArgs e)

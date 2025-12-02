@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Avalonia.Controls;
-using Avalonia.Platform.Storage;
 using CraKit.Models;
 
 namespace CraKit.Services;
@@ -15,101 +14,138 @@ public class HistoryService
     public static HistoryService Instance = new HistoryService();
 
     // Liste qui contient toutes les commandes exécutées
-    private List<HistoryEntry> history;
+    private List<HistoryEntry> historyBrut;
+    private List<HistoryEntry> historyParsed;
 
     // Constructeur
     public HistoryService()
     {
-        history = new List<HistoryEntry>();
+        historyBrut = new List<HistoryEntry>();
+        historyParsed = new List<HistoryEntry>();
     }
 
-    // Ajouter une commande dans l'historique
-    public void AddToHistory(string toolName, string command, string output, bool success, TimeSpan executionTime)
+    // Ajouter dans l'historique brut
+    public void AddToHistoryBrut(string toolName, string command, string output, bool success, TimeSpan executionTime)
     {
-        HistoryEntry entry = new HistoryEntry();
-        entry.Timestamp = DateTime.Now;
-        entry.ToolName = toolName;
-        entry.Command = command;
-        entry.Output = output;
-        entry.Success = success;
-        entry.ExecutionTime = executionTime;
-
-        history.Add(entry);
-        Console.WriteLine("[History] Nouvelle commande ajoutée pour " + toolName);
-    }
-
-    // Récupérer l'historique d'un outil spécifique
-    public List<HistoryEntry> GetHistoryByTool(string toolName)
-    {
-        List<HistoryEntry> result = new List<HistoryEntry>();
+        HistoryEntry entryBrut = new HistoryEntry();
         
-        for (int i = 0; i < history.Count; i++)
+        entryBrut.Timestamp = DateTime.Now;
+        entryBrut.ToolName = toolName;
+        entryBrut.Command = command;
+        entryBrut.Output = output;
+        entryBrut.Success = success;
+        entryBrut.ExecutionTime = executionTime;
+        
+        historyBrut.Add(entryBrut);
+       
+        Console.WriteLine("[HistoryBrut] Nouvelle commande ajoutée pour " + toolName);
+    }
+
+    // Ajouter dans l'historique parsed
+    public void AddToHistoryParsed(string toolName, string command, string username, string target, string protocol, string result, bool success, TimeSpan executionTime)
+    {
+        HistoryEntry entryParsed = new HistoryEntry();
+        
+        entryParsed.Timestamp = DateTime.Now;
+        entryParsed.ToolName = toolName;
+        entryParsed.Command = command;
+        entryParsed.Success = success;
+        entryParsed.Username = username;
+        entryParsed.Result = result;
+        entryParsed.Target = target;
+        entryParsed.Protocol = protocol;
+        entryParsed.ExecutionTime = executionTime;
+        
+        historyParsed.Add(entryParsed);
+        
+        Console.WriteLine("[HistoryParsed] Nouvelle commande ajoutée pour " + toolName);
+    }
+    
+    // Récupérer l'historique d'un outil spécifique
+    private List<HistoryEntry> GetHistoryByTool(string toolName)
+    {
+        List<HistoryEntry> resultBrut = new List<HistoryEntry>();
+
+        foreach (var entry in historyBrut)
         {
-            if (history[i].ToolName == toolName)
-            {
-                result.Add(history[i]);
-            }
+            if (entry.ToolName == toolName) resultBrut.Add(entry);
         }
         
-        return result;
+        return resultBrut;
+    }
+    
+    // Récupérer l'historique parsed d'un outil
+    private List<HistoryEntry> GetHistoryParsedByTool(string toolName)
+    {
+        List<HistoryEntry> resultParsed = new List<HistoryEntry>();
+
+        foreach (var entry in historyParsed)
+        {
+            if (entry.ToolName == toolName) resultParsed.Add(entry);
+        }
+        
+        return resultParsed;
     }
 
     // Effacer tout l'historique
     public void ClearHistory()
     {
-        history.Clear();
-        Console.WriteLine("[History] Historique effacé");
+        historyBrut.Clear();
+        historyParsed.Clear();
+        Console.WriteLine("[HistoryBrut] Historique effacé");
+        Console.WriteLine("[HistoryParsed] Historique effacé");
     }
 
     // Sauvegarder l'historique dans un fichier
     public async Task<bool> SaveHistoryToFileAsync(Window owner, string toolName)
     {
         // Récupérer les commandes pour cet outil
-        List<HistoryEntry> entriesToSave = GetHistoryByTool(toolName);
+        List<HistoryEntry> entriesBrut = GetHistoryByTool(toolName);
+        List<HistoryEntry> entriesParsed = GetHistoryParsedByTool(toolName);
 
         // Vérifier qu'il y a des données
-        if (entriesToSave.Count == 0)
+        if (entriesBrut.Count == 0 && entriesParsed.Count == 0)
         {
-            Console.WriteLine("[History] Pas d'historique à sauvegarder");
+            Console.WriteLine("[HistoryBrut et HistoryParsed] Pas d'historique à sauvegarder");
             return false;
         }
 
-        // Demander où sauvegarder le fichier
-        var storage = owner.StorageProvider;
-        var file = await storage.SaveFilePickerAsync(new FilePickerSaveOptions
-        {
-            Title = "Sauvegarder l'historique",
-            SuggestedFileName = "history_" + toolName + "_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt"
-        });
 
-        if (file == null)
-        {
-            Console.WriteLine("[History] Sauvegarde annulée");
-            return false;
-        }
-
-        // Créer le contenu du fichier
-        string content = CreateFileContent(entriesToSave, toolName);
-
-        // Sauvegarder le fichier
-        await File.WriteAllTextAsync(file.Path.LocalPath, content);
+        string fileNameBrut = "history_brut" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt";
+        string fileNameParsed = "history_parsed" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt";
         
-        Console.WriteLine("[History] Fichier sauvegardé : " + file.Path.LocalPath);
+        // Créer le contenu du fichier
+        string contentBrut = CreateFileContentBrut(entriesBrut, toolName);
+        string contentParsed = CreateFileContentParsed(entriesParsed, toolName);
+
+        // Racine  projet CraKit 
+        string root = Directory.GetParent(AppContext.BaseDirectory)!.Parent!.Parent!.Parent!.FullName;
+
+        // Dossiers historique
+        string cheminBrut = Path.Combine(root, "Sauvegarde", "Brut", fileNameBrut);
+        string cheminParsed = Path.Combine(root, "Sauvegarde", "Parsed", fileNameParsed);
+        
+        // Sauvegarder le fichier
+        await File.WriteAllTextAsync(cheminBrut, contentBrut);
+        await File.WriteAllTextAsync(cheminParsed, contentParsed);
+        
+        Console.WriteLine("[HistoryBrut] " + fileNameBrut + " Fichier sauvegardé : " + cheminBrut);
+        Console.WriteLine("[HistoryParsed] " + fileNameParsed + "Fichier sauvegardé : " + cheminParsed);
         return true;
     }
 
-    // Créer le contenu du fichier texte
-    private string CreateFileContent(List<HistoryEntry> entries, string toolName)
+    // Créer le contenu du fichier texte brut
+    private string CreateFileContentBrut(List<HistoryEntry> entries, string toolName)
     {
-        string content = "";
+        string contentBrut = "";
         
         // En-tête
-        content += "========================================\n";
-        content += "CRAKIT HISTORY EXPORT\n";
-        content += "Generated: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\n";
-        content += "Tool: " + toolName + "\n";
-        content += "Total Entries: " + entries.Count + "\n";
-        content += "========================================\n\n";
+        contentBrut += "========================================\n";
+        contentBrut += "CRAKIT HISTORY EXPORT\n";
+        contentBrut += "Generated: " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss") + "\n";
+        contentBrut += "Tool: " + toolName + "\n";
+        contentBrut += "Total Entries: " + entries.Count + "\n";
+        contentBrut += "========================================\n\n";
 
         // Ajouter chaque commande
         for (int i = 0; i < entries.Count; i++)
@@ -119,11 +155,11 @@ public class HistoryService
             string status = entry.Success ? "SUCCESS" : "FAILED";
             string time = entry.ExecutionTime.TotalSeconds.ToString("F2") + "s";
             
-            content += "[" + entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") + "] " + status + " (" + time + ")\n";
-            content += "Tool: " + entry.ToolName + "\n";
-            content += "Command: " + entry.Command + "\n";
-            content += "Output:\n" + entry.Output + "\n";
-            content += "------------------------------------------------------------\n\n";
+            contentBrut += "[" + entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") + "] " + status + " (" + time + ")\n";
+            contentBrut += "Tool: " + entry.ToolName + "\n";
+            contentBrut += "Command: " + entry.Command + "\n";
+            contentBrut += "Output:\n" + entry.Output + "\n";
+            contentBrut += "------------------------------------------------------------\n\n";
         }
 
         // Statistiques simples
@@ -145,15 +181,42 @@ public class HistoryService
         double successPercent = entries.Count > 0 ? (successCount * 100.0) / entries.Count : 0;
         double failPercent = entries.Count > 0 ? (failCount * 100.0) / entries.Count : 0;
         
-        content += "\n========================================\n";
-        content += "STATISTICS\n";
-        content += "========================================\n";
-        content += "Total commands: " + entries.Count + "\n";
-        content += "Successful: " + successCount + " (" + successPercent.ToString("F1") + "%)\n";
-        content += "Failed: " + failCount + " (" + failPercent.ToString("F1") + "%)\n";
-        content += "Average execution time: " + avgTime.ToString("F2") + "s\n";
+        contentBrut += "\n========================================\n";
+        contentBrut += "STATISTICS\n";
+        contentBrut += "========================================\n";
+        contentBrut += "Total commands: " + entries.Count + "\n";
+        contentBrut += "Successful: " + successCount + " (" + successPercent.ToString("F1") + "%)\n";
+        contentBrut += "Failed: " + failCount + " (" + failPercent.ToString("F1") + "%)\n";
+        contentBrut += "Average execution time: " + avgTime.ToString("F2") + "s\n";
 
-        return content;
+        return contentBrut;
+    }
+    
+    
+    
+    
+    // Créer le contenu du fichier texte brut
+    private string CreateFileContentParsed(List<HistoryEntry> entries, string toolName)
+    {
+        string contentParsed = "";
+        
+        // Ajouter chaque commande de style log
+        for (int i = 0; i < entries.Count; i++)
+        {
+            HistoryEntry entry = entries[i];
+            
+            contentParsed += entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") + " ; ";
+            contentParsed += entry.Success ? "SUCCESS; " : "FAILED; ";
+            contentParsed += entry.ToolName + "; ";
+            contentParsed += entry.Command + "; ";
+            contentParsed += entry.Target + "; ";
+            contentParsed += entry.Protocol + "; ";
+            contentParsed += entry.Username + "; ";
+            contentParsed += entry.Result + "; ";
+            contentParsed += entry.ExecutionTime.TotalSeconds.ToString("F2") + "s \n";;
+        }
+        
+        return contentParsed;
     }
 }
 

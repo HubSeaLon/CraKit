@@ -5,22 +5,21 @@ namespace CraKit.Models;
 // Classe simple pour stocker une commande dans l'historique
 public class HistoryEntry
 {
-    // Quand la commande a été exécutée
     public DateTime Timestamp;
-    
-    // Nom de l'outil (Hydra, John, etc.)
     public string ToolName;
-    
-    // La commande qui a été lancée
     public string Command;
-    
-    // Le résultat de la commande
     public string Output;
+
+    // Ajout du Username pour Hydra surtout
+    public string Username;
     
-    // Si ça a marché ou pas
+    // Ajout du Target pour les logs parsed 
+    public string Target;
+
+    public string Protocol;
+    // Ajout du Result pour logs parsed (mot de passe cracked ou trouvé)
+    public string Result;
     public bool Success;
-    
-    // Combien de temps ça a pris
     public TimeSpan ExecutionTime;
 
     // Constructeur 
@@ -30,6 +29,10 @@ public class HistoryEntry
         ToolName = "";
         Command = "";
         Output = "";
+        Username = "";
+        Protocol = "";
+        Target = "";
+        Result = "";
         Success = false;
         ExecutionTime = TimeSpan.Zero;
     }
