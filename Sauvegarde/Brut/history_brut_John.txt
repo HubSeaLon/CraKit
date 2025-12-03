@@ -125,3 +125,33 @@ Successful: 0 (0,0%)
 Failed: 1 (100,0%)
 Average execution time: 0,13s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 16:07:59
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 16:01:08] FAILED (0,78s)
+Tool: John
+Command: john --wordlist=/wordlists/ville.txt --format=raw-sha256 --rules=KoreLogic hashfiles/john10.txt
+Output:
+Loaded 1 password hash (Raw-SHA256 [SHA256 128/128 ASIMD 4x])
+
+[stderr]
+Using default input encoding: UTF-8
+Warning: poor OpenMP scalability for this hash type, consider --fork=8
+Will run 8 OpenMP threads
+fopen: /wordlists/ville.txt: No such file or directory
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,78s
+========================================

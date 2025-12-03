@@ -291,7 +291,7 @@ public partial class JohnVue : TemplateControl
                 }
                 else
                 {  
-                    wordlist = " --wordlist=/wordlists/" + WordlistComboBox.SelectedItem!;
+                    wordlist = " --wordlist=/root/wordlists/" + WordlistComboBox.SelectedItem!;
                 }
                 break;
             

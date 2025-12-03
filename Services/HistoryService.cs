@@ -211,7 +211,6 @@ public class HistoryService
             
             contentParsed += entry.Timestamp.ToString("yyyy-MM-dd HH:mm:ss") + "; ";
             contentParsed += entry.Success ? "SUCCESS; " : "FAILED; ";
-            contentParsed += entry.ToolName + "; ";
             contentParsed += entry.Command + "; ";
             contentParsed += entry.Target + "; ";
             
