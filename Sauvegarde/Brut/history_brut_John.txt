@@ -155,3 +155,138 @@ Successful: 0 (0,0%)
 Failed: 1 (100,0%)
 Average execution time: 0,78s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 17:56:12
+Tool: John
+Total Entries: 2
+========================================
+
+[2025-12-03 17:55:57] FAILED (0,02s)
+Tool: John
+Command: john
+Output:
+John the Ripper 1.9.0-jumbo-1+bleeding-aec1328d6c 2021-11-02 10:45:52 +0100 OMP [linux-gnu 64-bit aarch64 ASIMD AC]
+Copyright (c) 1996-2021 by Solar Designer and others
+Homepage: https://www.openwall.com/john/
+
+Usage: john [OPTIONS] [PASSWORD-FILES]
+
+Use --help to list all available options.
+
+------------------------------------------------------------
+
+[2025-12-03 17:56:08] FAILED (1,41s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt hashfiles/john5.txt
+Output:
+Loaded 2 password hashes with no different salts (LM [DES 128/128 ASIMD])
+
+[stderr]
+Warning: detected hash type "LM", but the string is also recognized as "dynamic=md5($p)"
+Use the "--format=dynamic=md5($p)" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "HAVAL-128-4"
+Use the "--format=HAVAL-128-4" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "MD2"
+Use the "--format=MD2" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "mdc2"
+Use the "--format=mdc2" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "mscash"
+Use the "--format=mscash" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "mscash2"
+Use the "--format=mscash2" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "NT"
+Use the "--format=NT" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-MD4"
+Use the "--format=Raw-MD4" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-MD5"
+Use the "--format=Raw-MD5" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-MD5u"
+Use the "--format=Raw-MD5u" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-SHA1-AxCrypt"
+Use the "--format=Raw-SHA1-AxCrypt" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "ripemd-128"
+Use the "--format=ripemd-128" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Snefru-128"
+Use the "--format=Snefru-128" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "ZipMonster"
+Use the "--format=ZipMonster" option to force loading these as that type instead
+Using default input encoding: UTF-8
+Using default target encoding: CP850
+Warning: poor OpenMP scalability for this hash type, consider --fork=8
+Will run 8 OpenMP threads
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+0g 0:00:00:01 DONE (2025-12-03 16:56) 0g/s 8701Kp/s 8701Kc/s 17402KC/s (HEIDI)..*7¡VA
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 2
+Successful: 0 (0,0%)
+Failed: 2 (100,0%)
+Average execution time: 0,71s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 17:56:57
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 17:56:56] FAILED (0,06s)
+Tool: John
+Command: john
+Output:
+John the Ripper 1.9.0-jumbo-1+bleeding-aec1328d6c 2021-11-02 10:45:52 +0100 OMP [linux-gnu 64-bit aarch64 ASIMD AC]
+Copyright (c) 1996-2021 by Solar Designer and others
+Homepage: https://www.openwall.com/john/
+
+Usage: john [OPTIONS] [PASSWORD-FILES]
+
+Use --help to list all available options.
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,06s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 18:01:52
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 18:01:48] FAILED (0,02s)
+Tool: John
+Command: john
+Output:
+John the Ripper 1.9.0-jumbo-1+bleeding-aec1328d6c 2021-11-02 10:45:52 +0100 OMP [linux-gnu 64-bit aarch64 ASIMD AC]
+Copyright (c) 1996-2021 by Solar Designer and others
+Homepage: https://www.openwall.com/john/
+
+Usage: john [OPTIONS] [PASSWORD-FILES]
+
+Use --help to list all available options.
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,02s
+========================================

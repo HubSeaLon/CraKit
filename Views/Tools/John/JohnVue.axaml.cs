@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -13,7 +13,6 @@ using Avalonia.Markup.Xaml;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
-using Org.BouncyCastle.Bcpg.Attr;
 
 
 namespace CraKit.Views.Tools.John;
@@ -29,11 +28,11 @@ public partial class JohnVue : TemplateControl
     private string mask = "";
     private bool hashidSelected;
     
-    
     private readonly ToolFileService toolFileService;
     private readonly ExecuterCommandeService executerCommandeService;
     private readonly HistoryService historyService;
 
+    private CancellationTokenSource? _cts;
     public JohnVue()
     {
         InitializeComponent();
@@ -150,7 +149,6 @@ public partial class JohnVue : TemplateControl
         MaskTextBox.Text = "";
     }
     
-    
     // Ajout des wordlists et hashfile 
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
@@ -203,6 +201,11 @@ public partial class JohnVue : TemplateControl
         ButtonOption4 = this.FindControl<Button>("ButtonOption4");
         ButtonOption5 = this.FindControl<Button>("ButtonOption5");
         
+        BtnLancer = this.FindControl<Button>("BtnLancer");
+        BtnStop =  this.FindControl<Button>("BtnStop");
+        
+        BtnStop!.IsEnabled = false;
+        
         EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
         SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
 
@@ -223,10 +226,10 @@ public partial class JohnVue : TemplateControl
 
             // Si pas connecté, on arrête
             if (ssh == null || !ssh.IsConnected) return;
-
-            var cmd = ssh.CreateCommand($"ls -1 {chemin}");
-            string resultat = cmd.Execute();
-
+            
+            var cmd = ssh!.CreateCommand($"ls -1 {chemin}");
+            var resultat = cmd.Execute();
+            
             laBox.Items.Clear();
             
             if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
@@ -343,6 +346,16 @@ public partial class JohnVue : TemplateControl
     // Lancer la commande et afficher 
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+        
+        btnLancer!.IsEnabled = false;
+        btnStop!.IsEnabled   = true;
+
+        // Nouveau token d’annulation
+        _cts?.Cancel();
+        _cts = new CancellationTokenSource();
+        
         var cmd = commande.Trim();
         if (string.IsNullOrWhiteSpace(cmd)) return;
         
@@ -358,6 +371,9 @@ public partial class JohnVue : TemplateControl
             var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(1));
             SortieTextBox.Text += outp + "\n";
             outputBuilder.Append(outp);
+            
+            BtnStop.IsEnabled = false;
+            BtnLancer.IsEnabled = true;
         }
         catch (Exception ex)
         {
@@ -372,17 +388,15 @@ public partial class JohnVue : TemplateControl
 
                 var output = outputBuilder.ToString();
                 var success = IsJohnSuccessful(output);
-            
+                
                 HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
                 FormatHashComboBox =  this.FindControl<ComboBox>("FormatHashComboBox");
-            
-                var target = HashfileComboBox!.SelectionBoxItem!.ToString();
-                var username = ExtractJohnUsername(output);
-
-                string format = FormatHashComboBox!.SelectionBoxItem?.ToString() ?? "";
                 
-                var result = ExtractJohnPassword(output);
-
+                var target = HashfileComboBox!.SelectionBoxItem?.ToString() ?? "No target";
+                var username = ExtractJohnUsername(output, success);
+                string format = FormatHashComboBox!.SelectionBoxItem?.ToString() ?? "No format";
+                var result = ExtractJohnPassword(output, success);
+                
                 // Enregistrer dans l'historique brut
                 historyService.AddToHistoryBrut("John", cmd, output, success, stopwatch.Elapsed);
                 historyService.AddToHistoryParsed("John", cmd, username!, target!, "", format!, result, success, stopwatch.Elapsed);
@@ -397,7 +411,7 @@ public partial class JohnVue : TemplateControl
         if (string.IsNullOrWhiteSpace(output)) return false;
 
         // Vérifie si John a trouvé au moins 1 mot de passe
-        // Recherche "1g" qui signifie "1 guess" (1 mot de passe trouvé)
+        // Recherche "1g" qui signifie 1 mot de passe trouvé
         if (Regex.IsMatch(output, @"\b1g\b|\bguesses:\s*1\b", RegexOptions.IgnoreCase))
             return true;
 
@@ -405,9 +419,9 @@ public partial class JohnVue : TemplateControl
         return Regex.IsMatch(output, @"^(\S+)\s+\([^)]*\)\s*$", RegexOptions.Multiline);
     }
 
-    private string ExtractJohnPassword(string output)
+    private string ExtractJohnPassword(string output, bool success)
     {
-        if (string.IsNullOrWhiteSpace(output)) return "No password found";
+        if (string.IsNullOrWhiteSpace(output) || !success) return "No password found";
 
         var passwords = new List<string>();
     
@@ -424,9 +438,9 @@ public partial class JohnVue : TemplateControl
         return passwords.Count > 0 ? string.Join(", ", passwords) : "No password found";
     }
 
-    private string ExtractJohnUsername(string output)
+    private string ExtractJohnUsername(string output, bool success)
     {
-        if (string.IsNullOrWhiteSpace(output)) return "No username";
+        if (string.IsNullOrWhiteSpace(output) || !success) return "No username";
 
         var usernames = new List<string>();
     
@@ -543,6 +557,27 @@ public partial class JohnVue : TemplateControl
         {
             Console.WriteLine($"[JSON ERROR] {ex.Message}");
         }
+    }
+
+
+    private void StopCommandeClick(object? sender, RoutedEventArgs e)
+    {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+
+        // Annuler le token
+        _cts?.Cancel();
+        executerCommandeService.StopCurrent();
+        
+        // Feedback UI
+        if (SortieTextBox != null)
+        {
+            SortieTextBox.Text += "\n[Stop demandé - Processus john terminé]\n";
+        }
+
+        // Réactiver Lancer, désactiver Stop
+        btnLancer!.IsEnabled = true;
+        btnStop!.IsEnabled = false;
     }
     
     // aller chercher le style <Style Selector="control|TemplateControl">
