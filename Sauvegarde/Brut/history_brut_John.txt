@@ -1,0 +1,157 @@
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 15:23:50
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 15:23:47] SUCCESS (0,25s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/burger.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 128/128 ASIMD 4x2])
+burger           (?)     
+
+[stderr]
+Using default input encoding: UTF-8
+Warning: no OpenMP support for this hash type, consider --fork=8
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+1g 0:00:00:00 DONE (2025-12-03 14:23) 33.33g/s 136533p/s 136533c/s 136533C/s silent..oooooo
+Use the "--show --format=Raw-MD5" options to display all of the cracked passwords reliably
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 0,25s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 15:24:08
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 15:23:47] SUCCESS (0,25s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/burger.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 128/128 ASIMD 4x2])
+burger           (?)     
+
+[stderr]
+Using default input encoding: UTF-8
+Warning: no OpenMP support for this hash type, consider --fork=8
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+1g 0:00:00:00 DONE (2025-12-03 14:23) 33.33g/s 136533p/s 136533c/s 136533C/s silent..oooooo
+Use the "--show --format=Raw-MD5" options to display all of the cracked passwords reliably
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 0,25s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 15:26:39
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 15:26:37] SUCCESS (0,22s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/pizza.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 128/128 ASIMD 4x2])
+pizza            (?)     
+
+[stderr]
+Using default input encoding: UTF-8
+Warning: no OpenMP support for this hash type, consider --fork=8
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+1g 0:00:00:00 DONE (2025-12-03 14:26) 50.00g/s 140800p/s 140800c/s 140800C/s gators..medicina
+Use the "--show --format=Raw-MD5" options to display all of the cracked passwords reliably
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 0,22s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 15:40:05
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 15:40:03] FAILED (0,13s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/pussy.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 128/128 ASIMD 4x2])
+No password hashes left to crack (see FAQ)
+
+[stderr]
+Using default input encoding: UTF-8
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,13s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 16:07:59
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 16:01:08] FAILED (0,78s)
+Tool: John
+Command: john --wordlist=/wordlists/ville.txt --format=raw-sha256 --rules=KoreLogic hashfiles/john10.txt
+Output:
+Loaded 1 password hash (Raw-SHA256 [SHA256 128/128 ASIMD 4x])
+
+[stderr]
+Using default input encoding: UTF-8
+Warning: poor OpenMP scalability for this hash type, consider --fork=8
+Will run 8 OpenMP threads
+fopen: /wordlists/ville.txt: No such file or directory
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,78s
+========================================

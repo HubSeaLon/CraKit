@@ -2,25 +2,44 @@ using System;
 
 namespace CraKit.Models;
 
+// Classe simple pour stocker une commande dans l'historique
 public class HistoryEntry
 {
-    public DateTime Timestamp { get; set; }
-    public string ToolName { get; set; } = string.Empty;
-    public string Command { get; set; } = string.Empty;
-    public string Output { get; set; } = string.Empty;
-    public bool Success { get; set; }
-    public TimeSpan? ExecutionTime { get; set; }
+    public DateTime Timestamp;
+    public string ToolName;
+    public string Command;
+    public string Output;
 
-    public override string ToString()
+    // Ajout du Username pour Hydra surtout
+    public string Username;
+    
+    // Ajout du Target pour les logs parsed 
+    public string Target;
+    
+    // Ajout du type de hash
+    public string Format;
+
+    public string Protocol;
+    // Ajout du Result pour logs parsed (mot de passe cracked ou trouvé)
+    public string Result;
+    
+    public bool Success;
+    public TimeSpan ExecutionTime;
+
+    // Constructeur 
+    public HistoryEntry()
     {
-        var status = Success ? "SUCCESS" : "FAILED";
-        var duration = ExecutionTime.HasValue ? " (" + ExecutionTime.Value.TotalSeconds.ToString("F2") + "s)" : "";
-        
-        return $"[{Timestamp:yyyy-MM-dd HH:mm:ss}] {status}{duration}\n" +
-               $"Tool: {ToolName}\n" +
-               $"Command: {Command}\n" +
-               $"Output:\n{Output}\n" +
-               new string('-', 60);
+        Timestamp = DateTime.Now;
+        ToolName = "";
+        Command = "";
+        Output = "";
+        Username = "";
+        Protocol = "";
+        Format = "";
+        Target = "";
+        Result = "";
+        Success = false;
+        ExecutionTime = TimeSpan.Zero;
     }
 }
 

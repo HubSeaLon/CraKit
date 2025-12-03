@@ -1,6 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -8,6 +13,7 @@ using Avalonia.Markup.Xaml;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
+using Org.BouncyCastle.Bcpg.Attr;
 
 
 namespace CraKit.Views.Tools.John;
@@ -26,6 +32,7 @@ public partial class JohnVue : TemplateControl
     
     private readonly ToolFileService toolFileService;
     private readonly ExecuterCommandeService executerCommandeService;
+    private readonly HistoryService historyService;
 
     public JohnVue()
     {
@@ -34,6 +41,7 @@ public partial class JohnVue : TemplateControl
         // Injection des Instances 
         toolFileService = new ToolFileService(ConnexionSshService.Instance);
         executerCommandeService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        historyService = HistoryService.Instance;
         
         AttachedToVisualTree += OnAttachedToVisualTree;
         
@@ -136,16 +144,9 @@ public partial class JohnVue : TemplateControl
         rule = "";
 
         FormatHashComboBox.SelectedIndex = -1;
-        FormatHashComboBox.SelectedItem = null;
-
         WordlistComboBox.SelectedIndex = -1;
-        WordlistComboBox.SelectedItem = null;
-
         HashfileComboBox.SelectedIndex = -1;
-        HashfileComboBox.SelectedItem = null;
-
         RuleComboBox.SelectedIndex = -1;
-        RuleComboBox.SelectedItem = null;
         MaskTextBox.Text = "";
     }
     
@@ -198,12 +199,12 @@ public partial class JohnVue : TemplateControl
         
         ButtonOption1 = this.FindControl<Button>("ButtonOption1");
         ButtonOption2 = this.FindControl<Button>("ButtonOption2");
-        ButtonOption3 =  this.FindControl<Button>("ButtonOption3");
-        ButtonOption4 =  this.FindControl<Button>("ButtonOption4");
-        ButtonOption5 =  this.FindControl<Button>("ButtonOption5");
+        ButtonOption3 = this.FindControl<Button>("ButtonOption3");
+        ButtonOption4 = this.FindControl<Button>("ButtonOption4");
+        ButtonOption5 = this.FindControl<Button>("ButtonOption5");
         
-        EntreeTextBox =  this.FindControl<TextBox>("EntreeTextBox");
-        SortieTextBox =  this.FindControl<TextBox>("SortieTextBox");
+        EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
+        SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
 
         WordlistComboBox!.IsVisible= false;
         HashfileComboBox!.IsVisible= false;
@@ -213,23 +214,20 @@ public partial class JohnVue : TemplateControl
     }
     
     
-     // Fonction qui fait le travail (LS en SSH)
+    // Fonction qui remplie les listes déroulantes
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
-        // 1. SECURITÉ : Si la boite est null (pas trouvée), on arrête tout pour éviter le crash
-        if (laBox == null) return;
-
         try 
         {
             var ssh = ConnexionSshService.Instance.Client;
 
-            // 2. SECURITÉ : Si pas connecté, on arrête
+            // Si pas connecté, on arrête
             if (ssh == null || !ssh.IsConnected) return;
 
             var cmd = ssh.CreateCommand($"ls -1 {chemin}");
             string resultat = cmd.Execute();
 
-            laBox.Items.Clear(); // <-- C'est ici que ça plantait avant si laBox était null
+            laBox.Items.Clear();
             
             if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
             {
@@ -293,7 +291,7 @@ public partial class JohnVue : TemplateControl
                 }
                 else
                 {  
-                    wordlist = " --wordlist=/wordlists/" + WordlistComboBox.SelectedItem!;
+                    wordlist = " --wordlist=/root/wordlists/" + WordlistComboBox.SelectedItem!;
                 }
                 break;
             
@@ -350,12 +348,133 @@ public partial class JohnVue : TemplateControl
         
         SortieTextBox.Text = $"$ {cmd}\n";
         
-        // Tolérance de 5 min pour des craking long (peut etre ajouter un timer)
-        var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(5));
-        SortieTextBox.Text += outp + "\n";
+        var stopwatch = Stopwatch.StartNew();
+        var outputBuilder = new StringBuilder();
+        
+        try
+        {
+            // Laisser 1 min max si la commande met du temps à se lancer
+
+            var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(1));
+            SortieTextBox.Text += outp + "\n";
+            outputBuilder.Append(outp);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lancement de la commande : {ex.Message}");
+        }
+        finally
+        {
+            // Ne pas enregistrer la commande hashid dans l'historique
+            if (!hashidSelected)
+            {
+                stopwatch.Stop();
+
+                var output = outputBuilder.ToString();
+                var success = IsJohnSuccessful(output);
+            
+                HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
+                FormatHashComboBox =  this.FindControl<ComboBox>("FormatHashComboBox");
+            
+                var target = HashfileComboBox!.SelectionBoxItem!.ToString();
+                var username = ExtractJohnUsername(output);
+
+                string format = FormatHashComboBox!.SelectionBoxItem?.ToString() ?? "";
+                
+                var result = ExtractJohnPassword(output);
+
+                // Enregistrer dans l'historique brut
+                historyService.AddToHistoryBrut("John", cmd, output, success, stopwatch.Elapsed);
+                historyService.AddToHistoryParsed("John", cmd, username!, target!, "", format!, result, success, stopwatch.Elapsed);
+
+                Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+            }
+        }
     }
     
-    // Chargement des différentes listes déroulantes (lecture json)
+    private bool IsJohnSuccessful(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return false;
+
+        // Vérifie si John a trouvé au moins 1 mot de passe
+        // Recherche "1g" qui signifie "1 guess" (1 mot de passe trouvé)
+        if (Regex.IsMatch(output, @"\b1g\b|\bguesses:\s*1\b", RegexOptions.IgnoreCase))
+            return true;
+
+        // Alternative : cherche le pattern "mot_de_passe (utilisateur ou ?)"
+        return Regex.IsMatch(output, @"^(\S+)\s+\([^)]*\)\s*$", RegexOptions.Multiline);
+    }
+
+    private string ExtractJohnPassword(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return "No password found";
+
+        var passwords = new List<string>();
+    
+        var lines = output.Split('\n');
+        foreach (var line in lines)
+        {
+            var match = Regex.Match(line.Trim(), @"^(\S+)\s+\([^)]*\)");
+            if (match.Success)
+            {
+                passwords.Add(match.Groups[1].Value);
+            }
+        }
+
+        return passwords.Count > 0 ? string.Join(", ", passwords) : "No password found";
+    }
+
+    private string ExtractJohnUsername(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return "No username";
+
+        var usernames = new List<string>();
+    
+        var lines = output.Split('\n');
+        foreach (var line in lines)
+        {
+            var match = Regex.Match(line.Trim(), @"^\S+\s+\(([^)]+)\)");
+            if (match.Success)
+            {
+                var username = match.Groups[1].Value.Trim();
+            
+                // Remplacer "?" par "No username" pour garder la correspondance
+                usernames.Add(username == "?" ? "No username" : username);
+            }
+        }
+
+        return usernames.Count > 0 ? string.Join(", ", usernames) : "No username";
+    }
+
+    
+    private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
+    {
+        var window = TopLevel.GetTopLevel(this) as Window;
+        if (window is null) return;
+
+        try
+        {
+            var success = await historyService.SaveHistoryToFileAsync(window, "John");
+            
+            if (success)
+            {
+                Console.WriteLine("[John] Historique sauvegardé avec succès !");
+                // TODO: Afficher un message de confirmation à l'utilisateur
+            }
+            else
+            {
+                Console.WriteLine("[John] Aucun historique à sauvegarder ou annulé");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[John] Erreur lors de la sauvegarde : {ex.Message}");
+        }
+    }
+    
+    
+    // ------------------------------------------------------------------------
+    // Chargement des différentes listes déroulantes des options (lecture json)
     private void ChargerLesListes()
     {
         var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
@@ -397,7 +516,6 @@ public partial class JohnVue : TemplateControl
             Console.WriteLine($"[JSON ERROR] {ex.Message}");
         }
     }
-    
     
     private void ChargerFormatTypes()
     {

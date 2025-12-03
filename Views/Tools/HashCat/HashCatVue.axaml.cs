@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes; 
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -32,7 +35,8 @@ public partial class HashCatVue : TemplateControl
     private readonly ExecuterCommandeService _execService;
     
     // Permet de savoir quel mode est selectionne.
-    private AttackType _currentAttackType = AttackType.Dictionary;
+    private AttackType _currentAttackType = AttackType.Dictionary;  
+    private readonly HistoryService historyService;
     
     // Commande qui permet d'arreter une attaque.
     private CancellationTokenSource? _cts;
@@ -42,6 +46,7 @@ public partial class HashCatVue : TemplateControl
         // On recupere la connexion SSH.
         _toolFileService = new ToolFileService(ConnexionSshService.Instance);
         _execService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        historyService = HistoryService.Instance;
         
         // Charge le fichier XAML.
         InitializeComponent();
@@ -444,48 +449,129 @@ public partial class HashCatVue : TemplateControl
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
         
-        // On utilise 'await' pour ne pas geler l'interface pendant que ça tourne.
-        await _execService.ExecuteCommandStreamingAsync(
-            commande,
+        var stopwatch = Stopwatch.StartNew();
+        var outputBuilder = new StringBuilder();
+
+        try
+        {
+            await _execService.ExecuteCommandStreamingAsync(
+                commande,
+
+                // Reçoit chaque ligne en temps réel
+                onLineReceived: ligne =>
+                {
+                    outputBuilder.AppendLine(ligne);
+                    
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        txtOutput.Text += ligne + "\n";
+                        txtOutput.CaretIndex = txtOutput.Text.Length; // auto-scroll
+                    });
+                },
+
+                // Fin de l’exécution (normalement)
+                onCompleted: () =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        txtOutput.Text += "\n>>> Fin de l'exécution Hashcat.";
+                        btnLancer.IsEnabled = true;
+                        btnStop.IsEnabled = false;
+                    });
+                },
+
+                // Erreur (SSH non connecté ou autre)
+                onError: msg =>
+                {
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        txtOutput.Text += $"\n[ERREUR] : {msg}";
+                        btnLancer.IsEnabled = true;
+                        btnStop.IsEnabled = false;
+                    });
+                },
+
+                // Cancel
+                cancel: _cts.Token
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lancement de la commande : {ex.Message}");
+        }
+        finally
+        {
+            stopwatch.Stop();
+
+            var output = outputBuilder.ToString();
+            var success = IsHashcatSuccessful(output);
             
-            // Callback : Ce code s'execute à chaque nouvelle ligne.
-            onLineReceived: ligne =>
-            {
-                // Le SSH tourne sur un "Thread" separe. On ne peut pas toucher l'UI depuis ce thread.
-                // On doit demander au Thread principal (UI) de faire la mise à jour.
-                Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += ligne + "\n";
-                    txtOutput.CaretIndex = txtOutput.Text.Length;
-                });
-            },
+            HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
+            HashTypeComboBox =  this.FindControl<ComboBox>("HashTypeComboBox");
+            
+            var target = HashfileComboBox!.SelectionBoxItem!.ToString();
+            var format = HashTypeComboBox!.SelectionBoxItem!.ToString();
+            var result = ExtractHashcatPassword(output);
 
-            // Ce code s'execute quand la commande est fini.
-            onCompleted: () =>
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += "\n>>> Fin de l'execution Hashcat.";
-                    btnLancer.IsEnabled = true;
-                    btnStop.IsEnabled   = false;
-                });
-            },
+            // Enregistrer dans l'historique brut
+            historyService.AddToHistoryBrut("Hashcat", commande, output, success, stopwatch.Elapsed);
+            historyService.AddToHistoryParsed("Hashcat", commande, "", target!, "", format!, result, success, stopwatch.Elapsed);
 
-            // Ce code s'execute s'il y a une erreur technique.
-            onError: msg =>
-            {
-                Dispatcher.UIThread.Post(() =>
-                {
-                    txtOutput.Text += $"\n[ERREUR] : {msg}";
-                    btnLancer.IsEnabled = true;
-                    btnStop.IsEnabled   = false;
-                });
-            },
-
-            // On passe le token pour pouvoir annuler si l'utilisateur clique sur STOP.
-            cancel: _cts.Token
-        );
+            Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+        }
     }
+
+    private bool IsHashcatSuccessful(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return false;
+
+        // Cas le plus simple : status "Cracked"
+        if (output.Contains("Status...........: Cracked", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Ou présence d'une ligne "hash:password"
+        return Regex.IsMatch(output, @"^[0-9A-Fa-f]{16,}:.+$", RegexOptions.Multiline);
+    }
+
+    
+    private string ExtractHashcatPassword(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return "No password found";
+
+        // Cherche une ligne "hash:password"
+        var match = Regex.Match(output, @"^[0-9A-Fa-f]{16,}:(.+)$", RegexOptions.Multiline);
+        if (!match.Success) return "No password found";
+
+        return match.Groups[1].Value.Trim();
+    }
+
+    
+    private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
+    {
+        var window = TopLevel.GetTopLevel(this) as Window;
+        if (window is null) return;
+
+        try
+        {
+            var success = await historyService.SaveHistoryToFileAsync(window, "Hashcat");
+            
+            if (success)
+            {
+                Console.WriteLine("[Hashcat] Historique sauvegardé avec succès !");
+                // TODO: Afficher un message de confirmation à l'utilisateur
+            }
+            else
+            {
+                Console.WriteLine("[Hashcat] Aucun historique à sauvegarder ou annulé");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Hashcat] Erreur lors de la sauvegarde : {ex.Message}");
+        }
+    }
+    
+   
     
     private void StopCommandeClick(object? sender, RoutedEventArgs e)
     {
@@ -522,7 +608,7 @@ public partial class HashCatVue : TemplateControl
         if (btnLancer != null) btnLancer.IsEnabled = true;
         if (btnStop   != null) btnStop.IsEnabled   = false;
     }
-
+    
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
