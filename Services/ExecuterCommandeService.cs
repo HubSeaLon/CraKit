@@ -66,6 +66,12 @@ public class ExecuterCommandeService
         {
             try
             {
+                // Eviter que John garde l'historique et show le mot de passe à chaque exécution (marche pas encore)
+                if (command.TrimStart().StartsWith("john "))
+                {
+                    command += " --pot=/dev/null";
+                }
+
                 _currentCommand = client.CreateCommand(command);
                 var asyncResult = _currentCommand.BeginExecute();
 
