@@ -168,3 +168,31 @@ Successful: 0 (0,0%)
 Failed: 1 (100,0%)
 Average execution time: 0,17s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 18:09:30
+Tool: Hydra
+Total Entries: 1
+========================================
+
+[2025-12-03 18:09:29] FAILED (0,12s)
+Tool: Hydra
+Command: hydra -t 16 -v
+Output:
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-12-03 17:09:29
+[ERROR] Invalid target definition!
+[ERROR] Either you use "www.example.com module [optional-module-parameters]" *or* you use the "module://www.example.com/optional-module-parameters" syntax!
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,12s
+========================================

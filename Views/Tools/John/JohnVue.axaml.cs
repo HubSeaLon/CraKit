@@ -349,9 +349,6 @@ public partial class JohnVue : TemplateControl
         var btnLancer = this.FindControl<Button>("BtnLancer");
         var btnStop = this.FindControl<Button>("BtnStop");
         
-        btnLancer!.IsEnabled = false;
-        btnStop!.IsEnabled   = true;
-
         // Nouveau token d’annulation
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
@@ -363,6 +360,9 @@ public partial class JohnVue : TemplateControl
         
         var stopwatch = Stopwatch.StartNew();
         var outputBuilder = new StringBuilder();
+        
+        btnLancer!.IsEnabled = false;
+        btnStop!.IsEnabled   = true;
         
         try
         {

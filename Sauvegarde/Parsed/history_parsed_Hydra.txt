@@ -1,0 +1,1 @@
+2025-12-03 18:09:29; FAILED; hydra -t 16 -v; No target; No protocol; Not found; 0,12s 

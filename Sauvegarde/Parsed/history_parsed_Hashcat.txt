@@ -1,0 +1,1 @@
+2025-12-03 18:09:17; FAILED; hashcat -m 0 -a 3 <fichier_hashes> ; No Hashfile; No Hashtype; No password found; 0,01s 

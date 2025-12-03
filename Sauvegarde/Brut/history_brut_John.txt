@@ -290,3 +290,44 @@ Successful: 0 (0,0%)
 Failed: 1 (100,0%)
 Average execution time: 0,02s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 18:08:05
+Tool: John
+Total Entries: 2
+========================================
+
+[2025-12-03 18:07:52] FAILED (0,02s)
+Tool: John
+Command: john
+Output:
+John the Ripper 1.9.0-jumbo-1+bleeding-aec1328d6c 2021-11-02 10:45:52 +0100 OMP [linux-gnu 64-bit aarch64 ASIMD AC]
+Copyright (c) 1996-2021 by Solar Designer and others
+Homepage: https://www.openwall.com/john/
+
+Usage: john [OPTIONS] [PASSWORD-FILES]
+
+Use --help to list all available options.
+
+------------------------------------------------------------
+
+[2025-12-03 18:08:03] FAILED (0,06s)
+Tool: John
+Command: john --wordlist=/root/wordlists/ville.txt --format=raw-sha1 hashfiles/john6.txt
+Output:
+No password hashes loaded (see FAQ)
+
+[stderr]
+Using default input encoding: UTF-8
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 2
+Successful: 0 (0,0%)
+Failed: 2 (100,0%)
+Average execution time: 0,04s
+========================================
