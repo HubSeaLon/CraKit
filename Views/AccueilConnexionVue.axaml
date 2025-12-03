@@ -32,6 +32,7 @@
             
             <Button Click="TestCommande"
                     Content="Test commandes"
+                    IsVisible="False"
                     HorizontalAlignment="Center"/>
                        
         </StackPanel>
