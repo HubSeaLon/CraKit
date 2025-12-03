@@ -471,7 +471,11 @@ public partial class HydraVue : TemplateControl
             ProtocolComboBox =  this.FindControl<ComboBox>("ProtocolComboBox");
             
             var username = UsernameTextBox?.Text ?? "No username";
-            var target = TargetTextBox?.Text ?? "No target";
+           
+            var target = string.IsNullOrWhiteSpace(TargetTextBox?.Text)
+                ? "No target"
+                : TargetTextBox.Text;
+
             var result = ExtractHydraPassword(output);
             var protocol = ProtocolComboBox!.SelectionBoxItem?.ToString() ?? "No protocol";
 

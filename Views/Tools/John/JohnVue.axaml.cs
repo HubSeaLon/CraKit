@@ -5,11 +5,11 @@ using System.Text;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
+using System.Threading;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Markup.Xaml;
-using Avalonia.Threading;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
@@ -202,6 +202,9 @@ public partial class JohnVue : TemplateControl
         ButtonOption5 = this.FindControl<Button>("ButtonOption5");
         
         BtnLancer = this.FindControl<Button>("BtnLancer");
+        BtnStop =  this.FindControl<Button>("BtnStop");
+        
+        BtnStop!.IsEnabled = false;
         
         EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
         SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
@@ -211,8 +214,6 @@ public partial class JohnVue : TemplateControl
         FormatHashComboBox!.IsVisible= false;
         RuleComboBox!.IsVisible= false;
         MaskTextBox!.IsVisible= false;
-        
-        BtnLancer!.IsEnabled= false;
     }
     
     
@@ -370,6 +371,9 @@ public partial class JohnVue : TemplateControl
             var outp = await executerCommandeService.ExecuteCommandAsync(cmd, TimeSpan.FromMinutes(1));
             SortieTextBox.Text += outp + "\n";
             outputBuilder.Append(outp);
+            
+            BtnStop.IsEnabled = false;
+            BtnLancer.IsEnabled = true;
         }
         catch (Exception ex)
         {
@@ -384,17 +388,15 @@ public partial class JohnVue : TemplateControl
 
                 var output = outputBuilder.ToString();
                 var success = IsJohnSuccessful(output);
-            
+                
                 HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
                 FormatHashComboBox =  this.FindControl<ComboBox>("FormatHashComboBox");
-            
-                var target = HashfileComboBox!.SelectionBoxItem!.ToString();
-                var username = ExtractJohnUsername(output);
-
-                string format = FormatHashComboBox!.SelectionBoxItem?.ToString() ?? "";
                 
-                var result = ExtractJohnPassword(output);
-
+                var target = HashfileComboBox!.SelectionBoxItem?.ToString() ?? "No target";
+                var username = ExtractJohnUsername(output, success);
+                string format = FormatHashComboBox!.SelectionBoxItem?.ToString() ?? "No format";
+                var result = ExtractJohnPassword(output, success);
+                
                 // Enregistrer dans l'historique brut
                 historyService.AddToHistoryBrut("John", cmd, output, success, stopwatch.Elapsed);
                 historyService.AddToHistoryParsed("John", cmd, username!, target!, "", format!, result, success, stopwatch.Elapsed);
@@ -417,9 +419,9 @@ public partial class JohnVue : TemplateControl
         return Regex.IsMatch(output, @"^(\S+)\s+\([^)]*\)\s*$", RegexOptions.Multiline);
     }
 
-    private string ExtractJohnPassword(string output)
+    private string ExtractJohnPassword(string output, bool success)
     {
-        if (string.IsNullOrWhiteSpace(output)) return "No password found";
+        if (string.IsNullOrWhiteSpace(output) || !success) return "No password found";
 
         var passwords = new List<string>();
     
@@ -436,9 +438,9 @@ public partial class JohnVue : TemplateControl
         return passwords.Count > 0 ? string.Join(", ", passwords) : "No password found";
     }
 
-    private string ExtractJohnUsername(string output)
+    private string ExtractJohnUsername(string output, bool success)
     {
-        if (string.IsNullOrWhiteSpace(output)) return "No username";
+        if (string.IsNullOrWhiteSpace(output) || !success) return "No username";
 
         var usernames = new List<string>();
     
@@ -555,6 +557,27 @@ public partial class JohnVue : TemplateControl
         {
             Console.WriteLine($"[JSON ERROR] {ex.Message}");
         }
+    }
+
+
+    private void StopCommandeClick(object? sender, RoutedEventArgs e)
+    {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        var btnStop = this.FindControl<Button>("BtnStop");
+
+        // Annuler le token
+        _cts?.Cancel();
+        executerCommandeService.StopCurrent();
+        
+        // Feedback UI
+        if (SortieTextBox != null)
+        {
+            SortieTextBox.Text += "\n[Stop demandé - Processus john terminé]\n";
+        }
+
+        // Réactiver Lancer, désactiver Stop
+        btnLancer!.IsEnabled = true;
+        btnStop!.IsEnabled = false;
     }
     
     // aller chercher le style <Style Selector="control|TemplateControl">
