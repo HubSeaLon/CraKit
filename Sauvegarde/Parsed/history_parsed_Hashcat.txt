@@ -1,1 +1,0 @@
-2025-12-03 15:27:55; SUCCESS; Hashcat; hashcat -m 0 -a 0 /root/hashfiles/pizza.txt /usr/share/wordlists/rockyou.txt; pizza.txt; 0; pizza; 3,03s 

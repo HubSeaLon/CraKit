@@ -1,5 +1,0 @@
-2025-12-03 15:23:47; SUCCESS; John; john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/burger.txt; burger.txt; raw-md5; No username; burger; 0,25s 
-2025-12-03 15:23:47; SUCCESS; John; john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/burger.txt; burger.txt; raw-md5; No username; burger; 0,25s 
-2025-12-03 15:26:37; SUCCESS; John; john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/pizza.txt; pizza.txt; raw-md5; No username; pizza; 0,22s 
-2025-12-03 15:40:03; FAILED; John; john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/pussy.txt; pussy.txt; raw-md5; No username; No password found; 0,13s 
-2025-12-03 16:01:08; FAILED; john --wordlist=/wordlists/ville.txt --format=raw-sha256 --rules=KoreLogic hashfiles/john10.txt; john10.txt; raw-sha256; No username; No password found; 0,78s 
