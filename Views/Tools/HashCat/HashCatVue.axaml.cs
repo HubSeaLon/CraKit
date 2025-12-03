@@ -211,19 +211,19 @@ public partial class HashCatVue : TemplateControl
         var ButtonOption5 = this.FindControl<Button>("ButtonOption5");
 
         // On cache tout par defaut.
-        boxWordlist.IsVisible = false;
-        boxWordlist2.IsVisible = false;
-        boxHashfile.IsVisible = false;
-        boxUserHashfile.IsVisible = false;
-        boxHashType.IsVisible = false;
-        boxRules.IsVisible = false;
-        txtMask.IsVisible = false;
+        boxWordlist!.IsVisible = false;
+        boxWordlist2!.IsVisible = false;
+        boxHashfile!.IsVisible = false;
+        boxUserHashfile!.IsVisible = false;
+        boxHashType!.IsVisible = false;
+        boxRules!.IsVisible = false;
+        txtMask!.IsVisible = false;
         
-        ButtonOption1.Opacity = 1;
-        ButtonOption2.Opacity = 1;
-        ButtonOption3.Opacity = 1;
-        ButtonOption4.Opacity = 1;
-        ButtonOption5.Opacity = 1;
+        ButtonOption1!.Opacity = 1;
+        ButtonOption2!.Opacity = 1;
+        ButtonOption3!.Opacity = 1;
+        ButtonOption4!.Opacity = 1;
+        ButtonOption5!.Opacity = 1;
         
         // On reset les selections.
         boxWordlist.SelectedItem = -1 ;
@@ -509,8 +509,9 @@ public partial class HashCatVue : TemplateControl
             HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
             HashTypeComboBox =  this.FindControl<ComboBox>("HashTypeComboBox");
             
-            var target = HashfileComboBox!.SelectionBoxItem!.ToString();
-            var format = HashTypeComboBox!.SelectionBoxItem!.ToString();
+            var target = HashfileComboBox!.SelectionBoxItem?.ToString() ?? "No Hashfile";
+            var format = HashTypeComboBox!.SelectionBoxItem?.ToString() ?? "No Hashtype";
+            
             var result = ExtractHashcatPassword(output);
 
             // Enregistrer dans l'historique brut

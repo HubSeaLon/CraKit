@@ -470,10 +470,10 @@ public partial class HydraVue : TemplateControl
             TargetTextBox = this.FindControl<TextBox>("TargetTextBox");
             ProtocolComboBox =  this.FindControl<ComboBox>("ProtocolComboBox");
             
-            var username = UsernameTextBox!.Text;
-            var target = TargetTextBox!.Text;
+            var username = UsernameTextBox?.Text ?? "No username";
+            var target = TargetTextBox?.Text ?? "No target";
             var result = ExtractHydraPassword(output);
-            var protocol = ProtocolComboBox!.SelectionBoxItem!.ToString();
+            var protocol = ProtocolComboBox!.SelectionBoxItem?.ToString() ?? "No protocol";
 
             // Enregistrer dans l'historique brut
             historyService.AddToHistoryBrut("Hydra", cmd, output, success, stopwatch.Elapsed);
