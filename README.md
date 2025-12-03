@@ -41,6 +41,9 @@ CraKit nécessite le SDK **.NET 8**.
 Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
 
 ```bash
+# Git clone le projet
+git clone https://github.com/HubSeaLon/CraKit.git
+
 # Installer les packages
 dotnet restore
 dotnet clean
@@ -54,7 +57,7 @@ dotnet package list
 CraKit utilise un conteneur Docker pour exécuter les outils Linux natifs en toute sécurité via une connexion SSH locale.
 
 1.  Ouvrez **Docker Desktop**.
-2.  Naviguez dans le répertoire `/Installation` du projet.
+2.  Naviguez dans le répertoire `/Installation` (`cd Installation`) du projet.
 3.  Exécutez les commandes suivantes :
 
 <!-- end list -->
