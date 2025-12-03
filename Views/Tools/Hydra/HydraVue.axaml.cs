@@ -469,8 +469,10 @@ public partial class HydraVue : TemplateControl
             UsernameTextBox = this.FindControl<TextBox>("UsernameTextBox");
             TargetTextBox = this.FindControl<TextBox>("TargetTextBox");
             ProtocolComboBox =  this.FindControl<ComboBox>("ProtocolComboBox");
-            
-            var username = UsernameTextBox?.Text ?? "No username";
+
+            var username = string.IsNullOrWhiteSpace(UsernameTextBox?.Text)
+                ? "No username"
+                : UsernameTextBox.Text;
            
             var target = string.IsNullOrWhiteSpace(TargetTextBox?.Text)
                 ? "No target"

@@ -169,3 +169,26 @@ Successful: 0 (0,0%)
 Failed: 1 (100,0%)
 Average execution time: 0,01s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 18:19:21
+Tool: Hashcat
+Total Entries: 1
+========================================
+
+[2025-12-03 18:19:20] FAILED (0,01s)
+Tool: Hashcat
+Command: hashcat -m 0 -a 0 <fichier_hashes> <wordlist>
+Output:
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,01s
+========================================

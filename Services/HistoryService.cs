@@ -216,7 +216,7 @@ public class HistoryService
             
             if (entry.ToolName == "Hydra") contentParsed += entry.Protocol + "; ";
             if (entry.ToolName != "Hydra") contentParsed += entry.Format + "; ";
-            if (entry.ToolName == "John") contentParsed += entry.Username + "; ";
+            if (entry.ToolName == "John" || entry.ToolName == "Hydra") contentParsed += entry.Username + "; ";
             
             contentParsed += entry.Result + "; ";
             contentParsed += entry.ExecutionTime.TotalSeconds.ToString("F2") + "s \n";;

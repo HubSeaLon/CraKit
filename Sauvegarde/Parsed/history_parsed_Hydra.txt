@@ -1,1 +1,3 @@
 2025-12-03 18:09:29; FAILED; hydra -t 16 -v; No target; No protocol; Not found; 0,12s 
+2025-12-03 18:15:31; FAILED; hydra -t 16 -v; No target; No protocol; Not found; 0,17s 
+2025-12-03 18:18:40; FAILED; hydra -t 16 -v; No target; No protocol; No username; Not found; 0,17s 
