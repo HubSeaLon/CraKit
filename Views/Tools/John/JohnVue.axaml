@@ -84,6 +84,7 @@
     <!-- BOUTON LANCER -->
     <t:TemplateControl.RunArea>
         <Button Content="Lancer"
+                x:Name="BtnLancer"
                 Click="LancerCommandeClick"
                 HorizontalAlignment="Center"/>
     </t:TemplateControl.RunArea>
