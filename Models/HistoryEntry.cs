@@ -22,6 +22,7 @@ public class HistoryEntry
     public string Protocol;
     // Ajout du Result pour logs parsed (mot de passe cracked ou trouvé)
     public string Result;
+    
     public bool Success;
     public TimeSpan ExecutionTime;
 

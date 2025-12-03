@@ -100,7 +100,7 @@ public class HistoryService
     // Sauvegarder l'historique dans un fichier
     public async Task<bool> SaveHistoryToFileAsync(Window owner, string toolName)
     {
-        // Récupérer les commandes pour cet outil
+        // Récupérer les commandes par outil (plus propre que tout en même temp)
         List<HistoryEntry> entriesBrut = GetHistoryByTool(toolName);
         List<HistoryEntry> entriesParsed = GetHistoryParsedByTool(toolName);
 
@@ -214,8 +214,8 @@ public class HistoryService
             
             if (entry.ToolName == "Hydra") contentParsed += entry.Protocol + "; ";
             if (entry.ToolName != "Hydra") contentParsed += entry.Format + "; ";
+            if (entry.ToolName == "John") contentParsed += entry.Username + "; ";
             
-            contentParsed += entry.Username + "; ";
             contentParsed += entry.Result + "; ";
             contentParsed += entry.ExecutionTime.TotalSeconds.ToString("F2") + "s \n";;
         }

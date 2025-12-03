@@ -6,7 +6,7 @@
                    xmlns:models="clr-namespace:CraKit.Models">
     
     <t:TemplateControl.HeaderRight>
-        <Button Content="Save history in file" />
+        <Button Content="Save history in file" Click="SaveHistoryClick"/>
     </t:TemplateControl.HeaderRight>
 
     <t:TemplateControl.LeftPane>
