@@ -13,6 +13,7 @@ using Avalonia.Markup.Xaml;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
+using Org.BouncyCastle.Bcpg.Attr;
 
 
 namespace CraKit.Views.Tools.John;
@@ -377,14 +378,16 @@ public partial class JohnVue : TemplateControl
             var success = IsJohnSuccessful(output);
             
             HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
+            FormatHashComboBox =  this.FindControl<ComboBox>("FormatHashComboBox");
             
             var target = HashfileComboBox!.SelectionBoxItem!.ToString();
             var username = ExtractJohnUsername(output);
+            var format = FormatHashComboBox!.SelectionBoxItem!.ToString();
             var result = ExtractJohnPassword(output);
 
             // Enregistrer dans l'historique brut
             historyService.AddToHistoryBrut("John", cmd, output, success, stopwatch.Elapsed);
-            historyService.AddToHistoryParsed("John", cmd, username!, target!, "No protocol", result, success, stopwatch.Elapsed);
+            historyService.AddToHistoryParsed("John", cmd, username!, target!, "", format!, result, success, stopwatch.Elapsed);
 
             Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
         }

@@ -42,7 +42,7 @@ public class HistoryService
     }
 
     // Ajouter dans l'historique parsed
-    public void AddToHistoryParsed(string toolName, string command, string username, string target, string protocol, string result, bool success, TimeSpan executionTime)
+    public void AddToHistoryParsed(string toolName, string command, string username, string target, string protocol, string format, string result, bool success, TimeSpan executionTime)
     {
         HistoryEntry entryParsed = new HistoryEntry();
         
@@ -54,6 +54,7 @@ public class HistoryService
         entryParsed.Result = result;
         entryParsed.Target = target;
         entryParsed.Protocol = protocol;
+        entryParsed.Format = format;
         entryParsed.ExecutionTime = executionTime;
         
         historyParsed.Add(entryParsed);
@@ -210,7 +211,10 @@ public class HistoryService
             contentParsed += entry.ToolName + "; ";
             contentParsed += entry.Command + "; ";
             contentParsed += entry.Target + "; ";
-            contentParsed += entry.Protocol + "; ";
+            
+            if (entry.ToolName == "Hydra") contentParsed += entry.Protocol + "; ";
+            if (entry.ToolName != "Hydra") contentParsed += entry.Format + "; ";
+            
             contentParsed += entry.Username + "; ";
             contentParsed += entry.Result + "; ";
             contentParsed += entry.ExecutionTime.TotalSeconds.ToString("F2") + "s \n";;

@@ -15,6 +15,9 @@ public class HistoryEntry
     
     // Ajout du Target pour les logs parsed 
     public string Target;
+    
+    // Ajout du type de hash
+    public string Format;
 
     public string Protocol;
     // Ajout du Result pour logs parsed (mot de passe cracked ou trouvé)
@@ -31,6 +34,7 @@ public class HistoryEntry
         Output = "";
         Username = "";
         Protocol = "";
+        Format = "";
         Target = "";
         Result = "";
         Success = false;

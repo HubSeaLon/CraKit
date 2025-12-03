@@ -477,7 +477,7 @@ public partial class HydraVue : TemplateControl
 
             // Enregistrer dans l'historique brut
             historyService.AddToHistoryBrut("Hydra", cmd, output, success, stopwatch.Elapsed);
-            historyService.AddToHistoryParsed("Hydra", cmd, username!, target!, protocol!, result, success, stopwatch.Elapsed);
+            historyService.AddToHistoryParsed("Hydra", cmd, username!, target!, protocol!, "", result, success, stopwatch.Elapsed);
 
             Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
 
