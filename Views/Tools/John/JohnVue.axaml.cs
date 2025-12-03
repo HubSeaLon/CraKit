@@ -378,7 +378,9 @@ public partial class JohnVue : TemplateControl
             
                 var target = HashfileComboBox!.SelectionBoxItem!.ToString();
                 var username = ExtractJohnUsername(output);
-                var format = FormatHashComboBox!.SelectionBoxItem!.ToString();
+
+                string format = FormatHashComboBox!.SelectionBoxItem?.ToString() ?? "";
+                
                 var result = ExtractJohnPassword(output);
 
                 // Enregistrer dans l'historique brut
