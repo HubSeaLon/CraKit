@@ -437,13 +437,11 @@ public partial class HashCatVue : TemplateControl
     
     private string ExtractHashcatPassword(string output)
     {
-        if (string.IsNullOrWhiteSpace(output))
-            return "No password found";
+        if (string.IsNullOrWhiteSpace(output)) return "No password found";
 
         // Cherche une ligne "hash:password"
         var match = Regex.Match(output, @"^[0-9A-Fa-f]{16,}:(.+)$", RegexOptions.Multiline);
-        if (!match.Success)
-            return "No password found";
+        if (!match.Success) return "No password found";
 
         return match.Groups[1].Value.Trim();
     }

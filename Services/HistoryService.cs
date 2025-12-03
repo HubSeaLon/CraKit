@@ -110,10 +110,9 @@ public class HistoryService
             Console.WriteLine("[HistoryBrut et HistoryParsed] Pas d'historique à sauvegarder");
             return false;
         }
-
-
-        string fileNameBrut = "history_brut" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt";
-        string fileNameParsed = "history_parsed" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt";
+        
+        string fileNameBrut   = $"history_brut_{toolName}.txt";
+        string fileNameParsed = $"history_parsed_{toolName}.txt";
         
         // Créer le contenu du fichier
         string contentBrut = CreateFileContentBrut(entriesBrut, toolName);
@@ -127,11 +126,11 @@ public class HistoryService
         string cheminParsed = Path.Combine(root, "Sauvegarde", "Parsed", fileNameParsed);
         
         // Sauvegarder le fichier
-        await File.WriteAllTextAsync(cheminBrut, contentBrut);
-        await File.WriteAllTextAsync(cheminParsed, contentParsed);
+        await File.AppendAllTextAsync(cheminBrut, contentBrut);
+        await File.AppendAllTextAsync(cheminParsed, contentParsed);
         
-        Console.WriteLine("[HistoryBrut] " + fileNameBrut + " Fichier sauvegardé : " + cheminBrut);
-        Console.WriteLine("[HistoryParsed] " + fileNameParsed + "Fichier sauvegardé : " + cheminParsed);
+        Console.WriteLine("[HistoryBrut] " + fileNameBrut + "Sauvegarde ajouté : " + cheminBrut);
+        Console.WriteLine("[HistoryParsed] " + fileNameParsed + "Sauvegarde ajouté : " + cheminParsed);
         return true;
     }
 
@@ -189,6 +188,10 @@ public class HistoryService
         contentBrut += "Successful: " + successCount + " (" + successPercent.ToString("F1") + "%)\n";
         contentBrut += "Failed: " + failCount + " (" + failPercent.ToString("F1") + "%)\n";
         contentBrut += "Average execution time: " + avgTime.ToString("F2") + "s\n";
+        contentBrut += "========================================\n";
+        
+        // Clear pour éviter de sauvegarder plusieurs fois les même choses
+        historyBrut.Clear();
 
         return contentBrut;
     }
@@ -219,6 +222,9 @@ public class HistoryService
             contentParsed += entry.Result + "; ";
             contentParsed += entry.ExecutionTime.TotalSeconds.ToString("F2") + "s \n";;
         }
+        
+        // Clear pour éviter de sauvegarder plusieurs fois les même choses
+        historyParsed.Clear();
         
         return contentParsed;
     }

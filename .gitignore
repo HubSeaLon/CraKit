@@ -3,8 +3,6 @@ bin/
 obj/
 
 /Installation/CraKit/
-/Sauvegarde/Brut/
-/Sauvegarde/Parsed/
 
 # Fichiers temporaires de Rider / Visual Studio
 .idea/

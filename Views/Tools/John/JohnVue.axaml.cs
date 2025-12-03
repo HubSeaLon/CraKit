@@ -144,16 +144,9 @@ public partial class JohnVue : TemplateControl
         rule = "";
 
         FormatHashComboBox.SelectedIndex = -1;
-        FormatHashComboBox.SelectedItem = null;
-
         WordlistComboBox.SelectedIndex = -1;
-        WordlistComboBox.SelectedItem = null;
-
         HashfileComboBox.SelectedIndex = -1;
-        HashfileComboBox.SelectedItem = null;
-
         RuleComboBox.SelectedIndex = -1;
-        RuleComboBox.SelectedItem = null;
         MaskTextBox.Text = "";
     }
     
@@ -206,12 +199,12 @@ public partial class JohnVue : TemplateControl
         
         ButtonOption1 = this.FindControl<Button>("ButtonOption1");
         ButtonOption2 = this.FindControl<Button>("ButtonOption2");
-        ButtonOption3 =  this.FindControl<Button>("ButtonOption3");
-        ButtonOption4 =  this.FindControl<Button>("ButtonOption4");
-        ButtonOption5 =  this.FindControl<Button>("ButtonOption5");
+        ButtonOption3 = this.FindControl<Button>("ButtonOption3");
+        ButtonOption4 = this.FindControl<Button>("ButtonOption4");
+        ButtonOption5 = this.FindControl<Button>("ButtonOption5");
         
-        EntreeTextBox =  this.FindControl<TextBox>("EntreeTextBox");
-        SortieTextBox =  this.FindControl<TextBox>("SortieTextBox");
+        EntreeTextBox = this.FindControl<TextBox>("EntreeTextBox");
+        SortieTextBox = this.FindControl<TextBox>("SortieTextBox");
 
         WordlistComboBox!.IsVisible= false;
         HashfileComboBox!.IsVisible= false;
@@ -460,8 +453,6 @@ public partial class JohnVue : TemplateControl
             if (success)
             {
                 Console.WriteLine("[John] Historique sauvegardé avec succès !");
-                
-                
                 // TODO: Afficher un message de confirmation à l'utilisateur
             }
             else
