@@ -7,7 +7,7 @@
     
     <!-- BOUTON BANDEAU HAUT -->
     <t:TemplateControl.HeaderRight>
-        <Button Content="Save history in file"/>
+        <Button Content="Save history in file" Click="SaveHistoryClick"/>
     </t:TemplateControl.HeaderRight>
 
     <!-- COLONNE GAUCHE : presets / types d’attaque -->

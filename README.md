@@ -36,12 +36,12 @@ CraKit nécessite le SDK **.NET 8**.
 Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
 
 ```bash
-# Ajout du package Avalonia
-dotnet add package Avalonia
-
-# Clean pour avoir un projet propre
+# Installer les packages
 dotnet restore
 dotnet clean
+
+# Vérifier les packages
+dotnet package list
 ```
 
 #### 3\. Docker (Environnement Kali)

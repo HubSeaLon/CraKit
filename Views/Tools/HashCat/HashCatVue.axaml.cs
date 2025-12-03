@@ -1,7 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Text;
 using System.Text.Json;
-using System.Text.Json.Nodes; 
+using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Interactivity;
@@ -14,57 +17,78 @@ using Avalonia.Threading;
 
 namespace CraKit.Views.Tools.HashCat;
 
-// Definition des modes d'attaque supportes
+// Enumeration pour lister proprement les types d'attaques disponibles.
 public enum AttackType
 {
-    Dictionary,
-    Rules,
-    Mask,
-    Association,
-    Prince
+    Dictionary, // -a 0
+    Rules,      // -a 0 + règles
+    Mask,       // -a 3
+    Combinator, // -a 1
+    Association // -a 9
 }
+
 
 public partial class HashCatVue : TemplateControl
 {
+    // Services pour gerer les fichiers et l'execution SSH.
     private readonly ToolFileService _toolFileService;
-    private AttackType _currentAttackType = AttackType.Dictionary;
-    
     private readonly ExecuterCommandeService _execService;
+    
+    // Permet de savoir quel mode est selectionne.
+    private AttackType _currentAttackType = AttackType.Dictionary;  
+    private readonly HistoryService historyService;
+    
+    // Commande qui permet d'arreter une attaque.
     private CancellationTokenSource? _cts;
-
+    
     public HashCatVue()
     {
-        // Injection des instances
+        // On recupere la connexion SSH.
         _toolFileService = new ToolFileService(ConnexionSshService.Instance);
         _execService = new ExecuterCommandeService(ConnexionSshService.Instance);
+        historyService = HistoryService.Instance;
         
+        // Charge le fichier XAML.
         InitializeComponent();
         
-        // Chargement initial des donnees
+        // On remplit les listes deroulantes dès le demarrage.
         ChargerLesListes();
         ChargerHashTypes();
     }
     
-    
+    // Charge les types de hash depuis un fichier JSON.
     private void ChargerHashTypes()
     {
         try 
         {
-            // Lecture du fichier JSON contenant les types de hash (MD5, SHA1...)
+            // On construit le chemin vers le fichier JSON.
             string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "HashCat.json");
-            string? jsonBrut = ToolBase.LireFichierTexte(chemin);
-
-            if (string.IsNullOrEmpty(jsonBrut)) return;
             
+            // On lit le contenu brut du fichier.
+            string jsonBrut = ToolBase.LireFichierTexte(chemin);
+            
+            if (string.IsNullOrEmpty(jsonBrut)) 
+            {
+                return;
+            }
+            
+            // On transforme le texte en objet JSON manipulable.
             var rootNode = JsonNode.Parse(jsonBrut);
-            var valuesNode = rootNode?["options"]?["hashType"]?["values"];
+            var valuesNode = rootNode?["options"]["hashType"]["values"];
 
+            // Si on a bien trouve la liste des valeurs dans le JSON
             if (valuesNode != null)
             {
+                // Options pour ignorer la casse (Majuscule/minuscule) lors de la lecture.
                 var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                
+                // Deserialisation : On transforme le JSON en une liste d'objets C# (List<OptionMode>).
                 var listeModes = valuesNode.Deserialize<List<OptionMode>>(options);
                 
+                // On recupère la ComboBox de l'interface.
                 var boxType = this.FindControl<ComboBox>("HashTypeComboBox");
+                
+                // Si la liste est valide et que la boite existe, on lie les donnees.
                 if (listeModes != null && boxType != null)
                 {
                     boxType.ItemsSource = listeModes;
@@ -77,65 +101,105 @@ public partial class HashCatVue : TemplateControl
         }
     }
     
-    // Recupere la liste des fichiers sur le serveur via SSH
     private void RemplirComboBox(ComboBox laBox, string chemin)
     {
-        if (laBox == null) return;
+        // Securite de base.
+        if (laBox == null) 
+        {
+            return;
+        }
 
         try
         {
             var ssh = ConnexionSshService.Instance.Client;
-            if (ssh == null || !ssh.IsConnected) return;
-
+            
+            if (ssh == null || !ssh.IsConnected) 
+            {
+                return;
+            }
+            
             var cmd = ssh.CreateCommand($"ls -1 {chemin}");
             string resultat = cmd.Execute();
-
+            
             laBox.Items.Clear();
-
-            // On verifie qu'il y a bien des fichiers et pas d'erreur Linux
+            
             if (!string.IsNullOrWhiteSpace(resultat) && !resultat.Contains("No such file"))
             {
+                // On decoupe le resultat ligne par ligne pour obtenir les noms de fichiers.
                 var fichiers = resultat.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var f in fichiers) laBox.Items.Add(f);
+                
+                foreach (var f in fichiers) 
+                {
+                    laBox.Items.Add(f);
+                }
             }
         }
-        catch (Exception ex) { Console.WriteLine($"[SSH] Erreur : {ex.Message}"); }
-    }
-
-    private void ChargerLesListes()
-    {
-        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
-        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
-        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
-
-        // Remplissage des ComboBox avec les chemins distants
-        
-        if (boxWordlist != null) RemplirComboBox(boxWordlist, "/root/wordlists");
-        if (boxHashfile != null) RemplirComboBox(boxHashfile, "/root/hashfiles");
-        if (boxRules != null) RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
+        catch (Exception ex) 
+        { 
+            Console.WriteLine($"[SSH] Erreur : {ex.Message}"); 
+        }
     }
     
-    // Methodes declenchees par les boutons du menu de gauche
+    private void ChargerLesListes()
+    {
+        // On recupère toutes les references aux contrôles XAML.
+        var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        var boxWordlist2 = this.FindControl<ComboBox>("WordlistComboBox2");
+        var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        var boxUserHashfile = this.FindControl<ComboBox>("HashUserfileComboBox");
+        var boxRules = this.FindControl<ComboBox>("RulesComboBox");
+
+        // On appelle la fonction de remplissage pour chaque boite si elle existe.
+        
+        if (boxWordlist != null) 
+        {
+            RemplirComboBox(boxWordlist, "/root/wordlists");
+        }
+        
+        if (boxWordlist2 != null) 
+        {
+            RemplirComboBox(boxWordlist2, "/root/wordlists");
+        }
+        
+        if (boxHashfile != null) 
+        {
+            RemplirComboBox(boxHashfile, "/root/hashfiles");
+        }
+        
+        if (boxUserHashfile != null) 
+        {
+            RemplirComboBox(boxUserHashfile, "/root/hashfiles");
+        }
+        
+        if (boxRules != null) 
+        {
+            RemplirComboBox(boxRules, "/usr/share/hashcat/rules");
+        }
+    }
+    
+    // Gestionnaires d'evenements Clicks sur les boutons du menu
     private void DictionaryAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Dictionary);
     private void DictionaryAttackAndRulesClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Rules);
     private void BruteForceAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Mask);
+    private void CombinatorClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Combinator);
     private void AssociationAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Association);
-    private void PrinceAttackClick(object? sender, RoutedEventArgs e) => SetAttackMode(AttackType.Prince);
 
-    // Declenche quand on change une valeur dans une liste
+    // Declenche quand l'utilisateur change une selection
     private void OnSelectionChanged(object? sender, SelectionChangedEventArgs e) => GenererCommande();
     
-    // Declenche quand on tape dans le champ Masque
+    // Declenche quand l'utilisateur tape dans la zone de Masque.
     private void OnMaskInputChanged(object? sender, KeyEventArgs e) => GenererCommande();
     
-    // Active ou desactive les elements de l'interface selon le mode choisi
+    // Change l'interface selon le mode d'attaque choisi.
     private void SetAttackMode(AttackType type)
     {
         _currentAttackType = type;
 
-        // Recuperation des controles UI
+        // Recuperation de tous les elements graphiques.
         var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        var boxWordlist2 = this.FindControl<ComboBox>("WordlistComboBox2");
         var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        var boxUserHashfile = this.FindControl<ComboBox>("HashUserfileComboBox");
         var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
         var boxRules = this.FindControl<ComboBox>("RulesComboBox");
         var txtMask = this.FindControl<TextBox>("MaskInputBox"); 
@@ -146,9 +210,11 @@ public partial class HashCatVue : TemplateControl
         var ButtonOption4 = this.FindControl<Button>("ButtonOption4");
         var ButtonOption5 = this.FindControl<Button>("ButtonOption5");
 
-        // On cache/desactive/reset tout
+        // On cache tout par defaut.
         boxWordlist!.IsVisible = false;
+        boxWordlist2!.IsVisible = false;
         boxHashfile!.IsVisible = false;
+        boxUserHashfile!.IsVisible = false;
         boxHashType!.IsVisible = false;
         boxRules!.IsVisible = false;
         txtMask!.IsVisible = false;
@@ -159,13 +225,16 @@ public partial class HashCatVue : TemplateControl
         ButtonOption4!.Opacity = 1;
         ButtonOption5!.Opacity = 1;
         
+        // On reset les selections.
         boxWordlist.SelectedItem = -1 ;
+        boxWordlist2!.SelectedItem = -1;
         boxHashfile.SelectedItem = -1 ;
+        boxUserHashfile!.SelectedItem = -1;
         boxHashType.SelectedItem = -1 ;
         boxRules.SelectedItem = -1 ;
         txtMask.Text = string.Empty;
         
-        // On active uniquement ce qui est necessaire
+        // On reactive uniquement ce qui est necessaire pour le mode choisi.
         switch (type)
         {
             case AttackType.Dictionary:
@@ -191,54 +260,75 @@ public partial class HashCatVue : TemplateControl
                 txtMask.IsVisible = true;
                 break;
             
-            case AttackType.Association:
+            case AttackType.Combinator:
                 ButtonOption4.Opacity = 0.4;
                 boxWordlist.IsVisible = true;
+                boxWordlist2.IsVisible = true;
                 boxHashfile.IsVisible = true;
+                boxHashType.IsVisible = true;
+                break;
+            
+            case AttackType.Association:
+                ButtonOption5.Opacity = 0.4;
+                boxWordlist.IsVisible = true;
+                boxUserHashfile.IsVisible = true;
                 boxHashType.IsVisible = true;
                 boxRules.IsVisible = true;
                 break;
-            
-            case AttackType.Prince:
-                ButtonOption5.Opacity = 0.4;
-                boxWordlist.IsVisible = true;
-                boxHashfile.IsVisible = true;
-                boxHashType.IsVisible = true;
-                break;
         }
+        
+        // Une fois l'interface calee, on regenère la commande.
         GenererCommande();
     }
 
-    // Construction dynamique de la commande Hashcat
+    // Construit la ligne de commande Hashcat en fonction de l'UI.
     private void GenererCommande()
     {
         var txtInput = this.FindControl<TextBox>("TxtCommandInput");
         var boxWordlist = this.FindControl<ComboBox>("WordlistComboBox");
+        var boxWordlist2 = this.FindControl<ComboBox>("WordlistComboBox2");
         var boxHashfile = this.FindControl<ComboBox>("HashfileComboBox");
+        var boxUserHashfile = this.FindControl<ComboBox>("HashUserfileComboBox");
         var boxHashType = this.FindControl<ComboBox>("HashTypeComboBox");
         var boxRules = this.FindControl<ComboBox>("RulesComboBox");
         var txtMask = this.FindControl<TextBox>("MaskInputBox");
 
-        if (txtInput == null) return;
+        if (txtInput == null) 
+        {
+            return;
+        }
         
-        // Recuperation des valeurs
-        
-        string modeValue = "0"; 
+
+        // Recuperation du Mode Hash.
+        string modeValue = "0"; // Valeur par defaut.
         if (boxHashType?.SelectedItem is OptionMode selectedMode)
         {
             modeValue = selectedMode.value.ToString();
         }
         
+        // Chemins des fichiers.
         string hashPath = "<fichier_hashes>";
         if (boxHashfile?.SelectedItem != null)
         {
             hashPath = $"/root/hashfiles/{boxHashfile.SelectedItem}";
         }
         
+        string hashUserPath = "<fichier_user:hash>";
+        if (boxUserHashfile?.SelectedItem != null)
+        {
+            hashUserPath = $"/root/hashfiles/{boxUserHashfile.SelectedItem}";
+        }
+        
         string wordlistPath = "<wordlist>";
         if (boxWordlist?.SelectedItem != null)
         {
             wordlistPath = $"/root/wordlists/{boxWordlist.SelectedItem}";
+        }
+        
+        string wordlist2Path = "<wordlist>";
+        if (boxWordlist2?.SelectedItem != null)
+        {
+            wordlist2Path = $"/root/wordlists/{boxWordlist2.SelectedItem}";
         }
         
         string rulePath = "";
@@ -259,118 +349,230 @@ public partial class HashCatVue : TemplateControl
         switch (_currentAttackType)
         {
             case AttackType.Dictionary:
+                // Mode 0 simple : Hash + Dico
                 finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath}";
                 break;
 
             case AttackType.Rules:
-                finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath}{rulePath}";
+                // Mode 0 avec règles : Hash + Dico + Rule
+                finalCommand = $"hashcat -m {modeValue} -a 0 {hashPath} {wordlistPath} {rulePath}";
                 break;
             
             case AttackType.Mask:
+                // Mode 3 : Hash + Masque (Bruteforce)
                 finalCommand = $"hashcat -m {modeValue} -a 3 {hashPath} {maskValue}";
                 break;
             
-            case AttackType.Association:
-                finalCommand = $"hashcat -m {modeValue} -a 9 {hashPath} {wordlistPath}{rulePath}";
+            case AttackType.Combinator:
+                // Mode 1 : Hash + Dico1 + Dico2
+                finalCommand = $"hashcat -m {modeValue} -a 1 {hashPath} {wordlistPath} {wordlist2Path}";
                 break;
             
-            case AttackType.Prince:
-                finalCommand = $"hashcat -m {modeValue} -a 8 {hashPath} {wordlistPath}";
+            case AttackType.Association:
+                // Mode 9 : HashUser + DicoUsers + Rule + flag username
+                finalCommand = $"hashcat -m {modeValue} -a 9 {hashUserPath} {wordlistPath} {rulePath} --username";
                 break;
         }
 
+        // On affiche la commande dans la TextBox.
         txtInput.Text = finalCommand;
     }
+
+    // Fonction pour uploader une Wordlist depuis le PC local vers le serveur.
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
         var window = TopLevel.GetTopLevel(this) as Window;
-        if (window == null) return;
+        if (window == null) 
+        {
+            return;
+        }
+
         try
         {
+            // 'await' est crucial ici : on attend que l'upload soit fini AVANT de recharger les listes.
             await _toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
-            var box = this.FindControl<ComboBox>("WordlistComboBox");
-            if (box != null) RemplirComboBox(box, "/root/wordlists");
+            
+            // On recharge tout pour que le nouveau fichier apparaisse immediatement.
+            ChargerLesListes(); 
         }
-        catch (Exception ex) { Console.WriteLine(ex.Message); }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine(ex.Message); 
+        }
     }
 
+    // Fonction pour uploader un fichier de Hash.
     private async void AjouterHashfileClick(object? sender, RoutedEventArgs e)
     {
         var window = TopLevel.GetTopLevel(this) as Window;
-        if (window == null) return;
+        if (window == null) 
+        {
+            return;
+        }
+
         try
         {
             await _toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
-            var box = this.FindControl<ComboBox>("HashfileComboBox");
-            if (box != null) RemplirComboBox(box, "/root/hashfiles");
+            ChargerLesListes();
         }
-        catch (Exception ex) { Console.WriteLine(ex.Message); }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine(ex.Message); 
+        }
     }
     
+
     private async void LancerCommandeClick(object? sender, RoutedEventArgs e)
     {
         var txtInput  = this.FindControl<TextBox>("TxtCommandInput");
         var txtOutput = this.FindControl<TextBox>("TxtOutput");
         var btnLancer = this.FindControl<Button>("BtnLancer");
         var btnStop   = this.FindControl<Button>("BtnStop");
-
-        // Vérifications simples
+        
         if (txtInput == null || txtOutput == null || btnLancer == null || btnStop == null)
+        {
             return;
+        }
 
         var commande = txtInput.Text;
         if (string.IsNullOrWhiteSpace(commande))
+        {
             return;
+        }
 
-        // Reset / état UI
-        txtOutput.Text = ">>> Démarrage de l'attaque Hashcat...\n";
-        btnLancer.IsEnabled = false;
-        btnStop.IsEnabled   = true;
+        // Preparation de l'UI
+        txtOutput.Text = ">>> Demarrage de l'attaque Hashcat...\n";
+        btnLancer.IsEnabled = false; // On desactive Lancer pour eviter le double clic.
+        btnStop.IsEnabled   = true;  // On active Stop.
 
-        // Nouveau token d’annulation
+        // Gestion de l'annulation
         _cts?.Cancel();
         _cts = new CancellationTokenSource();
+        
+        var stopwatch = Stopwatch.StartNew();
+        var outputBuilder = new StringBuilder();
 
-        await _execService.ExecuteCommandStreamingAsync(
-            commande,
+        try
+        {
+            await _execService.ExecuteCommandStreamingAsync(
+                commande,
 
-            // Reçoit chaque ligne en temps réel
-            onLineReceived: ligne =>
-            {
-                Dispatcher.UIThread.Post(() =>
+                // Reçoit chaque ligne en temps réel
+                onLineReceived: ligne =>
                 {
-                    txtOutput.Text += ligne + "\n";
-                    txtOutput.CaretIndex = txtOutput.Text.Length; // auto-scroll
-                });
-            },
+                    outputBuilder.AppendLine(ligne);
+                    
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        txtOutput.Text += ligne + "\n";
+                        txtOutput.CaretIndex = txtOutput.Text.Length; // auto-scroll
+                    });
+                },
 
-            // Fin de l’exécution (normalement)
-            onCompleted: () =>
-            {
-                Dispatcher.UIThread.Post(() =>
+                // Fin de l’exécution (normalement)
+                onCompleted: () =>
                 {
-                    txtOutput.Text += "\n>>> Fin de l'exécution Hashcat.";
-                    btnLancer.IsEnabled = true;
-                    btnStop.IsEnabled   = false;
-                });
-            },
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        txtOutput.Text += "\n>>> Fin de l'exécution Hashcat.";
+                        btnLancer.IsEnabled = true;
+                        btnStop.IsEnabled = false;
+                    });
+                },
 
-            // Erreur (SSH non connecté ou autre)
-            onError: msg =>
-            {
-                Dispatcher.UIThread.Post(() =>
+                // Erreur (SSH non connecté ou autre)
+                onError: msg =>
                 {
-                    txtOutput.Text += $"\n[ERREUR] : {msg}";
-                    btnLancer.IsEnabled = true;
-                    btnStop.IsEnabled   = false;
-                });
-            },
+                    Dispatcher.UIThread.Post(() =>
+                    {
+                        txtOutput.Text += $"\n[ERREUR] : {msg}";
+                        btnLancer.IsEnabled = true;
+                        btnStop.IsEnabled = false;
+                    });
+                },
 
-            // Cancel
-            cancel: _cts.Token
-        );
+                // Cancel
+                cancel: _cts.Token
+            );
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erreur lancement de la commande : {ex.Message}");
+        }
+        finally
+        {
+            stopwatch.Stop();
+
+            var output = outputBuilder.ToString();
+            var success = IsHashcatSuccessful(output);
+            
+            HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
+            HashTypeComboBox =  this.FindControl<ComboBox>("HashTypeComboBox");
+            
+            var target = HashfileComboBox!.SelectionBoxItem?.ToString() ?? "No Hashfile";
+            var format = HashTypeComboBox!.SelectionBoxItem?.ToString() ?? "No Hashtype";
+            
+            var result = ExtractHashcatPassword(output);
+
+            // Enregistrer dans l'historique brut
+            historyService.AddToHistoryBrut("Hashcat", commande, output, success, stopwatch.Elapsed);
+            historyService.AddToHistoryParsed("Hashcat", commande, "", target!, "", format!, result, success, stopwatch.Elapsed);
+
+            Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+        }
     }
 
+    private bool IsHashcatSuccessful(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return false;
+
+        // Cas le plus simple : status "Cracked"
+        if (output.Contains("Status...........: Cracked", StringComparison.OrdinalIgnoreCase))
+            return true;
+
+        // Ou présence d'une ligne "hash:password"
+        return Regex.IsMatch(output, @"^[0-9A-Fa-f]{16,}:.+$", RegexOptions.Multiline);
+    }
+
+    
+    private string ExtractHashcatPassword(string output)
+    {
+        if (string.IsNullOrWhiteSpace(output)) return "No password found";
+
+        // Cherche une ligne "hash:password"
+        var match = Regex.Match(output, @"^[0-9A-Fa-f]{16,}:(.+)$", RegexOptions.Multiline);
+        if (!match.Success) return "No password found";
+
+        return match.Groups[1].Value.Trim();
+    }
+
+    
+    private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
+    {
+        var window = TopLevel.GetTopLevel(this) as Window;
+        if (window is null) return;
+
+        try
+        {
+            var success = await historyService.SaveHistoryToFileAsync(window, "Hashcat");
+            
+            if (success)
+            {
+                Console.WriteLine("[Hashcat] Historique sauvegardé avec succès !");
+                // TODO: Afficher un message de confirmation à l'utilisateur
+            }
+            else
+            {
+                Console.WriteLine("[Hashcat] Aucun historique à sauvegarder ou annulé");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Hashcat] Erreur lors de la sauvegarde : {ex.Message}");
+        }
+    }
+    
+   
     
     private void StopCommandeClick(object? sender, RoutedEventArgs e)
     {
@@ -378,39 +580,41 @@ public partial class HashCatVue : TemplateControl
         var btnLancer = this.FindControl<Button>("BtnLancer");
         var btnStop   = this.FindControl<Button>("BtnStop");
 
-        // Annulation côté client / service
+        // 1. On annule la tache.
         _cts?.Cancel();
         _execService.StopCurrent();
 
-        // Kill brutal côté Kali (tous les processus hashcat)
+        // 2. On tue brutalement le processus Hashcat sur le serveur Kali.
         try
         {
             var ssh = ConnexionSshService.Instance.Client;
             if (ssh != null && ssh.IsConnected)
             {
+                // garantit que la commande est bien nettoyee après usage.
                 using var killCmd = ssh.CreateCommand("pkill -9 hashcat");
                 killCmd.Execute();
             }
         }
         catch
         {
-            // On ignore les erreurs de kill (process déjà mort, etc.)
+            
         }
 
-        // Feedback UI
+
         if (txtOutput != null)
-            txtOutput.Text += "\n\n>>> STOP FORCÉ PAR L'UTILISATEUR (Hashcat).";
+        {
+            txtOutput.Text += "\n\n>>> STOP FORCe PAR L'UTILISATEUR (Hashcat).";
+        }
 
         if (btnLancer != null) btnLancer.IsEnabled = true;
         if (btnStop   != null) btnStop.IsEnabled   = false;
     }
-
-
+    
     private void InitializeComponent()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
-    // aller chercher le style <Style Selector="control|TemplateControl">
+    // Necessaire pour les templates Avalonia
     protected override Type StyleKeyOverride => typeof(TemplateControl);
 }

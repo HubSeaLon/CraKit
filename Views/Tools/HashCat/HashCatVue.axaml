@@ -6,7 +6,7 @@
                    xmlns:models="clr-namespace:CraKit.Models">
     
     <t:TemplateControl.HeaderRight>
-        <Button Content="Save history in file" />
+        <Button Content="Save history in file" Click="SaveHistoryClick"/>
     </t:TemplateControl.HeaderRight>
 
     <t:TemplateControl.LeftPane>
@@ -38,16 +38,16 @@
                     HorizontalAlignment="Left" 
                     x:Name="ButtonOption3"
                     Click="BruteForceAttackClick"/>
+
+            <Button Content="Attaque par combinaison" 
+                    HorizontalAlignment="Left" 
+                    x:Name="ButtonOption4"
+                    Click="CombinatorClick"/>
             
             <Button Content="Attaque par association" 
                     HorizontalAlignment="Left" 
-                    x:Name="ButtonOption4"
-                    Click="AssociationAttackClick"/>
-            
-            <Button Content="Attaque par prince" 
-                    HorizontalAlignment="Left" 
                     x:Name="ButtonOption5"
-                    Click="PrinceAttackClick"/>
+                    Click="AssociationAttackClick"/>
             
         </StackPanel>
     </t:TemplateControl.LeftPane>
@@ -55,17 +55,19 @@
     <t:TemplateControl.RightTop>
         <WrapPanel>
             
-            <ComboBox x:Name="WordlistComboBox" 
-                      PlaceholderText="Choisir Wordlist" 
+           
+
+            <ComboBox x:Name="HashfileComboBox" 
+                      PlaceholderText="Choisir Hashfile" 
                       SelectedIndex="-1"
                       MinWidth="220" 
                       Margin="0,0,8,8"
                       IsVisible="False"
                       SelectionChanged="OnSelectionChanged">
             </ComboBox>
-
-            <ComboBox x:Name="HashfileComboBox" 
-                      PlaceholderText="Choisir Hashfile" 
+            
+            <ComboBox x:Name="HashUserfileComboBox" 
+                      PlaceholderText="Choisir UserHashfile" 
                       SelectedIndex="-1"
                       MinWidth="220" 
                       Margin="0,0,8,8"
@@ -104,6 +106,24 @@
                      Margin="0,0,8,8"
                      IsVisible="False" 
                      KeyUp="OnMaskInputChanged"/>
+            
+            <ComboBox x:Name="WordlistComboBox" 
+                      PlaceholderText="Choisir Wordlist" 
+                      SelectedIndex="-1"
+                      MinWidth="220" 
+                      Margin="0,0,8,8"
+                      IsVisible="False"
+                      SelectionChanged="OnSelectionChanged">
+            </ComboBox>
+            
+            <ComboBox x:Name="WordlistComboBox2" 
+                      PlaceholderText="Choisir Wordlist n°2" 
+                      SelectedIndex="-1"
+                      MinWidth="220" 
+                      Margin="0,0,8,8"
+                      IsVisible="False"
+                      SelectionChanged="OnSelectionChanged">
+            </ComboBox>
 
         </WrapPanel>
     </t:TemplateControl.RightTop>
@@ -114,7 +134,8 @@
                  AcceptsReturn="False"
                  Height="26"
                  VerticalAlignment="Center"
-                 HorizontalAlignment="Stretch"/>
+                 HorizontalAlignment="Stretch"
+                 IsReadOnly="True" />
     </t:TemplateControl.Input>
 
     <t:TemplateControl.RunArea>
