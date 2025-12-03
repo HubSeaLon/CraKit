@@ -27,15 +27,23 @@ Avant de commencer, assurez-vous de disposer des éléments suivants :
 CraKit nécessite le SDK **.NET 8**.
 
 * [Télécharger .NET 8](https://dotnet.microsoft.com/fr-fr/download/dotnet/8.0)
+* [Vérifier OS compatibilité](https://github.com/dotnet/core/blob/main/release-notes/8.0/supported-os.md)
 * Vérifier l'installation :
     ```bash
     dotnet --version
     ```
+  
+#### 2. IDE 
+* Rider JetBrains (Licence étudiante ou non commercial) gratuit
+* [Téléchargement](https://www.jetbrains.com/fr-fr/rider/download/?section=windows)
 
-#### 2. Dépendances & Packages
+#### 3. Dépendances & Packages
 Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
 
 ```bash
+# Git clone le projet
+git clone https://github.com/HubSeaLon/CraKit.git
+
 # Installer les packages
 dotnet restore
 dotnet clean
@@ -44,12 +52,12 @@ dotnet clean
 dotnet package list
 ```
 
-#### 3\. Docker (Environnement Kali)
+#### 4\. Docker (Environnement Kali)
 
 CraKit utilise un conteneur Docker pour exécuter les outils Linux natifs en toute sécurité via une connexion SSH locale.
 
 1.  Ouvrez **Docker Desktop**.
-2.  Naviguez dans le répertoire `/Installation` du projet.
+2.  Naviguez dans le répertoire `/Installation` (`cd Installation`) du projet.
 3.  Exécutez les commandes suivantes :
 
 <!-- end list -->
