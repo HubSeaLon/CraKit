@@ -365,24 +365,28 @@ public partial class JohnVue : TemplateControl
         }
         finally
         {
-            stopwatch.Stop();
+            // Ne pas enregistrer la commande hashid dans l'historique
+            if (!hashidSelected)
+            {
+                stopwatch.Stop();
 
-            var output = outputBuilder.ToString();
-            var success = IsJohnSuccessful(output);
+                var output = outputBuilder.ToString();
+                var success = IsJohnSuccessful(output);
             
-            HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
-            FormatHashComboBox =  this.FindControl<ComboBox>("FormatHashComboBox");
+                HashfileComboBox = this.FindControl<ComboBox>("HashfileComboBox");
+                FormatHashComboBox =  this.FindControl<ComboBox>("FormatHashComboBox");
             
-            var target = HashfileComboBox!.SelectionBoxItem!.ToString();
-            var username = ExtractJohnUsername(output);
-            var format = FormatHashComboBox!.SelectionBoxItem!.ToString();
-            var result = ExtractJohnPassword(output);
+                var target = HashfileComboBox!.SelectionBoxItem!.ToString();
+                var username = ExtractJohnUsername(output);
+                var format = FormatHashComboBox!.SelectionBoxItem!.ToString();
+                var result = ExtractJohnPassword(output);
 
-            // Enregistrer dans l'historique brut
-            historyService.AddToHistoryBrut("John", cmd, output, success, stopwatch.Elapsed);
-            historyService.AddToHistoryParsed("John", cmd, username!, target!, "", format!, result, success, stopwatch.Elapsed);
+                // Enregistrer dans l'historique brut
+                historyService.AddToHistoryBrut("John", cmd, output, success, stopwatch.Elapsed);
+                historyService.AddToHistoryParsed("John", cmd, username!, target!, "", format!, result, success, stopwatch.Elapsed);
 
-            Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+                Console.WriteLine($"[Commande Brut + Parsed] ajoutées à l'historique ({stopwatch.Elapsed.TotalSeconds:F2}s) - Success: {success}");
+            }
         }
     }
     

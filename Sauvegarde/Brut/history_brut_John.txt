@@ -97,3 +97,31 @@ Successful: 1 (100,0%)
 Failed: 0 (0,0%)
 Average execution time: 0,22s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-03 15:40:05
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-03 15:40:03] FAILED (0,13s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/pussy.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 128/128 ASIMD 4x2])
+No password hashes left to crack (see FAQ)
+
+[stderr]
+Using default input encoding: UTF-8
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,13s
+========================================
