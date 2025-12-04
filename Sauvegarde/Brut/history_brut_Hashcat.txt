@@ -1,0 +1,88 @@
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-04 01:43:34
+Tool: Hashcat
+Total Entries: 1
+========================================
+
+[2025-12-04 01:43:23] SUCCESS (2,96s)
+Tool: Hashcat
+Command: hashcat -m 0 -a 0 /root/hashfiles/hash2.txt /usr/share/wordlists/rockyou.txt
+Output:
+hashcat (v7.1.2) starting
+
+Initializing bridges. Please be patient...Initialized bridgesInitializing backend runtimes. Please be patient...Initialized backend runtimesInitializing backend devices. Please be patient...Initialized backend devicesOpenCL API (OpenCL 3.0 PoCL 6.0+debian  Linux, None+Asserts, RELOC, SPIR-V, LLVM 18.1.8, SLEEF, DISTRO, POCL_DEBUG) - Platform #1 [The pocl project]
+====================================================================================================================================================
+* Device #01: cpu-haswell-12th Gen Intel(R) Core(TM) i5-12400F, 6929/13859 MB (2048 MB allocatable), 12MCU
+
+Minimum password length supported by kernel: 0
+Maximum password length supported by kernel: 256
+
+Counting lines in /root/hashfiles/hash2.txt. Please be patient...Counted lines in /root/hashfiles/hash2.txtParsed Hashes: 1/1 (100.00%)Parsed Hashes: 1/1 (100.00%)Sorting hashes. Please be patient...Sorted hashesRemoving duplicate hashes. Please be patient...Removed duplicate hashesSorting salts. Please be patient...Sorted saltsComparing hashes with potfile entries. Please be patient...Compared hashes with potfile entriesGenerating bitmap tables...Generated bitmap tablesHashes: 1 digests; 1 unique digests, 1 unique salts
+Bitmaps: 16 bits, 65536 entries, 0x0000ffff mask, 262144 bytes, 5/13 rotates
+Rules: 1
+
+Optimizers applied:
+* Zero-Byte
+* Early-Skip
+* Not-Salted
+* Not-Iterated
+* Single-Hash
+* Single-Salt
+* Raw-Hash
+
+ATTENTION! Pure (unoptimized) backend kernels selected.
+Pure kernels can crack longer passwords, but drastically reduce performance.
+If you want to switch to optimized kernels, append -O to your commandline.
+See the above message to find out about the exact limits.
+
+Watchdog: Hardware monitoring interface not found on your system.
+Watchdog: Temperature abort trigger disabled.
+
+Initializing bridge salts. Please be patient...Initialized bridge saltsInitializing device kernels and memory. Please be patient...Initializing backend runtime for device #1. Please be patient...Initialized backend runtime for device #1Host memory allocated for this attack: 515 MB (14332 MB free)
+
+Initialized device kernels and memoryStarting self-test. Please be patient...Finished self-testDictionary cache hit:
+* Filename..: /usr/share/wordlists/rockyou.txt
+* Passwords.: 14344385
+* Bytes.....: 139921507
+* Keyspace..: 14344385
+
+Starting autotune. Please be patient...Finished autotune
+                                                          
+[s]tatus [p]ause [b]ypass [c]heckpoint [f]inish [q]uit => 
+                                                          
+5026bc63b5418ffdb54f238db245ec01:romain
+
+                                                          
+Session..........: hashcat
+Status...........: Cracked
+Hash.Mode........: 0 (MD5)
+Hash.Target......: 5026bc63b5418ffdb54f238db245ec01
+Time.Started.....: Thu Dec  4 00:43:21 2025 (0 secs)
+Time.Estimated...: Thu Dec  4 00:43:21 2025 (0 secs)
+Kernel.Feature...: Pure Kernel (password length 0-256 bytes)
+Guess.Base.......: File (/usr/share/wordlists/rockyou.txt)
+Guess.Queue......: 1/1 (100.00%)
+Speed.#01........:  4153.7 kH/s (0.37ms) @ Accel:1024 Loops:1 Thr:1 Vec:8
+Recovered........: 1/1 (100.00%) Digests (total), 1/1 (100.00%) Digests (new)
+Progress.........: 24576/14344385 (0.17%)
+Rejected.........: 0/24576 (0.00%)
+Restore.Point....: 12288/14344385 (0.09%)
+Restore.Sub.#01..: Salt:0 Amplifier:0-1 Iteration:0-1
+Candidate.Engine.: Device Generator
+Candidates.#01...: havana -> 280789
+
+Started: Thu Dec  4 00:43:20 2025
+Stopped: Thu Dec  4 00:43:23 2025
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 2,96s
+========================================

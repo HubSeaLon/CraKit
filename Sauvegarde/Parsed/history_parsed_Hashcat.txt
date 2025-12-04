@@ -1,0 +1,1 @@
+2025-12-04 01:43:23; SUCCESS; hashcat -m 0 -a 0 /root/hashfiles/hash2.txt /usr/share/wordlists/rockyou.txt; hash2.txt; 0; romain; 2,96s 

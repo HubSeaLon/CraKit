@@ -1,0 +1,67 @@
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-04 01:32:10
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-04 01:32:01] SUCCESS (0,24s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/hash1.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 256/256 AVX2 8x3])
+password123      (?)     
+
+[stderr]
+Created directory: /root/.john
+Using default input encoding: UTF-8
+Warning: no OpenMP support for this hash type, consider --fork=12
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+1g 0:00:00:00 DONE (2025-12-04 00:32) 25.00g/s 38400p/s 38400c/s 38400C/s 753951..mexico1
+Use the "--show --format=Raw-MD5" options to display all of the cracked passwords reliably
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 0,24s
+========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-04 01:43:02
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-04 01:42:55] SUCCESS (0,25s)
+Tool: John
+Command: john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/hash2.txt
+Output:
+Loaded 1 password hash (Raw-MD5 [MD5 256/256 AVX2 8x3])
+romain           (?)     
+
+[stderr]
+Using default input encoding: UTF-8
+Warning: no OpenMP support for this hash type, consider --fork=12
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+1g 0:00:00:00 DONE (2025-12-04 00:42) 20.00g/s 460800p/s 460800c/s 460800C/s jamela..cherryblossom
+Use the "--show --format=Raw-MD5" options to display all of the cracked passwords reliably
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 1 (100,0%)
+Failed: 0 (0,0%)
+Average execution time: 0,25s
+========================================

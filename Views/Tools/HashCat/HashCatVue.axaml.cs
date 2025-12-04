@@ -65,7 +65,7 @@ public partial class HashCatVue : TemplateControl
             string chemin = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "HashCat.json");
             
             // On lit le contenu brut du fichier.
-            string jsonBrut = ToolBase.LireFichierTexte(chemin);
+            var jsonBrut = ToolBase.LireFichierTexte(chemin);
             
             if (string.IsNullOrEmpty(jsonBrut)) 
             {
@@ -74,7 +74,7 @@ public partial class HashCatVue : TemplateControl
             
             // On transforme le texte en objet JSON manipulable.
             var rootNode = JsonNode.Parse(jsonBrut);
-            var valuesNode = rootNode?["options"]["hashType"]["values"];
+            var valuesNode = rootNode?["options"]?["hashType"]?["values"];
 
             // Si on a bien trouve la liste des valeurs dans le JSON
             if (valuesNode != null)
@@ -154,6 +154,7 @@ public partial class HashCatVue : TemplateControl
         if (boxWordlist != null) 
         {
             RemplirComboBox(boxWordlist, "/root/wordlists");
+            boxWordlist.Items.Add("rockyou.txt");
         }
         
         if (boxWordlist2 != null) 
@@ -322,7 +323,14 @@ public partial class HashCatVue : TemplateControl
         string wordlistPath = "<wordlist>";
         if (boxWordlist?.SelectedItem != null)
         {
-            wordlistPath = $"/root/wordlists/{boxWordlist.SelectedItem}";
+            if (boxWordlist.SelectedItem.ToString() == "rockyou.txt")
+            {
+                wordlistPath = $"/usr/share/wordlists/{boxWordlist.SelectedItem}";
+            }
+            else
+            {
+                wordlistPath = $"/root/wordlists/{boxWordlist.SelectedItem}";
+            }
         }
         
         string wordlist2Path = "<wordlist>";
