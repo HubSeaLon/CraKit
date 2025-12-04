@@ -28,14 +28,21 @@ CraKit nécessite le SDK **.NET 8**.
 
 * [Télécharger .NET 8](https://dotnet.microsoft.com/fr-fr/download/dotnet/8.0)
 * [Vérifier OS compatibilité](https://github.com/dotnet/core/blob/main/release-notes/8.0/supported-os.md)
-* Vérifier l'installation :
-    ```bash
+
+Vérifier l'installation :
+
+```bash
     dotnet --version
-    ```
+```
   
-#### 2. IDE 
-* Rider JetBrains (Licence étudiante ou non commercial) gratuit
-* [Téléchargement](https://www.jetbrains.com/fr-fr/rider/download/?section=windows)
+#### 2. IDE
+Nous vous conseillons 2 ide gratuit : 
+
+* [Rider JetBrains](https://www.jetbrains.com/fr-fr/rider/download/?section=windows)
+
+ou
+
+* [Visual Studio](https://visualstudio.microsoft.com/fr/vs/community/)
 
 #### 3. Dépendances & Packages
 Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
@@ -84,6 +91,10 @@ docker ps -a
 docker compose stop
 docker compose start
 ```
+
+#### 5\. Design
+
+⚠️ Si l'application est peu lisible au démarrage, vérifiez que le mode sombre est bien activé. ⚠️
 
 -----
 
