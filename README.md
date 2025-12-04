@@ -19,6 +19,11 @@ CraKit centralise les outils suivants :
 
 ## 🚀 Installation
 
+```bash
+# Git clone le projet
+git clone https://github.com/HubSeaLon/CraKit.git
+```
+
 ### Pré-requis
 
 Avant de commencer, assurez-vous de disposer des éléments suivants :
@@ -37,22 +42,8 @@ CraKit nécessite le SDK **.NET 8**.
 * Rider JetBrains (Licence étudiante ou non commercial) gratuit
 * [Téléchargement](https://www.jetbrains.com/fr-fr/rider/download/?section=windows)
 
-#### 3. Dépendances & Packages
-Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
 
-```bash
-# Git clone le projet
-git clone https://github.com/HubSeaLon/CraKit.git
-
-# Installer les packages
-dotnet restore
-dotnet clean
-
-# Vérifier les packages
-dotnet package list
-```
-
-#### 4\. Docker (Environnement Kali)
+#### 3\. Docker (Environnement Kali)
 
 CraKit utilise un conteneur Docker pour exécuter les outils Linux natifs en toute sécurité via une connexion SSH locale.
 
@@ -63,15 +54,10 @@ CraKit utilise un conteneur Docker pour exécuter les outils Linux natifs en tou
 <!-- end list -->
 
 ```bash
-# Construction de l'image Kali personnalisée
-docker compose build 
-
-# Démarrage du conteneur en arrière-plan
+# Construction et démarrage du conteneur en arrière-plan
 docker compose up -d
 ```
-
 **Commandes utiles pour la gestion du conteneur :**
-
 ```bash
 # Vérifier que l'image "kali-crakit" existe
 docker images
@@ -83,6 +69,24 @@ docker ps -a
 # Arrêter / Redémarrer le conteneur
 docker compose stop
 docker compose start
+```
+
+#### 4. Dépendances & Packages
+Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
+
+```bash
+# Installer les packages
+dotnet restore
+dotnet clean
+
+# Vérifier les packages
+dotnet package list
+
+# Compiler 
+dotnet build
+
+# Lancer
+dotnet run
 ```
 
 -----
