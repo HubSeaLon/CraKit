@@ -5,6 +5,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -13,6 +14,7 @@ using Avalonia.Threading;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
+using Tmds.DBus.Protocol;
 
 namespace CraKit.Views.Tools.Hydra;
 
@@ -142,6 +144,7 @@ public partial class HydraVue : TemplateControl
     // Ajout des wordlists et userlists
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
         
@@ -150,15 +153,26 @@ public partial class HydraVue : TemplateControl
             await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
             ChargerLesListes(); // Recharger après upload
             Console.WriteLine("Wordlist uploaded!");
+            
+            MessageFile!.Text = "Wordlist ajouté avec succès !";
+            
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            
+            MessageFile!.Text = "Erreur upload Wordlist !";
+            
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     
     private async void AjouterUserlistClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
 
@@ -167,15 +181,26 @@ public partial class HydraVue : TemplateControl
             await toolFileService.PickAndUploadAsync(ToolFileModel.Userlist, window);
             ChargerLesListes(); // Recharger après upload
             Console.WriteLine("Userlist uploaded!");
+            
+            MessageFile!.Text = "Userlist ajouté avec succès !";
+            
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            MessageFile!.Text = "Erreur upload Userlist !";
+            
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     
     private async void AjouterCombolistClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
 
@@ -184,10 +209,20 @@ public partial class HydraVue : TemplateControl
             await toolFileService.PickAndUploadAsync(ToolFileModel.Combolist, window);
             ChargerLesListes(); // Recharger après upload
             Console.WriteLine("Combolist uploaded!");
+            
+            MessageFile!.Text = "Combolist ajouté avec succès !";
+            
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            MessageFile!.Text = "Erreur upload Combolist !";
+
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     
@@ -559,6 +594,7 @@ public partial class HydraVue : TemplateControl
     // Sauvegarder l'historique dans un fichier
     private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
 
@@ -570,15 +606,29 @@ public partial class HydraVue : TemplateControl
             {
                 Console.WriteLine("[Hydra] Historique sauvegardé avec succès !");
                 // TODO: Afficher un message de confirmation à l'utilisateur
+                
+                MessageFile!.Text = "Historique de session sauvegardé !";
+            
+                // Attendre 5 secondes sans bloquer l’UI
+                await Task.Delay(5000);
+                MessageFile.Text = "";
             }
             else
             {
                 Console.WriteLine("[Hydra] Aucun historique à sauvegarder ou annulé");
+                MessageFile!.Text = "Aucun historique de session à sauvegarder !";
+                
+                await Task.Delay(5000);
+                MessageFile.Text = "";
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Hydra] Erreur lors de la sauvegarde : {ex.Message}");
+            
+            MessageFile!.Text = "Erreur sauvegarde historique !";
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     

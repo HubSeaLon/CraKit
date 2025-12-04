@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -13,7 +14,6 @@ using Avalonia.Markup.Xaml;
 using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates;
-
 
 namespace CraKit.Views.Tools.John;
 
@@ -152,6 +152,7 @@ public partial class JohnVue : TemplateControl
     // Ajout des wordlists et hashfile 
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
         
@@ -159,16 +160,27 @@ public partial class JohnVue : TemplateControl
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
             // Ajouter MessageBox pour avertir ou zone texte
+            MessageFile!.Text = "Wordlist ajouté avec succès !";
+            
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
             ChargerLesListes();
         }
         catch (Exception ex)
         {
+            MessageFile!.Text = "Erreur lors de l'upload wordlist !";
+     
+            await Task.Delay(5000);
+            MessageFile.Text = "";
             Console.WriteLine(ex.Message);
         }
     }
     
     private async void AjouterHashfileClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile =  this.FindControl<TextBlock>("MessageFile");
+        
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
 
@@ -176,13 +188,23 @@ public partial class JohnVue : TemplateControl
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
             // Ajouter MessageBox pour avertir ? Ou bien une zone texte simple
+            
+            MessageFile!.Text = "Hashfile ajouté avec succès !";
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
+            
             ChargerLesListes();
         }
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            MessageFile!.Text = "Erreur lors de l'upload hashfile !";
+            
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
-        
     }
     
     
@@ -463,6 +485,7 @@ public partial class JohnVue : TemplateControl
     
     private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
 
@@ -474,15 +497,25 @@ public partial class JohnVue : TemplateControl
             {
                 Console.WriteLine("[John] Historique sauvegardé avec succès !");
                 // TODO: Afficher un message de confirmation à l'utilisateur
+                
+                MessageFile!.Text = "Historique de session enregistré !";
+                await Task.Delay(5000);
+                MessageFile.Text = "";
             }
             else
             {
                 Console.WriteLine("[John] Aucun historique à sauvegarder ou annulé");
+                MessageFile!.Text = "Aucun historique à sauvegarder !";
+                await Task.Delay(5000);
+                MessageFile.Text = "";
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[John] Erreur lors de la sauvegarde : {ex.Message}");
+            MessageFile!.Text = "Erreur lors de la sauvegarder !";
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     

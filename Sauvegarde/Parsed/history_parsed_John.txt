@@ -1,2 +1,3 @@
 2025-12-04 01:32:01; SUCCESS; john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/hash1.txt; hash1.txt; raw-md5; No username; password123; 0,24s 
 2025-12-04 01:42:55; SUCCESS; john --wordlist=/usr/share/wordlists/rockyou.txt --format=raw-md5 hashfiles/hash2.txt; hash2.txt; raw-md5; No username; romain; 0,25s 
+2025-12-04 20:25:58; FAILED; john --wordlist=/root/wordlists/ville.txt hashfiles/burger.txt; burger.txt; No format; No username; No password found; 0,19s 

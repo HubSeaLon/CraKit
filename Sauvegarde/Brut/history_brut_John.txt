@@ -65,3 +65,65 @@ Successful: 1 (100,0%)
 Failed: 0 (0,0%)
 Average execution time: 0,25s
 ========================================
+========================================
+CRAKIT HISTORY EXPORT
+Generated: 2025-12-04 20:25:59
+Tool: John
+Total Entries: 1
+========================================
+
+[2025-12-04 20:25:58] FAILED (0,19s)
+Tool: John
+Command: john --wordlist=/root/wordlists/ville.txt hashfiles/burger.txt
+Output:
+Loaded 2 password hashes with no different salts (LM [DES 128/128 ASIMD])
+
+[stderr]
+Warning: detected hash type "LM", but the string is also recognized as "dynamic=md5($p)"
+Use the "--format=dynamic=md5($p)" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "HAVAL-128-4"
+Use the "--format=HAVAL-128-4" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "MD2"
+Use the "--format=MD2" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "mdc2"
+Use the "--format=mdc2" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "mscash"
+Use the "--format=mscash" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "mscash2"
+Use the "--format=mscash2" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "NT"
+Use the "--format=NT" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-MD4"
+Use the "--format=Raw-MD4" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-MD5"
+Use the "--format=Raw-MD5" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-MD5u"
+Use the "--format=Raw-MD5u" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Raw-SHA1-AxCrypt"
+Use the "--format=Raw-SHA1-AxCrypt" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "ripemd-128"
+Use the "--format=ripemd-128" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "Snefru-128"
+Use the "--format=Snefru-128" option to force loading these as that type instead
+Warning: detected hash type "LM", but the string is also recognized as "ZipMonster"
+Use the "--format=ZipMonster" option to force loading these as that type instead
+Using default input encoding: UTF-8
+Using default target encoding: CP850
+Warning: poor OpenMP scalability for this hash type, consider --fork=8
+Will run 8 OpenMP threads
+Press Ctrl-C to abort, or send SIGUSR1 to john process for status
+Warning: Only 20 candidates left, minimum 1024 needed for performance.
+0g 0:00:00:00 DONE (2025-12-04 19:25) 0g/s 2000p/s 2000c/s 4000C/s PARIS..VALENCE
+Session completed. 
+
+------------------------------------------------------------
+
+
+========================================
+STATISTICS
+========================================
+Total commands: 1
+Successful: 0 (0,0%)
+Failed: 1 (100,0%)
+Average execution time: 0,19s
+========================================

@@ -6,17 +6,11 @@ namespace CraKit.Views.Tools;
 
 public abstract class ToolBase
 {
-    public Guid OutilId { get; set; }
     public string Name { get; set; }
-    public string Description { get; set; }
-    public DateTime CreatedAt { get; set; }
 
     protected ToolBase(string name, string description)
     {
-        OutilId = Guid.NewGuid();
-        CreatedAt = DateTime.Now;
         Name = name;
-        Description = description;
     }
     
     public static string? LireFichierTexte(string nomFichier)

@@ -20,6 +20,7 @@
                         Click="AjouterHashfileClick" />
             </StackPanel>
 
+            <TextBlock Text="" x:Name="MessageFile" Margin="0,4,0,4"/>
             <TextBlock Text="Modes Hashcat :" 
                        FontWeight="Bold" 
                        Margin="0,4,0,4"/>

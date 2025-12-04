@@ -13,7 +13,9 @@ using CraKit.Models;
 using CraKit.Services;
 using CraKit.Templates; 
 using System.Threading;
+using System.Threading.Tasks;
 using Avalonia.Threading;
+using Tmds.DBus.Protocol;
 
 namespace CraKit.Views.Tools.HashCat;
 
@@ -389,6 +391,7 @@ public partial class HashCatVue : TemplateControl
     // Fonction pour uploader une Wordlist depuis le PC local vers le serveur.
     private async void AjouterWordlistClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window == null) 
         {
@@ -400,18 +403,29 @@ public partial class HashCatVue : TemplateControl
             // 'await' est crucial ici : on attend que l'upload soit fini AVANT de recharger les listes.
             await _toolFileService.PickAndUploadAsync(ToolFileModel.Wordlist, window);
             
+            MessageFile!.Text = "Wordlist ajouté avec succès !";
+            
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
+            
             // On recharge tout pour que le nouveau fichier apparaisse immediatement.
             ChargerLesListes(); 
         }
         catch (Exception ex) 
         { 
             Console.WriteLine(ex.Message); 
+            MessageFile!.Text = "Erreur upload Wordlist !";
+            
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
 
     // Fonction pour uploader un fichier de Hash.
     private async void AjouterHashfileClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window == null) 
         {
@@ -421,11 +435,23 @@ public partial class HashCatVue : TemplateControl
         try
         {
             await _toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
+            
+            MessageFile!.Text = "Hashfile ajouté avec succès !";
+            
+            // Attendre 5 secondes sans bloquer l’UI
+            await Task.Delay(5000);
+            MessageFile.Text = "";
+            
             ChargerLesListes();
         }
         catch (Exception ex) 
         { 
             Console.WriteLine(ex.Message); 
+            
+            MessageFile!.Text = "Erreur upload Hashfile !";
+            
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     
@@ -557,6 +583,7 @@ public partial class HashCatVue : TemplateControl
     
     private async void SaveHistoryClick(object? sender, RoutedEventArgs e)
     {
+        MessageFile = this.FindControl<TextBlock>("MessageFile");
         var window = TopLevel.GetTopLevel(this) as Window;
         if (window is null) return;
 
@@ -568,15 +595,31 @@ public partial class HashCatVue : TemplateControl
             {
                 Console.WriteLine("[Hashcat] Historique sauvegardé avec succès !");
                 // TODO: Afficher un message de confirmation à l'utilisateur
+                
+                MessageFile!.Text = "Historique de session sauvegardé !";
+            
+                // Attendre 5 secondes sans bloquer l’UI
+                await Task.Delay(5000);
+                MessageFile.Text = "";
             }
             else
             {
                 Console.WriteLine("[Hashcat] Aucun historique à sauvegarder ou annulé");
+                
+                MessageFile!.Text = "Aucun historique de session à sauvegarder !";
+                
+                await Task.Delay(5000);
+                MessageFile.Text = "";
             }
         }
         catch (Exception ex)
         {
             Console.WriteLine($"[Hashcat] Erreur lors de la sauvegarde : {ex.Message}");
+            
+            MessageFile!.Text = "Erreur sauvegarde historique !";
+            
+            await Task.Delay(5000);
+            MessageFile.Text = "";
         }
     }
     

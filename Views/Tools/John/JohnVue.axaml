@@ -20,6 +20,7 @@
                 <Button Content="Ajouter hashfile" Click="AjouterHashfileClick" />
             </StackPanel>
 
+            <TextBlock Text="" x:Name="MessageFile" Margin="0,4,0,4"/>
             <TextBlock Text="Choisir option :" FontWeight="Bold" Margin="0,4,0,4"/>
             <Button x:Name="ButtonOption1" Content="Identifier format hash (hashfile)" HorizontalAlignment="Left" Click="choixOptionClick"/>
             <Button x:Name="ButtonOption2" Content="Crack auto (wordlist, hashfile)" HorizontalAlignment="Left" Click="choixOptionClick"/>

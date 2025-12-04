@@ -26,6 +26,7 @@
                 <Button Content="Ajouter combolist" Click="AjouterCombolistClick" />
             </StackPanel>
 
+            <TextBlock Text="" x:Name="MessageFile" Margin="0,4,0,4"/>
             <TextBlock Text="Choisir mode :" FontWeight="Bold" Margin="0,4,0,4"/>
             <Button x:Name="ButtonOption1" Content="Single user + wordlist" HorizontalAlignment="Left" Click="choixOptionClick"/>
             <Button x:Name="ButtonOption2" Content="User list + wordlist" HorizontalAlignment="Left" Click="choixOptionClick"/>
