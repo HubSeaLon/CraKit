@@ -176,7 +176,7 @@ public partial class JohnVue : TemplateControl
         {
             await toolFileService.PickAndUploadAsync(ToolFileModel.HashFile, window);
             // Ajouter MessageBox pour avertir ? Ou bien une zone texte simple
-            ChargerHashTypes();
+            ChargerLesListes();
         }
         catch (Exception ex)
         {
