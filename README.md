@@ -80,6 +80,22 @@ docker compose stop
 docker compose start
 ```
 
+#### 4. Dépendances & Packages
+
+
+Installez les dépendances nécessaires (notamment le framework UI Avalonia) :
+
+```bash
+# Installer les packages
+dotnet restore
+dotnet clean
+```
+
+```bash
+# Vérifier les packages
+dotnet package list
+```
+
 #### 5\. Design
 
 ⚠️ Si l'application est peu lisible au démarrage, vérifiez que le mode sombre est bien activé. ⚠️
