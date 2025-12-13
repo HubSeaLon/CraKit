@@ -37,7 +37,7 @@ CraKit nécessite le SDK **.NET 8**.
 Vérifier l'installation :
 
 ```bash
-    dotnet --version
+dotnet --version
 ```
 
   
