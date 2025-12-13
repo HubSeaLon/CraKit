@@ -96,7 +96,7 @@ dotnet run
 
 #### 5\. Design
 
-⚠️ Si l'application est peu lisible au démarrage, vérifiez que le mode sombre est bien activé. ⚠️
+⚠️ Si l'application est peu lisible au démarrage, vérifiez que le mode sombre est bien activé sur votre système. ⚠️
 
 -----
 
