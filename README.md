@@ -42,15 +42,9 @@ Vérifier l'installation :
 
   
 #### 2. IDE 
-Nous vous conseillons 2 ide gratuit :
+Nous vous conseillons l'IDE gratuit Rider (nécessite un compte) :
 
 * [Rider JetBrains](https://www.jetbrains.com/fr-fr/rider/download/?section=windows)
-
-ou
-
-* [Visual Studio](https://visualstudio.microsoft.com/fr/vs/community/)
-
-
 
 #### 3\. Docker (Environnement Kali)
 
@@ -94,6 +88,10 @@ dotnet clean
 ```bash
 # Vérifier les packages
 dotnet package list
+
+# Compiler et lancer
+dotnet build
+dotnet run
 ```
 
 #### 5\. Design
